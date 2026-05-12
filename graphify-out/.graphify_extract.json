@@ -1,0 +1,145 @@
+{
+  "nodes": [
+    {
+      "id": "racedocv1_architecture_racedocv1",
+      "label": "RacedocV1",
+      "file_type": "document",
+      "source_file": "RaceDocV1_Architecture.md"
+    },
+    {
+      "id": "racedocv1_architecture_entryform",
+      "label": "Entry Form",
+      "file_type": "document",
+      "source_file": "RaceDocV1_Architecture.md"
+    },
+    {
+      "id": "racedocv1_architecture_inspectionform",
+      "label": "Inspection Form",
+      "file_type": "document",
+      "source_file": "RaceDocV1_Architecture.md"
+    },
+    {
+      "id": "racedocv1_architecture_weightin",
+      "label": "Weight-In",
+      "file_type": "document",
+      "source_file": "RaceDocV1_Architecture.md"
+    },
+    {
+      "id": "racedocv1_architecture_successballast",
+      "label": "Success Ballast",
+      "file_type": "document",
+      "source_file": "RaceDocV1_Architecture.md"
+    },
+    {
+      "id": "racedocv1_architecture_bop",
+      "label": "Balance of Performance (BOP)",
+      "file_type": "document",
+      "source_file": "RaceDocV1_Architecture.md"
+    },
+    {
+      "id": "racedocv1_architecture_audit_trail",
+      "label": "Audit Trail",
+      "file_type": "document",
+      "source_file": "RaceDocV1_Architecture.md"
+    },
+    {
+      "id": "racedocv1_architecture_rbac",
+      "label": "RBAC",
+      "file_type": "document",
+      "source_file": "RaceDocV1_Architecture.md"
+    },
+    {
+      "id": "racedocv1_architecture_competitorrequest",
+      "label": "Competitor Request",
+      "file_type": "document",
+      "source_file": "RaceDocV1_Architecture.md"
+    },
+    {
+      "id": "racedocv1_architecture_supabase",
+      "label": "Supabase",
+      "file_type": "document",
+      "source_file": "RaceDocV1_Architecture.md"
+    },
+    {
+      "id": "agents_graphify",
+      "label": "Graphify",
+      "file_type": "document",
+      "source_file": "AGENTS.md"
+    },
+    {
+      "id": "brandguidelines_branding",
+      "label": "Branding",
+      "file_type": "document",
+      "source_file": "BrandGuidelines.md"
+    }
+  ],
+  "edges": [
+    {
+      "source": "racedocv1_architecture_racedocv1",
+      "target": "racedocv1_architecture_entryform",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "RaceDocV1_Architecture.md"
+    },
+    {
+      "source": "racedocv1_architecture_racedocv1",
+      "target": "racedocv1_architecture_inspectionform",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "RaceDocV1_Architecture.md"
+    },
+    {
+      "source": "racedocv1_architecture_racedocv1",
+      "target": "racedocv1_architecture_weightin",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "RaceDocV1_Architecture.md"
+    },
+    {
+      "source": "racedocv1_architecture_inspectionform",
+      "target": "racedocv1_architecture_bop",
+      "relation": "calculates",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "RaceDocV1_Architecture.md"
+    },
+    {
+      "source": "racedocv1_architecture_weightin",
+      "target": "racedocv1_architecture_successballast",
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "RaceDocV1_Architecture.md"
+    },
+    {
+      "source": "racedocv1_architecture_weightin",
+      "target": "racedocv1_architecture_bop",
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "RaceDocV1_Architecture.md"
+    },
+    {
+      "source": "racedocv1_architecture_racedocv1",
+      "target": "racedocv1_architecture_supabase",
+      "relation": "uses_as_backend",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "RaceDocV1_Architecture.md"
+    },
+    {
+      "source": "agents_graphify",
+      "target": "racedocv1_architecture_racedocv1",
+      "relation": "indexes",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "AGENTS.md"
+    }
+  ],
+  "hyperedges": [],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

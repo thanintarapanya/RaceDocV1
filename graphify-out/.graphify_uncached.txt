@@ -1,0 +1,3 @@
+/Users/apple/Desktop/RaceDocV1Github/AGENTS.md
+/Users/apple/Desktop/RaceDocV1Github/RaceDocV1_Architecture.md
+/Users/apple/Desktop/RaceDocV1Github/BrandGuidelines.md

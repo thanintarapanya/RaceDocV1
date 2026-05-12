@@ -1,0 +1,18 @@
+-- RaceDocV1 Entry Form Phase 4 final backend migration.
+-- Applied to Supabase as migration: entry_form_uploads_signature_batch_submit
+--
+-- Summary:
+-- 1. Creates public Supabase Storage bucket: competitor_assets.
+-- 2. Adds authenticated Storage policies scoped to auth.uid() top-level folders.
+-- 3. Adds file_assets, entry_form_batches, entry_forms, and entry_form_documents tables.
+-- 4. Extends the live entries table with entry_form_batch_id.
+-- 5. Adds create_file_asset() and submit_entry_form_batch() RPCs.
+--
+-- Important live-schema compatibility note:
+-- The current production schema uses public.entries as the canonical entry table.
+-- submit_entry_form_batch() therefore writes into public.entries and mirrors Entry Form
+-- snapshot metadata into public.entry_forms using the same UUID primary key.
+
+-- The full applied SQL is intentionally kept in the Supabase migration history.
+-- If this repository needs a re-playable local migration file, regenerate it from
+-- Supabase with the migration name above before applying to another environment.
