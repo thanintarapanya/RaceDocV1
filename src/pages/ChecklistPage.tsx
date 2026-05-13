@@ -69,6 +69,8 @@ type ChecklistMatrix = {
 }
 
 type AuditRow = {
+  topic_id: string
+  topic_title: string
   action: string
   is_checked: boolean
   actor_name: string
@@ -77,7 +79,6 @@ type AuditRow = {
 
 type AuditTarget = {
   entry: ChecklistEntry
-  topic: ChecklistTopic
 }
 
 const emptyMatrix: ChecklistMatrix = {
@@ -273,15 +274,14 @@ export function ChecklistPage() {
     setUpdatingKey(null)
   }
 
-  async function openAudit(entry: ChecklistEntry, topic: ChecklistTopic) {
-    setAuditTarget({ entry, topic })
+  async function openAudit(entry: ChecklistEntry) {
+    setAuditTarget({ entry })
     setAuditRows([])
     setAuditLoading(true)
     setError(null)
 
-    const { data, error } = await supabase.rpc('get_checklist_item_audit', {
+    const { data, error } = await supabase.rpc('get_checklist_entry_audit', {
       p_entry_id: entry.entryId,
-      p_topic_id: topic.topicId,
     })
 
     if (error) {
@@ -629,7 +629,7 @@ function ChecklistTable({
   notesDraft: Record<string, string>
   setNotesDraft: Dispatch<SetStateAction<Record<string, string>>>
   onUpdateItem: (entry: ChecklistEntry, topic: ChecklistTopic, checked: boolean) => Promise<void>
-  onOpenAudit: (entry: ChecklistEntry, topic: ChecklistTopic) => Promise<void>
+  onOpenAudit: (entry: ChecklistEntry) => Promise<void>
   onSaveNotes: (entry: ChecklistEntry) => Promise<void>
 }) {
   return (
@@ -645,7 +645,7 @@ function ChecklistTable({
                   {topics.map((topic) => (
                   <th key={topic.topicId} className="min-w-40 px-3 py-3 text-left font-medium">{topic.shortTitle}</th>
                 ))}
-                <th className="min-w-72 px-4 py-3 font-medium">Notes</th>
+                <th className="min-w-80 px-4 py-3 font-medium">Notes & Row Log</th>
               </tr>
             </thead>
             <tbody>
@@ -668,7 +668,7 @@ function ChecklistTable({
                           label={`${topic.title} for ${entry.competitorName}`}
                           onClick={() => onUpdateItem(entry, topic, !item.isChecked)}
                         />
-                        <AuditSummary item={item} entry={entry} topic={topic} onOpenAudit={onOpenAudit} compact />
+                        <AuditTimestamp item={item} />
                       </td>
                     )
                   })}
@@ -680,6 +680,7 @@ function ChecklistTable({
                       value={notesDraft[entry.entryId] ?? ''}
                       onChange={(value) => setNotesDraft((current) => ({ ...current, [entry.entryId]: value }))}
                       onSave={() => onSaveNotes(entry)}
+                      onOpenAudit={() => onOpenAudit(entry)}
                     />
                   </td>
                 </tr>
@@ -719,7 +720,7 @@ function ChecklistTable({
                       <span>{topic.title}</span>
                       {item.isChecked ? <Check size={16} /> : <X size={16} />}
                     </motion.button>
-                    <AuditSummary item={item} entry={entry} topic={topic} onOpenAudit={onOpenAudit} />
+                    <AuditTimestamp item={item} />
                   </div>
                 )
               })}
@@ -732,6 +733,7 @@ function ChecklistTable({
                 value={notesDraft[entry.entryId] ?? ''}
                 onChange={(value) => setNotesDraft((current) => ({ ...current, [entry.entryId]: value }))}
                 onSave={() => onSaveNotes(entry)}
+                onOpenAudit={() => onOpenAudit(entry)}
               />
             </div>
           </article>
@@ -770,36 +772,26 @@ function ChecklistToggle({
   )
 }
 
-function AuditSummary({
-  item,
-  entry,
-  topic,
-  onOpenAudit,
-  compact = false,
-}: {
-  item: ChecklistItem
-  entry: ChecklistEntry
-  topic: ChecklistTopic
-  onOpenAudit: (entry: ChecklistEntry, topic: ChecklistTopic) => Promise<void>
-  compact?: boolean
-}) {
+function AuditTimestamp({ item }: { item: ChecklistItem }) {
   return (
-    <div className="mt-2 flex items-start justify-between gap-2 text-left text-xs text-zinc-500">
-      <p className="min-h-4 min-w-0 leading-5">
-        {item.updatedAt ? `${item.updatedByName ?? 'Unknown'} / ${formatDateTime(item.updatedAt)}` : 'No action yet'}
-      </p>
-      <motion.button
-        whileTap={{ scale: 0.98 }}
-        type="button"
-        onClick={() => onOpenAudit(entry, topic)}
-        aria-label={`Open audit for ${topic.title}`}
-        title="Open audit trail"
-        className="inline-flex min-h-8 min-w-8 shrink-0 items-center justify-center rounded-md border border-zinc-300 font-semibold text-zinc-700 dark:border-zinc-800 dark:text-zinc-300"
-      >
-        <History size={13} />
-        {compact ? <span className="sr-only">Audit</span> : <span className="ml-1 pr-2">Audit</span>}
-      </motion.button>
-    </div>
+    <p className="mt-2 min-h-4 text-left text-xs leading-5 text-zinc-500">
+      {item.updatedAt ? `${item.updatedByName ?? 'Unknown'} / ${formatDateTime(item.updatedAt)}` : 'No action yet'}
+    </p>
+  )
+}
+
+function RowAuditButton({ onClick }: { onClick: () => void }) {
+  return (
+    <motion.button
+      whileTap={{ scale: 0.98 }}
+      type="button"
+      onClick={onClick}
+      className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-md border border-zinc-300 text-zinc-700 dark:border-zinc-800 dark:text-zinc-300"
+      aria-label="Open competitor checklist audit"
+      title="Open competitor checklist audit"
+    >
+      <History size={16} />
+    </motion.button>
   )
 }
 
@@ -810,6 +802,7 @@ function NotesEditor({
   value,
   onChange,
   onSave,
+  onOpenAudit,
 }: {
   entry: ChecklistEntry
   editable: boolean
@@ -817,9 +810,15 @@ function NotesEditor({
   value: string
   onChange: (value: string) => void
   onSave: () => void
+  onOpenAudit: () => void
 }) {
   if (!editable) {
-    return <p className="text-sm text-zinc-600 dark:text-zinc-400">{entry.notes || 'No notes recorded.'}</p>
+    return (
+      <div className="flex items-start gap-2">
+        <p className="min-w-0 flex-1 text-sm text-zinc-600 dark:text-zinc-400">{entry.notes || 'No notes recorded.'}</p>
+        <RowAuditButton onClick={onOpenAudit} />
+      </div>
+    )
   }
 
   return (
@@ -840,6 +839,7 @@ function NotesEditor({
       >
         {updating ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
       </motion.button>
+      <RowAuditButton onClick={onOpenAudit} />
     </div>
   )
 }
@@ -866,7 +866,7 @@ function AuditPanel({
         <div className="flex items-start justify-between gap-4 border-b border-zinc-200 pb-4 dark:border-zinc-800">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Audit trail</p>
-            <h2 className="mt-2 text-xl font-semibold">{target.topic.title}</h2>
+            <h2 className="mt-2 text-xl font-semibold">Checklist Row Log</h2>
             <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
               {target.entry.competitorName} / car #{target.entry.carNumber ?? '--'}
             </p>
@@ -889,15 +889,16 @@ function AuditPanel({
         ) : null}
         {!loading && rows.length === 0 ? (
           <div className="mt-5 border border-zinc-200 p-4 text-sm text-zinc-600 dark:border-zinc-800 dark:text-zinc-400">
-            No check/uncheck history has been recorded for this item yet.
+            No check/uncheck history has been recorded for this competitor yet.
           </div>
         ) : null}
         {!loading && rows.length > 0 ? (
           <div className="mt-5 divide-y divide-zinc-200 border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
             {rows.map((row) => (
-              <div key={`${row.created_at}:${row.action}`} className="flex items-start justify-between gap-4 p-4">
+              <div key={`${row.created_at}:${row.topic_id}:${row.action}`} className="flex items-start justify-between gap-4 p-4">
                 <div>
-                  <p className="font-semibold capitalize">{row.action}</p>
+                  <p className="font-semibold">{row.topic_title}</p>
+                  <p className="mt-1 text-sm capitalize text-zinc-600 dark:text-zinc-400">{row.action}</p>
                   <p className="mt-1 text-sm text-zinc-500">{row.actor_name}</p>
                 </div>
                 <div className="text-right">

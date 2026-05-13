@@ -405,6 +405,38 @@ as $$
   limit 20;
 $$;
 
+create or replace function public.get_checklist_entry_audit(p_entry_id uuid)
+returns table(
+  topic_id uuid,
+  topic_title text,
+  action text,
+  is_checked boolean,
+  actor_name text,
+  created_at timestamptz
+)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select
+    ct.id as topic_id,
+    coalesce(nullif(ct.title_en, ''), ct.title_th, 'Checklist topic') as topic_title,
+    al.action,
+    coalesce((al.new_values ->> 'is_checked')::boolean, false) as is_checked,
+    coalesce(nullif(btrim(concat_ws(' ', p.first_name_en, p.last_name_en)), ''), nullif(btrim(concat_ws(' ', p.first_name_th, p.last_name_th)), ''), 'System') as actor_name,
+    al.created_at
+  from public.entry_forms ef
+  join public.checklist_items ci on ci.entry_form_id = ef.id
+  join public.checklist_topics ct on ct.id = ci.checklist_topic_id
+  join public.audit_logs al on al.entity_type = 'checklist_item' and al.entity_id = ci.id
+  left join public.profiles p on p.id = al.action_by_id
+  where ef.id = p_entry_id
+    and (public.has_any_role(array['ADMIN', 'SECRETARY', 'HEAD_SCRUTINEER', 'SCRUTINEER_STAFF', 'OFFSITE_SCRUTINEER', 'CHAIRMAN', 'STEWARD', 'CLERK'], null) or public.can_manage_competitor(ef.competitor_profile_id, ef.season_id))
+  order by al.created_at desc, ct.sort_order asc
+  limit 100;
+$$;
+
 revoke execute on function public.is_checklist_operator() from public, anon;
 revoke execute on function public.get_dynamic_checklist_matrix() from public, anon;
 revoke execute on function public.create_checklist_topic(uuid, text, text, boolean) from public, anon;
@@ -412,6 +444,7 @@ revoke execute on function public.move_checklist_topic(uuid, text) from public, 
 revoke execute on function public.delete_checklist_topic(uuid) from public, anon;
 revoke execute on function public.update_checklist_item(uuid, uuid, boolean) from public, anon;
 revoke execute on function public.get_checklist_item_audit(uuid, uuid) from public, anon;
+revoke execute on function public.get_checklist_entry_audit(uuid) from public, anon;
 
 grant execute on function public.is_checklist_operator() to authenticated, service_role;
 grant execute on function public.get_dynamic_checklist_matrix() to authenticated, service_role;
@@ -420,5 +453,6 @@ grant execute on function public.move_checklist_topic(uuid, text) to authenticat
 grant execute on function public.delete_checklist_topic(uuid) to authenticated, service_role;
 grant execute on function public.update_checklist_item(uuid, uuid, boolean) to authenticated, service_role;
 grant execute on function public.get_checklist_item_audit(uuid, uuid) to authenticated, service_role;
+grant execute on function public.get_checklist_entry_audit(uuid) to authenticated, service_role;
 
 commit;
