@@ -7,7 +7,6 @@ import { AdminOrSecretaryRoute, ScrutineerReportRoute } from './auth/RoleGate'
 import {
   ArchiveRestore,
   Settings,
-  Wrench,
 } from 'lucide-react'
 import { AppLayout } from './layout/AppLayout'
 import { AuthHealthPage } from './pages/AuthHealthPage'
@@ -19,6 +18,7 @@ import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { InspectionFormPage } from './pages/InspectionFormPage'
 import { LoginPage } from './pages/LoginPage'
 import { OnboardingPage } from './pages/OnboardingPage'
+import { OrganizerSettingsPage } from './pages/OrganizerSettingsPage'
 import { RaceResultPage } from './pages/RaceResultPage'
 import { SignUpPage } from './pages/SignUpPage'
 import { ScrutineerReportPage } from './pages/ScrutineerReportPage'
@@ -130,11 +130,7 @@ const router = createBrowserRouter([
         path: 'organizer-settings',
         element: (
           <AdminOrSecretaryRoute>
-            <TabPlaceholderPage
-              title="Organizer Settings"
-              description="Season, event, race, series, and rule configuration will be implemented in the organizer settings phase."
-              icon={Wrench}
-            />
+            <OrganizerSettingsPage />
           </AdminOrSecretaryRoute>
         ),
       },

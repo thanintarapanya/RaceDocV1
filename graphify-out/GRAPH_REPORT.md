@@ -1,39 +1,37 @@
 # Graph Report - RaceDocV1Github  (2026-05-13)
 
 ## Corpus Check
-- 37 files · ~42,560 words
+- 38 files · ~45,137 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 173 nodes · 167 edges · 12 communities detected
-- Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 14 edges (avg confidence: 0.81)
+- 197 nodes · 199 edges · 10 communities detected
+- Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 14 edges (avg confidence: 0.81)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
+- [[_COMMUNITY_Community 0|Community 0]]
 - [[_COMMUNITY_Community 1|Community 1]]
 - [[_COMMUNITY_Community 2|Community 2]]
 - [[_COMMUNITY_Community 3|Community 3]]
-- [[_COMMUNITY_Community 5|Community 5]]
+- [[_COMMUNITY_Community 4|Community 4]]
 - [[_COMMUNITY_Community 6|Community 6]]
-- [[_COMMUNITY_Community 10|Community 10]]
-- [[_COMMUNITY_Community 16|Community 16]]
-- [[_COMMUNITY_Community 17|Community 17]]
+- [[_COMMUNITY_Community 28|Community 28]]
+- [[_COMMUNITY_Community 29|Community 29]]
+- [[_COMMUNITY_Community 30|Community 30]]
 - [[_COMMUNITY_Community 31|Community 31]]
-- [[_COMMUNITY_Community 32|Community 32]]
-- [[_COMMUNITY_Community 33|Community 33]]
-- [[_COMMUNITY_Community 34|Community 34]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `useAuth()` - 7 edges
 2. `getAuthErrorMessage()` - 6 edges
-3. `RacedocV1` - 5 edges
-4. `canSeeAdminNavigation()` - 4 edges
-5. `uploadEntryAsset()` - 4 edges
-6. `uniqueValues()` - 4 edges
-7. `getNavigationItems()` - 3 edges
-8. `AdminOrSecretaryRoute()` - 3 edges
-9. `loadOptions()` - 3 edges
-10. `updateStep1()` - 3 edges
+3. `finishSave()` - 5 edges
+4. `RacedocV1` - 5 edges
+5. `canSeeAdminNavigation()` - 4 edges
+6. `uploadEntryAsset()` - 4 edges
+7. `uniqueValues()` - 4 edges
+8. `getNavigationItems()` - 3 edges
+9. `AdminOrSecretaryRoute()` - 3 edges
+10. `loadOptions()` - 3 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `RacedocV1` --indexes--> `Graphify`  [INFERRED]
@@ -49,64 +47,56 @@
 
 ## Communities
 
+### Community 0 - "Community 0"
+Cohesion: 0.06
+Nodes (17): createInitialEntryFormState(), createPersonalSnapshot(), draw(), getCanvasPoint(), handleDocumentUpload(), handleSignatureUpload(), handleSubmitBatch(), loadOptions() (+9 more)
+
 ### Community 1 - "Community 1"
+Cohesion: 0.12
+Nodes (14): createCircuitForm(), createEmptyCircuitForm(), createEmptyEventForm(), createEmptyRaceForm(), createEmptySeasonForm(), createEventForm(), createRaceForm(), createSeasonForm() (+6 more)
+
+### Community 2 - "Community 2"
 Cohesion: 0.11
 Nodes (10): AuthRedirect(), OnboardingRoute(), ProtectedRoute(), AdminOrSecretaryRoute(), ScrutineerReportRoute(), useAuth(), CompetitorRequestPage(), canSeeAdminNavigation() (+2 more)
 
-### Community 2 - "Community 2"
+### Community 3 - "Community 3"
 Cohesion: 0.16
 Nodes (4): getInvitationNotice(), inviteRoleByEmail(), resendInvitation(), sendRoleInvitation()
 
-### Community 3 - "Community 3"
+### Community 4 - "Community 4"
 Cohesion: 0.15
 Nodes (7): getAuthErrorMessage(), handleEmailLogin(), handleGoogleLogin(), handleSubmit(), validateIdentity(), handleSignUp(), handleSubmit()
 
-### Community 5 - "Community 5"
+### Community 6 - "Community 6"
 Cohesion: 0.29
 Nodes (8): Graphify, Balance of Performance (BOP), Entry Form, Inspection Form, RacedocV1, Success Ballast, Supabase, Weight-In
 
-### Community 6 - "Community 6"
-Cohesion: 0.33
-Nodes (6): handleDocumentUpload(), handleSignatureUpload(), sanitizeFileName(), updateConsent(), updateDocumentAsset(), uploadEntryAsset()
-
-### Community 10 - "Community 10"
-Cohesion: 0.5
-Nodes (5): loadOptions(), uniqueValues(), updateSeason(), updateSeries(), updateStep1()
-
-### Community 16 - "Community 16"
-Cohesion: 0.67
-Nodes (3): createInitialEntryFormState(), createPersonalSnapshot(), handleSubmitBatch()
-
-### Community 17 - "Community 17"
-Cohesion: 0.67
-Nodes (3): draw(), getCanvasPoint(), startDrawing()
-
-### Community 31 - "Community 31"
+### Community 28 - "Community 28"
 Cohesion: 1.0
 Nodes (1): Audit Trail
 
-### Community 32 - "Community 32"
+### Community 29 - "Community 29"
 Cohesion: 1.0
 Nodes (1): RBAC
 
-### Community 33 - "Community 33"
+### Community 30 - "Community 30"
 Cohesion: 1.0
 Nodes (1): Competitor Request
 
-### Community 34 - "Community 34"
+### Community 31 - "Community 31"
 Cohesion: 1.0
 Nodes (1): Branding
 
 ## Knowledge Gaps
 - **8 isolated node(s):** `Entry Form`, `Success Ballast`, `Audit Trail`, `RBAC`, `Competitor Request` (+3 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Community 31`** (1 nodes): `Audit Trail`
+- **Thin community `Community 28`** (1 nodes): `Audit Trail`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 32`** (1 nodes): `RBAC`
+- **Thin community `Community 29`** (1 nodes): `RBAC`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 33`** (1 nodes): `Competitor Request`
+- **Thin community `Community 30`** (1 nodes): `Competitor Request`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 34`** (1 nodes): `Branding`
+- **Thin community `Community 31`** (1 nodes): `Branding`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
@@ -121,6 +111,8 @@ _Questions this graph is uniquely positioned to answer:_
 - **What connects `Entry Form`, `Success Ballast`, `Audit Trail` to the rest of the system?**
   _8 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.07 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
+  _Cohesion score 0.12 - nodes in this community are weakly interconnected._
+- **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.11 - nodes in this community are weakly interconnected._
