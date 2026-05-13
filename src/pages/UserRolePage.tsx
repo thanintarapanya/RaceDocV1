@@ -58,6 +58,14 @@ type RoleManagementPayload = {
   invitations: RoleInvitation[]
 }
 
+type SendRoleInvitationResponse = {
+  invitationId?: string
+  emailSent?: boolean
+  emailSkipped?: string
+  warning?: string
+  error?: string
+}
+
 const emptyPayload: RoleManagementPayload = {
   canManage: false,
   users: [],
@@ -168,17 +176,22 @@ export function UserRolePage() {
     setError(null)
     setNotice(null)
 
-    const { error } = await supabase.rpc('invite_user_role_by_email', {
-      p_email: inviteEmail.trim(),
-      p_role_code: inviteRoleCode,
-      p_expires_days: 14,
-    })
+    const { data, error } = await supabase.functions.invoke<SendRoleInvitationResponse>(
+      'send-role-invitation',
+      {
+        body: {
+          email: inviteEmail.trim(),
+          roleCode: inviteRoleCode,
+          expiresDays: 14,
+        },
+      },
+    )
 
-    if (error) {
-      setError(error.message)
+    if (error || data?.error) {
+      setError(data?.error ?? error?.message ?? 'Unable to record role invitation.')
     } else {
       setInviteEmail('')
-      setNotice('Role invitation recorded. If the user has already signed up, the role is active now.')
+      setNotice(getInvitationNotice(data))
       await loadData()
     }
 
@@ -585,4 +598,11 @@ function userMatchesRoleFilter(user: ManagedUser, roleFilter: string) {
   const activeRoles = user.roles.filter((role) => role.isActive)
   if (roleFilter === 'none') return activeRoles.length === 0
   return activeRoles.some((role) => role.code === roleFilter)
+}
+
+function getInvitationNotice(response: SendRoleInvitationResponse | null) {
+  if (response?.warning) return response.warning
+  if (response?.emailSkipped) return response.emailSkipped
+  if (response?.emailSent) return 'Role invitation recorded and email sent.'
+  return 'Role invitation recorded.'
 }

@@ -9,7 +9,7 @@
       "source_file": "eslint.config.js",
       "source_location": "L1",
       "id": "eslint_config_js",
-      "community": 23,
+      "community": 24,
       "norm_label": "eslint.config.js"
     },
     {
@@ -18,8 +18,35 @@
       "source_file": "vite.config.ts",
       "source_location": "L1",
       "id": "vite_config_ts",
-      "community": 24,
+      "community": 25,
       "norm_label": "vite.config.ts"
+    },
+    {
+      "label": "index.ts",
+      "file_type": "code",
+      "source_file": "supabase/functions/send-role-invitation/index.ts",
+      "source_location": "L1",
+      "id": "supabase_functions_send_role_invitation_index_ts",
+      "community": 13,
+      "norm_label": "index.ts"
+    },
+    {
+      "label": "getRedirectUrl()",
+      "file_type": "code",
+      "source_file": "supabase/functions/send-role-invitation/index.ts",
+      "source_location": "L113",
+      "id": "send_role_invitation_index_getredirecturl",
+      "community": 13,
+      "norm_label": "getredirecturl()"
+    },
+    {
+      "label": "jsonResponse()",
+      "file_type": "code",
+      "source_file": "supabase/functions/send-role-invitation/index.ts",
+      "source_location": "L119",
+      "id": "send_role_invitation_index_jsonresponse",
+      "community": 13,
+      "norm_label": "jsonresponse()"
     },
     {
       "label": "App.tsx",
@@ -27,7 +54,7 @@
       "source_file": "src/App.tsx",
       "source_location": "L1",
       "id": "src_app_tsx",
-      "community": 17,
+      "community": 18,
       "norm_label": "app.tsx"
     },
     {
@@ -36,7 +63,7 @@
       "source_file": "src/main.tsx",
       "source_location": "L1",
       "id": "src_main_tsx",
-      "community": 17,
+      "community": 18,
       "norm_label": "main.tsx"
     },
     {
@@ -108,7 +135,7 @@
       "source_file": "src/auth/auth-context.ts",
       "source_location": "L1",
       "id": "src_auth_auth_context_ts",
-      "community": 25,
+      "community": 26,
       "norm_label": "auth-context.ts"
     },
     {
@@ -162,7 +189,7 @@
       "source_file": "src/auth/AuthContext.tsx",
       "source_location": "L1",
       "id": "src_auth_authcontext_tsx",
-      "community": 18,
+      "community": 19,
       "norm_label": "authcontext.tsx"
     },
     {
@@ -171,7 +198,7 @@
       "source_file": "src/auth/AuthContext.tsx",
       "source_location": "L34",
       "id": "auth_authcontext_authprovider",
-      "community": 18,
+      "community": 19,
       "norm_label": "authprovider()"
     },
     {
@@ -216,7 +243,7 @@
       "source_file": "src/layout/AppLayout.tsx",
       "source_location": "L1",
       "id": "src_layout_applayout_tsx",
-      "community": 26,
+      "community": 27,
       "norm_label": "applayout.tsx"
     },
     {
@@ -225,7 +252,7 @@
       "source_file": "src/components/LoadingScreen.tsx",
       "source_location": "L1",
       "id": "src_components_loadingscreen_tsx",
-      "community": 27,
+      "community": 28,
       "norm_label": "loadingscreen.tsx"
     },
     {
@@ -234,7 +261,7 @@
       "source_file": "src/components/SeriesRaceFilter.tsx",
       "source_location": "L1",
       "id": "src_components_seriesracefilter_tsx",
-      "community": 13,
+      "community": 14,
       "norm_label": "seriesracefilter.tsx"
     },
     {
@@ -243,7 +270,7 @@
       "source_file": "src/components/SeriesRaceFilter.tsx",
       "source_location": "L3",
       "id": "components_seriesracefilter_seriesracefilter",
-      "community": 13,
+      "community": 14,
       "norm_label": "seriesracefilter()"
     },
     {
@@ -252,7 +279,7 @@
       "source_file": "src/components/SeriesRaceFilter.tsx",
       "source_location": "L31",
       "id": "components_seriesracefilter_filterresultsummary",
-      "community": 13,
+      "community": 14,
       "norm_label": "filterresultsummary()"
     },
     {
@@ -279,7 +306,7 @@
       "source_file": "src/lib/utils.ts",
       "source_location": "L1",
       "id": "src_lib_utils_ts",
-      "community": 19,
+      "community": 20,
       "norm_label": "utils.ts"
     },
     {
@@ -288,7 +315,7 @@
       "source_file": "src/lib/utils.ts",
       "source_location": "L4",
       "id": "lib_utils_cn",
-      "community": 19,
+      "community": 20,
       "norm_label": "cn()"
     },
     {
@@ -297,7 +324,7 @@
       "source_file": "src/lib/supabase.ts",
       "source_location": "L1",
       "id": "src_lib_supabase_ts",
-      "community": 28,
+      "community": 29,
       "norm_label": "supabase.ts"
     },
     {
@@ -306,7 +333,7 @@
       "source_file": "src/lib/series-race-filter.ts",
       "source_location": "L1",
       "id": "src_lib_series_race_filter_ts",
-      "community": 14,
+      "community": 15,
       "norm_label": "series-race-filter.ts"
     },
     {
@@ -315,7 +342,7 @@
       "source_file": "src/lib/series-race-filter.ts",
       "source_location": "L5",
       "id": "lib_series_race_filter_getseriesraceoptions",
-      "community": 14,
+      "community": 15,
       "norm_label": "getseriesraceoptions()"
     },
     {
@@ -324,7 +351,7 @@
       "source_file": "src/lib/series-race-filter.ts",
       "source_location": "L11",
       "id": "lib_series_race_filter_filterbyseriesrace",
-      "community": 14,
+      "community": 15,
       "norm_label": "filterbyseriesrace()"
     },
     {
@@ -594,7 +621,7 @@
       "source_file": "src/pages/DashboardPlaceholder.tsx",
       "source_location": "L1",
       "id": "src_pages_dashboardplaceholder_tsx",
-      "community": 29,
+      "community": 30,
       "norm_label": "dashboardplaceholder.tsx"
     },
     {
@@ -765,7 +792,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L1251",
       "id": "pages_entryformpage_handlesubmitbatch",
-      "community": 15,
+      "community": 16,
       "norm_label": "handlesubmitbatch()"
     },
     {
@@ -810,7 +837,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L1921",
       "id": "pages_entryformpage_getcanvaspoint",
-      "community": 16,
+      "community": 17,
       "norm_label": "getcanvaspoint()"
     },
     {
@@ -819,7 +846,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L1931",
       "id": "pages_entryformpage_startdrawing",
-      "community": 16,
+      "community": 17,
       "norm_label": "startdrawing()"
     },
     {
@@ -828,7 +855,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L1943",
       "id": "pages_entryformpage_draw",
-      "community": 16,
+      "community": 17,
       "norm_label": "draw()"
     },
     {
@@ -873,7 +900,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L2208",
       "id": "pages_entryformpage_createinitialentryformstate",
-      "community": 15,
+      "community": 16,
       "norm_label": "createinitialentryformstate()"
     },
     {
@@ -882,7 +909,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L2223",
       "id": "pages_entryformpage_createpersonalsnapshot",
-      "community": 15,
+      "community": 16,
       "norm_label": "createpersonalsnapshot()"
     },
     {
@@ -1053,7 +1080,7 @@
       "source_file": "src/pages/TabPlaceholderPage.tsx",
       "source_location": "L1",
       "id": "src_pages_tabplaceholderpage_tsx",
-      "community": 20,
+      "community": 21,
       "norm_label": "tabplaceholderpage.tsx"
     },
     {
@@ -1062,7 +1089,7 @@
       "source_file": "src/pages/TabPlaceholderPage.tsx",
       "source_location": "L4",
       "id": "pages_tabplaceholderpage_tabplaceholderpage",
-      "community": 20,
+      "community": 21,
       "norm_label": "tabplaceholderpage()"
     },
     {
@@ -1249,7 +1276,7 @@
       "label": "run()",
       "file_type": "code",
       "source_file": "src/pages/UserRolePage.tsx",
-      "source_location": "L110",
+      "source_location": "L118",
       "id": "pages_userrolepage_run",
       "community": 3,
       "norm_label": "run()"
@@ -1258,7 +1285,7 @@
       "label": "assignRole()",
       "file_type": "code",
       "source_file": "src/pages/UserRolePage.tsx",
-      "source_location": "L140",
+      "source_location": "L148",
       "id": "pages_userrolepage_assignrole",
       "community": 3,
       "norm_label": "assignrole()"
@@ -1267,7 +1294,7 @@
       "label": "inviteRoleByEmail()",
       "file_type": "code",
       "source_file": "src/pages/UserRolePage.tsx",
-      "source_location": "L164",
+      "source_location": "L172",
       "id": "pages_userrolepage_inviterolebyemail",
       "community": 3,
       "norm_label": "inviterolebyemail()"
@@ -1276,7 +1303,7 @@
       "label": "cancelInvitation()",
       "file_type": "code",
       "source_file": "src/pages/UserRolePage.tsx",
-      "source_location": "L188",
+      "source_location": "L201",
       "id": "pages_userrolepage_cancelinvitation",
       "community": 3,
       "norm_label": "cancelinvitation()"
@@ -1285,7 +1312,7 @@
       "label": "deactivateRole()",
       "file_type": "code",
       "source_file": "src/pages/UserRolePage.tsx",
-      "source_location": "L210",
+      "source_location": "L223",
       "id": "pages_userrolepage_deactivaterole",
       "community": 3,
       "norm_label": "deactivaterole()"
@@ -1294,7 +1321,7 @@
       "label": "normalizePayload()",
       "file_type": "code",
       "source_file": "src/pages/UserRolePage.tsx",
-      "source_location": "L551",
+      "source_location": "L564",
       "id": "pages_userrolepage_normalizepayload",
       "community": 3,
       "norm_label": "normalizepayload()"
@@ -1303,7 +1330,7 @@
       "label": "getFirstElevatedRoleCode()",
       "file_type": "code",
       "source_file": "src/pages/UserRolePage.tsx",
-      "source_location": "L561",
+      "source_location": "L574",
       "id": "pages_userrolepage_getfirstelevatedrolecode",
       "community": 3,
       "norm_label": "getfirstelevatedrolecode()"
@@ -1312,7 +1339,7 @@
       "label": "keepElevatedRoleCode()",
       "file_type": "code",
       "source_file": "src/pages/UserRolePage.tsx",
-      "source_location": "L565",
+      "source_location": "L578",
       "id": "pages_userrolepage_keepelevatedrolecode",
       "community": 3,
       "norm_label": "keepelevatedrolecode()"
@@ -1321,7 +1348,7 @@
       "label": "filterAssignableUsers()",
       "file_type": "code",
       "source_file": "src/pages/UserRolePage.tsx",
-      "source_location": "L571",
+      "source_location": "L584",
       "id": "pages_userrolepage_filterassignableusers",
       "community": 3,
       "norm_label": "filterassignableusers()"
@@ -1330,10 +1357,19 @@
       "label": "userMatchesRoleFilter()",
       "file_type": "code",
       "source_file": "src/pages/UserRolePage.tsx",
-      "source_location": "L583",
+      "source_location": "L596",
       "id": "pages_userrolepage_usermatchesrolefilter",
       "community": 3,
       "norm_label": "usermatchesrolefilter()"
+    },
+    {
+      "label": "getInvitationNotice()",
+      "file_type": "code",
+      "source_file": "src/pages/UserRolePage.tsx",
+      "source_location": "L603",
+      "id": "pages_userrolepage_getinvitationnotice",
+      "community": 3,
+      "norm_label": "getinvitationnotice()"
     },
     {
       "label": "DashboardPage.tsx",
@@ -1341,7 +1377,7 @@
       "source_file": "src/pages/DashboardPage.tsx",
       "source_location": "L1",
       "id": "src_pages_dashboardpage_tsx",
-      "community": 21,
+      "community": 22,
       "norm_label": "dashboardpage.tsx"
     },
     {
@@ -1350,7 +1386,7 @@
       "source_file": "src/pages/DashboardPage.tsx",
       "source_location": "L79",
       "id": "pages_dashboardpage_run",
-      "community": 21,
+      "community": 22,
       "norm_label": "run()"
     },
     {
@@ -1359,7 +1395,7 @@
       "source_file": "src/pages/AuthHealthPage.tsx",
       "source_location": "L1",
       "id": "src_pages_authhealthpage_tsx",
-      "community": 22,
+      "community": 23,
       "norm_label": "authhealthpage.tsx"
     },
     {
@@ -1368,7 +1404,7 @@
       "source_file": "src/pages/AuthHealthPage.tsx",
       "source_location": "L24",
       "id": "pages_authhealthpage_rundiagnostic",
-      "community": 22,
+      "community": 23,
       "norm_label": "rundiagnostic()"
     },
     {
@@ -1423,7 +1459,7 @@
       "label": "Audit Trail",
       "file_type": "document",
       "source_file": "RaceDocV1_Architecture.md",
-      "community": 30,
+      "community": 31,
       "norm_label": "audit trail",
       "id": "racedocv1_architecture_audit_trail"
     },
@@ -1431,7 +1467,7 @@
       "label": "RBAC",
       "file_type": "document",
       "source_file": "RaceDocV1_Architecture.md",
-      "community": 31,
+      "community": 32,
       "norm_label": "rbac",
       "id": "racedocv1_architecture_rbac"
     },
@@ -1439,7 +1475,7 @@
       "label": "Competitor Request",
       "file_type": "document",
       "source_file": "RaceDocV1_Architecture.md",
-      "community": 32,
+      "community": 33,
       "norm_label": "competitor request",
       "id": "racedocv1_architecture_competitorrequest"
     },
@@ -1463,12 +1499,36 @@
       "label": "Branding",
       "file_type": "document",
       "source_file": "BrandGuidelines.md",
-      "community": 33,
+      "community": 34,
       "norm_label": "branding",
       "id": "brandguidelines_branding"
     }
   ],
   "links": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/functions/send-role-invitation/index.ts",
+      "source_location": "L113",
+      "weight": 1.0,
+      "_src": "supabase_functions_send_role_invitation_index_ts",
+      "_tgt": "send_role_invitation_index_getredirecturl",
+      "source": "supabase_functions_send_role_invitation_index_ts",
+      "target": "send_role_invitation_index_getredirecturl",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/functions/send-role-invitation/index.ts",
+      "source_location": "L119",
+      "weight": 1.0,
+      "_src": "supabase_functions_send_role_invitation_index_ts",
+      "_tgt": "send_role_invitation_index_jsonresponse",
+      "source": "supabase_functions_send_role_invitation_index_ts",
+      "target": "send_role_invitation_index_jsonresponse",
+      "confidence_score": 1.0
+    },
     {
       "relation": "imports_from",
       "confidence": "EXTRACTED",
@@ -3093,7 +3153,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/UserRolePage.tsx",
-      "source_location": "L110",
+      "source_location": "L118",
       "weight": 1.0,
       "_src": "src_pages_userrolepage_tsx",
       "_tgt": "pages_userrolepage_run",
@@ -3105,7 +3165,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/UserRolePage.tsx",
-      "source_location": "L140",
+      "source_location": "L148",
       "weight": 1.0,
       "_src": "src_pages_userrolepage_tsx",
       "_tgt": "pages_userrolepage_assignrole",
@@ -3117,7 +3177,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/UserRolePage.tsx",
-      "source_location": "L164",
+      "source_location": "L172",
       "weight": 1.0,
       "_src": "src_pages_userrolepage_tsx",
       "_tgt": "pages_userrolepage_inviterolebyemail",
@@ -3129,7 +3189,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/UserRolePage.tsx",
-      "source_location": "L188",
+      "source_location": "L201",
       "weight": 1.0,
       "_src": "src_pages_userrolepage_tsx",
       "_tgt": "pages_userrolepage_cancelinvitation",
@@ -3141,7 +3201,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/UserRolePage.tsx",
-      "source_location": "L210",
+      "source_location": "L223",
       "weight": 1.0,
       "_src": "src_pages_userrolepage_tsx",
       "_tgt": "pages_userrolepage_deactivaterole",
@@ -3153,7 +3213,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/UserRolePage.tsx",
-      "source_location": "L551",
+      "source_location": "L564",
       "weight": 1.0,
       "_src": "src_pages_userrolepage_tsx",
       "_tgt": "pages_userrolepage_normalizepayload",
@@ -3165,7 +3225,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/UserRolePage.tsx",
-      "source_location": "L561",
+      "source_location": "L574",
       "weight": 1.0,
       "_src": "src_pages_userrolepage_tsx",
       "_tgt": "pages_userrolepage_getfirstelevatedrolecode",
@@ -3177,7 +3237,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/UserRolePage.tsx",
-      "source_location": "L565",
+      "source_location": "L578",
       "weight": 1.0,
       "_src": "src_pages_userrolepage_tsx",
       "_tgt": "pages_userrolepage_keepelevatedrolecode",
@@ -3189,7 +3249,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/UserRolePage.tsx",
-      "source_location": "L571",
+      "source_location": "L584",
       "weight": 1.0,
       "_src": "src_pages_userrolepage_tsx",
       "_tgt": "pages_userrolepage_filterassignableusers",
@@ -3201,12 +3261,36 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/UserRolePage.tsx",
-      "source_location": "L583",
+      "source_location": "L596",
       "weight": 1.0,
       "_src": "src_pages_userrolepage_tsx",
       "_tgt": "pages_userrolepage_usermatchesrolefilter",
       "source": "src_pages_userrolepage_tsx",
       "target": "pages_userrolepage_usermatchesrolefilter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/UserRolePage.tsx",
+      "source_location": "L603",
+      "weight": 1.0,
+      "_src": "src_pages_userrolepage_tsx",
+      "_tgt": "pages_userrolepage_getinvitationnotice",
+      "source": "src_pages_userrolepage_tsx",
+      "target": "pages_userrolepage_getinvitationnotice",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/UserRolePage.tsx",
+      "source_location": "L194",
+      "weight": 1.0,
+      "_src": "pages_userrolepage_inviterolebyemail",
+      "_tgt": "pages_userrolepage_getinvitationnotice",
+      "source": "pages_userrolepage_inviterolebyemail",
+      "target": "pages_userrolepage_getinvitationnotice",
       "confidence_score": 1.0
     },
     {
