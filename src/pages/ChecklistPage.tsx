@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import {
   ArrowDown,
   ArrowUp,
+  AlertTriangle,
   Check,
   ClipboardCheck,
   History,
@@ -161,6 +162,10 @@ export function ChecklistPage() {
     [eventEntries, selectedSeries, searchQuery],
   )
   const totals = useMemo(() => calculateTotals(eventEntries, eventTopics), [eventEntries, eventTopics])
+  const visibleIncompleteCount = useMemo(
+    () => visibleEntries.filter((entry) => getMissingTopics(entry, eventTopics).length > 0).length,
+    [eventTopics, visibleEntries],
+  )
   const selectedBulkTopicId = eventTopics.some((topic) => topic.topicId === bulkTopicId)
     ? bulkTopicId
     : eventTopics[0]?.topicId || ''
@@ -434,6 +439,9 @@ export function ChecklistPage() {
             onBulkUpdate={bulkUpdateChecklistItems}
           />
         ) : null}
+        {!loading && visibleEntries.length > 0 && eventTopics.length > 0 ? (
+          <CompletionWarning visibleIncompleteCount={visibleIncompleteCount} visibleCount={visibleEntries.length} />
+        ) : null}
         {loading ? <ChecklistSkeleton /> : null}
         {!loading && !selectedEventId ? <ChecklistEmpty title="No event is available." description="Create an Event first before configuring Checklist topics." /> : null}
         {!loading && selectedEventId && eventTopics.length === 0 ? <ChecklistEmpty title="No checklist topics configured." description="Admin or Secretary can add the first topic from the topic settings panel." /> : null}
@@ -591,6 +599,34 @@ function BulkActionBar({
         </motion.button>
       </div>
     </motion.section>
+  )
+}
+
+function CompletionWarning({
+  visibleIncompleteCount,
+  visibleCount,
+}: {
+  visibleIncompleteCount: number
+  visibleCount: number
+}) {
+  if (visibleIncompleteCount === 0) {
+    return (
+      <div className="mb-4 border border-emerald-200 bg-emerald-500/10 p-4 text-sm text-emerald-700 dark:border-emerald-900/60 dark:text-emerald-400">
+        All {visibleCount} visible row(s) are 100% complete.
+      </div>
+    )
+  }
+
+  return (
+    <div className="mb-4 flex items-start gap-3 border border-amber-200 bg-amber-500/10 p-4 text-sm text-amber-700 dark:border-amber-900/60 dark:text-amber-500">
+      <AlertTriangle size={18} className="mt-0.5 shrink-0" />
+      <div>
+        <p className="font-semibold">{visibleIncompleteCount} of {visibleCount} visible row(s) are incomplete.</p>
+        <p className="mt-1 text-amber-800/80 dark:text-amber-300/80">
+          This is a warning only. Checklist completion does not change race eligibility or other modules.
+        </p>
+      </div>
+    </div>
   )
 }
 
@@ -799,6 +835,7 @@ function ChecklistTable({
                   <td className="sticky left-0 z-10 bg-zinc-50 px-4 py-4 dark:bg-zinc-950">
                     <p className="font-medium">{entry.competitorName}</p>
                     <p className="mt-1 text-sm text-zinc-500">{entry.competitorEmail}</p>
+                    <EntryCompletionStatus entry={entry} topics={topics} />
                   </td>
                   <td className="px-4 py-4 text-sm text-zinc-700 dark:text-zinc-300">{entry.seriesClass}</td>
                   <td className="px-4 py-4 font-mono tabular-nums">#{entry.carNumber ?? '--'}</td>
@@ -842,6 +879,7 @@ function ChecklistTable({
               <div>
                 <h2 className="font-semibold">{entry.competitorName}</h2>
                 <p className="mt-1 text-sm text-zinc-500">{entry.eventName} / {entry.seriesClass}</p>
+                <EntryCompletionStatus entry={entry} topics={topics} />
               </div>
               <span className="font-mono text-sm tabular-nums">#{entry.carNumber ?? '--'}</span>
             </div>
@@ -914,6 +952,27 @@ function ChecklistToggle({
     >
       {checked ? <Check size={17} /> : <X size={17} />}
     </motion.button>
+  )
+}
+
+function EntryCompletionStatus({ entry, topics }: { entry: ChecklistEntry; topics: ChecklistTopic[] }) {
+  const missingTopics = getMissingTopics(entry, topics)
+
+  if (missingTopics.length === 0) {
+    return (
+      <span className="mt-2 inline-flex rounded-sm bg-emerald-500/10 px-2 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-emerald-700 dark:text-emerald-400">
+        Complete
+      </span>
+    )
+  }
+
+  return (
+    <div className="mt-2 flex max-w-72 items-start gap-2 text-xs text-amber-700 dark:text-amber-500">
+      <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+      <p>
+        Missing {missingTopics.length}: {missingTopics.slice(0, 2).map((topic) => topic.title).join(', ')}{missingTopics.length > 2 ? ` +${missingTopics.length - 2}` : ''}
+      </p>
+    </div>
   )
 }
 
@@ -1134,6 +1193,10 @@ function getEntryItem(entry: ChecklistEntry, topicId: string): ChecklistItem {
     updatedByName: null,
     updatedAt: null,
   }
+}
+
+function getMissingTopics(entry: ChecklistEntry, topics: ChecklistTopic[]) {
+  return topics.filter((topic) => !getEntryItem(entry, topic.topicId).isChecked)
 }
 
 function filterChecklistEntries(entries: ChecklistEntry[], searchQuery: string) {
