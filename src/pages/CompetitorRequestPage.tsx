@@ -96,6 +96,11 @@ type ReviewDraft = {
   comment: string
 }
 
+type ReviewerSelectionDraft = {
+  selectedKey: string
+  reviewerKeys: string[]
+}
+
 export function CompetitorRequestPage() {
   const { roles } = useAuth()
   const canFinalize = canSeeAdminNavigation(roles)
@@ -116,7 +121,7 @@ export function CompetitorRequestPage() {
   const [activeRequestId, setActiveRequestId] = useState<string | null>(null)
   const [activeApprovalId, setActiveApprovalId] = useState<string | null>(null)
   const [decisionDrafts, setDecisionDrafts] = useState<Record<string, FinalDecisionDraft>>({})
-  const [reviewerDrafts, setReviewerDrafts] = useState<Record<string, string>>({})
+  const [reviewerDrafts, setReviewerDrafts] = useState<Record<string, ReviewerSelectionDraft>>({})
   const [reviewDrafts, setReviewDrafts] = useState<Record<string, ReviewDraft>>({})
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
@@ -161,6 +166,7 @@ export function CompetitorRequestPage() {
       setSelectedEntryId((current) => current || nextEntries[0]?.entry_id || '')
       setRequests(nextRequests)
       setDecisionDrafts(Object.fromEntries(nextRequests.map((request) => [request.request_id, createDecisionDraft(request)])))
+      setReviewerDrafts((current) => createReviewerDrafts(nextRequests, current))
       setReviewDrafts(createReviewDrafts(nextRequests))
     }
 
@@ -295,10 +301,9 @@ export function CompetitorRequestPage() {
   }
 
   async function assignReviewers(request: CompetitorRequest) {
-    const selectedKey = reviewerDrafts[request.request_id]
-    const selected = reviewerOptions.find((reviewer) => getReviewerKey(reviewer) === selectedKey)
-    if (!selected) {
-      setError('Select an official reviewer first.')
+    const selectedReviewers = getSelectedReviewers(reviewerOptions, reviewerDrafts[request.request_id]?.reviewerKeys ?? [])
+    if (selectedReviewers.length === 0) {
+      setError('Select at least one official reviewer first.')
       return
     }
 
@@ -308,13 +313,13 @@ export function CompetitorRequestPage() {
 
     const { error } = await supabase.rpc('assign_competitor_request_reviewers', {
       p_request_id: request.request_id,
-      p_reviewers: [{ profileId: selected.profile_id, roleCode: selected.role_code }],
+      p_reviewers: selectedReviewers.map((reviewer) => ({ profileId: reviewer.profile_id, roleCode: reviewer.role_code })),
     })
 
     if (error) {
       setError(error.message)
     } else {
-      setNotice('Request sent to official reviewer.')
+      setNotice(`Request sent to ${selectedReviewers.length} official reviewer(s).`)
       await loadData()
     }
 
@@ -361,6 +366,33 @@ export function CompetitorRequestPage() {
         ...changes,
       },
     }))
+  }
+
+  function updateReviewerDraft(requestId: string, changes: Partial<ReviewerSelectionDraft>) {
+    setReviewerDrafts((current) => ({
+      ...current,
+      [requestId]: {
+        ...(current[requestId] ?? createReviewerDraft()),
+        ...changes,
+      },
+    }))
+  }
+
+  function addReviewerDraft(requestId: string) {
+    const draft = reviewerDrafts[requestId] ?? createReviewerDraft()
+    if (!draft.selectedKey || draft.reviewerKeys.includes(draft.selectedKey)) return
+
+    updateReviewerDraft(requestId, {
+      reviewerKeys: [...draft.reviewerKeys, draft.selectedKey],
+      selectedKey: '',
+    })
+  }
+
+  function removeReviewerDraft(requestId: string, reviewerKey: string) {
+    const draft = reviewerDrafts[requestId] ?? createReviewerDraft()
+    updateReviewerDraft(requestId, {
+      reviewerKeys: draft.reviewerKeys.filter((key) => key !== reviewerKey),
+    })
   }
 
   return (
@@ -535,7 +567,7 @@ export function CompetitorRequestPage() {
                   index={index}
                   canFinalize={canFinalize}
                   reviewers={reviewerOptions}
-                  selectedReviewerKey={reviewerDrafts[request.request_id] ?? ''}
+                  reviewerDraft={reviewerDrafts[request.request_id] ?? createReviewerDraft()}
                   active={activeRequestId === request.request_id}
                   activeApprovalId={activeApprovalId}
                   draft={decisionDrafts[request.request_id] ?? createDecisionDraft(request)}
@@ -544,7 +576,9 @@ export function CompetitorRequestPage() {
                   onFinalize={finalizeRequest}
                   onAssignReviewer={assignReviewers}
                   onDraftChange={updateDecisionDraft}
-                  onReviewerChange={(value) => setReviewerDrafts((current) => ({ ...current, [request.request_id]: value }))}
+                  onReviewerChange={(value) => updateReviewerDraft(request.request_id, { selectedKey: value })}
+                  onAddReviewer={() => addReviewerDraft(request.request_id)}
+                  onRemoveReviewer={(reviewerKey) => removeReviewerDraft(request.request_id, reviewerKey)}
                   onReviewDraftChange={updateReviewDraft}
                   onSubmitReview={submitReview}
                 />
@@ -562,7 +596,7 @@ function RequestRow({
   index,
   canFinalize,
   reviewers,
-  selectedReviewerKey,
+  reviewerDraft,
   active,
   activeApprovalId,
   draft,
@@ -572,6 +606,8 @@ function RequestRow({
   onAssignReviewer,
   onDraftChange,
   onReviewerChange,
+  onAddReviewer,
+  onRemoveReviewer,
   onReviewDraftChange,
   onSubmitReview,
 }: {
@@ -579,7 +615,7 @@ function RequestRow({
   index: number
   canFinalize: boolean
   reviewers: ReviewerOption[]
-  selectedReviewerKey: string
+  reviewerDraft: ReviewerSelectionDraft
   active: boolean
   activeApprovalId: string | null
   draft: FinalDecisionDraft
@@ -589,6 +625,8 @@ function RequestRow({
   onAssignReviewer: (request: CompetitorRequest) => Promise<void>
   onDraftChange: (requestId: string, changes: Partial<FinalDecisionDraft>) => void
   onReviewerChange: (value: string) => void
+  onAddReviewer: () => void
+  onRemoveReviewer: (reviewerKey: string) => void
   onReviewDraftChange: (approvalId: string, changes: Partial<ReviewDraft>) => void
   onSubmitReview: (approval: RequestApproval) => Promise<void>
 }) {
@@ -637,23 +675,29 @@ function RequestRow({
           <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
             Ask Steward, President, Clerk, or Head Scrutineer to recommend before final decision.
           </p>
-          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-end">
+          <div className="mt-3 grid gap-3">
             <label className="block min-w-0 flex-1">
               <span className="text-sm font-medium">Official reviewer</span>
               <select
-                value={selectedReviewerKey}
+                value={reviewerDraft.selectedKey}
                 onChange={(event) => onReviewerChange(event.target.value)}
                 className="mt-2 min-h-11 w-full rounded-md border border-zinc-300 bg-zinc-50 px-3 text-base outline-none transition focus:border-primary dark:border-zinc-800 dark:bg-zinc-950"
               >
                 <option value="">Select reviewer</option>
                 {reviewers.map((reviewer) => (
-                  <option key={getReviewerKey(reviewer)} value={getReviewerKey(reviewer)}>
+                  <option key={getReviewerKey(reviewer)} value={getReviewerKey(reviewer)} disabled={reviewerDraft.reviewerKeys.includes(getReviewerKey(reviewer))}>
                     {reviewer.display_name} / {reviewer.role_name}
                   </option>
                 ))}
               </select>
             </label>
-            <SmallAction label="Send Review" disabled={active || !selectedReviewerKey} onClick={() => onAssignReviewer(request)} primary icon={<Send size={15} />} />
+            <div className="flex flex-wrap gap-2">
+              <SmallAction label="Add Reviewer" disabled={active || !reviewerDraft.selectedKey} onClick={onAddReviewer} icon={<Plus size={15} />} />
+              <SmallAction label={`Send ${reviewerDraft.reviewerKeys.length || ''} Review${reviewerDraft.reviewerKeys.length === 1 ? '' : 's'}`} disabled={active || reviewerDraft.reviewerKeys.length === 0} onClick={() => onAssignReviewer(request)} primary icon={<Send size={15} />} />
+            </div>
+            {reviewerDraft.reviewerKeys.length > 0 ? (
+              <ReviewerChips reviewerKeys={reviewerDraft.reviewerKeys} reviewers={reviewers} onRemove={onRemoveReviewer} />
+            ) : null}
           </div>
           {reviewers.length === 0 ? (
             <p className="mt-3 text-sm text-amber-700 dark:text-amber-400">
@@ -770,6 +814,32 @@ function TopicChips({ topics }: { topics: RequestTopicSelection[] }) {
           {formatTopicLabel(topic)}
         </span>
       ))}
+    </div>
+  )
+}
+
+function ReviewerChips({
+  reviewerKeys,
+  reviewers,
+  onRemove,
+}: {
+  reviewerKeys: string[]
+  reviewers: ReviewerOption[]
+  onRemove: (reviewerKey: string) => void
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {reviewerKeys.map((reviewerKey) => {
+        const reviewer = reviewers.find((option) => getReviewerKey(option) === reviewerKey)
+        return (
+          <span key={reviewerKey} className="inline-flex items-center gap-2 rounded-md border border-zinc-200 px-2 py-1 text-xs font-semibold dark:border-zinc-800">
+            {reviewer ? `${reviewer.display_name} / ${reviewer.role_name}` : reviewerKey}
+            <button type="button" onClick={() => onRemove(reviewerKey)} aria-label="Remove reviewer">
+              <X size={13} />
+            </button>
+          </span>
+        )
+      })}
     </div>
   )
 }
@@ -962,6 +1032,25 @@ function createReviewDrafts(requests: CompetitorRequest[]) {
   return Object.fromEntries(
     requests.flatMap((request) => request.approvals.map((approval) => [approval.approvalId, createReviewDraft(approval)])),
   )
+}
+
+function createReviewerDraft(): ReviewerSelectionDraft {
+  return { selectedKey: '', reviewerKeys: [] }
+}
+
+function createReviewerDrafts(
+  requests: CompetitorRequest[],
+  current: Record<string, ReviewerSelectionDraft>,
+) {
+  return Object.fromEntries(
+    requests.map((request) => [request.request_id, current[request.request_id] ?? createReviewerDraft()]),
+  )
+}
+
+function getSelectedReviewers(reviewers: ReviewerOption[], reviewerKeys: string[]) {
+  return reviewerKeys
+    .map((reviewerKey) => reviewers.find((reviewer) => getReviewerKey(reviewer) === reviewerKey))
+    .filter((reviewer): reviewer is ReviewerOption => Boolean(reviewer))
 }
 
 function createTopicSelection(option: RequestTopicOption, otherText = ''): RequestTopicSelection {

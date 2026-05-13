@@ -1,11 +1,11 @@
 # Graph Report - RaceDocV1Github  (2026-05-13)
 
 ## Corpus Check
-- 38 files · ~45,606 words
+- 38 files · ~45,975 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 207 nodes · 207 edges · 10 communities detected
+- 210 nodes · 212 edges · 11 communities detected
 - Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 12 edges (avg confidence: 0.81)
 - Token cost: 0 input · 0 output
 
@@ -13,6 +13,7 @@
 - [[_COMMUNITY_Community 0|Community 0]]
 - [[_COMMUNITY_Community 1|Community 1]]
 - [[_COMMUNITY_Community 2|Community 2]]
+- [[_COMMUNITY_Community 3|Community 3]]
 - [[_COMMUNITY_Community 4|Community 4]]
 - [[_COMMUNITY_Community 5|Community 5]]
 - [[_COMMUNITY_Community 7|Community 7]]
@@ -56,6 +57,10 @@ Cohesion: 0.12
 Nodes (14): createCircuitForm(), createEmptyCircuitForm(), createEmptyEventForm(), createEmptyRaceForm(), createEmptySeasonForm(), createEventForm(), createRaceForm(), createSeasonForm() (+6 more)
 
 ### Community 2 - "Community 2"
+Cohesion: 0.12
+Nodes (3): addReviewerDraft(), removeReviewerDraft(), updateReviewerDraft()
+
+### Community 3 - "Community 3"
 Cohesion: 0.15
 Nodes (9): AuthRedirect(), OnboardingRoute(), ProtectedRoute(), AdminOrSecretaryRoute(), ScrutineerReportRoute(), useAuth(), canSeeAdminNavigation(), canSeeScrutineerReportNavigation() (+1 more)
 
@@ -112,5 +117,5 @@ _Questions this graph is uniquely positioned to answer:_
   _Cohesion score 0.06 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.12 - nodes in this community are weakly interconnected._
-- **Should `Community 3` be split into smaller, more focused modules?**
+- **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.12 - nodes in this community are weakly interconnected._
