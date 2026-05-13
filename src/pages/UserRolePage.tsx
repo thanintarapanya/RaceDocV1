@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Loader2, MailPlus, RefreshCcw, Search, ShieldCheck, UserRoundCog, X } from 'lucide-react'
+import { Loader2, MailPlus, RefreshCcw, Search, Send, ShieldCheck, UserRoundCog, X } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useAuth } from '@/auth/useAuth'
 import { supabase } from '@/lib/supabase'
@@ -176,21 +176,29 @@ export function UserRolePage() {
     setError(null)
     setNotice(null)
 
-    const { data, error } = await supabase.functions.invoke<SendRoleInvitationResponse>(
-      'send-role-invitation',
-      {
-        body: {
-          email: inviteEmail.trim(),
-          roleCode: inviteRoleCode,
-          expiresDays: 14,
-        },
-      },
-    )
+    const { data, error } = await sendRoleInvitation(inviteEmail.trim(), inviteRoleCode)
 
     if (error || data?.error) {
       setError(data?.error ?? error?.message ?? 'Unable to record role invitation.')
     } else {
       setInviteEmail('')
+      setNotice(getInvitationNotice(data))
+      await loadData()
+    }
+
+    setUpdatingKey(null)
+  }
+
+  async function resendInvitation(invitation: RoleInvitation) {
+    setUpdatingKey(`resend-${invitation.invitationId}`)
+    setError(null)
+    setNotice(null)
+
+    const { data, error } = await sendRoleInvitation(invitation.email, invitation.roleCode)
+
+    if (error || data?.error) {
+      setError(data?.error ?? error?.message ?? 'Unable to resend role invitation.')
+    } else {
       setNotice(getInvitationNotice(data))
       await loadData()
     }
@@ -442,7 +450,12 @@ export function UserRolePage() {
               <h2 className="mt-2 text-xl font-semibold">Role Matrix</h2>
             </div>
             <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
-              <InvitationList invitations={payload.invitations} updatingKey={updatingKey} onCancel={cancelInvitation} />
+              <InvitationList
+                invitations={payload.invitations}
+                updatingKey={updatingKey}
+                onCancel={cancelInvitation}
+                onResend={resendInvitation}
+              />
               {payload.users.map((user) => (
                 <UserRoleRow
                   key={user.profileId}
@@ -463,10 +476,12 @@ function InvitationList({
   invitations,
   updatingKey,
   onCancel,
+  onResend,
 }: {
   invitations: RoleInvitation[]
   updatingKey: string | null
   onCancel: (invitation: RoleInvitation) => Promise<void>
+  onResend: (invitation: RoleInvitation) => Promise<void>
 }) {
   if (invitations.length === 0) return null
 
@@ -481,16 +496,28 @@ function InvitationList({
               <p className="mt-1 text-sm text-zinc-500">{invitation.roleName} / {invitation.status}</p>
             </div>
             {invitation.status === 'Pending' ? (
-              <motion.button
-                whileTap={{ scale: 0.98 }}
-                type="button"
-                onClick={() => onCancel(invitation)}
-                disabled={updatingKey === invitation.invitationId}
-                className="inline-flex min-h-9 items-center justify-center gap-2 rounded-md border border-zinc-300 px-3 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800"
-              >
-                {updatingKey === invitation.invitationId ? <Loader2 size={14} className="animate-spin" /> : <X size={14} />}
-                Cancel
-              </motion.button>
+              <div className="flex flex-wrap gap-2">
+                <motion.button
+                  whileTap={{ scale: 0.98 }}
+                  type="button"
+                  onClick={() => onResend(invitation)}
+                  disabled={updatingKey === `resend-${invitation.invitationId}`}
+                  className="inline-flex min-h-9 items-center justify-center gap-2 rounded-md border border-zinc-300 px-3 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800"
+                >
+                  {updatingKey === `resend-${invitation.invitationId}` ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                  Resend
+                </motion.button>
+                <motion.button
+                  whileTap={{ scale: 0.98 }}
+                  type="button"
+                  onClick={() => onCancel(invitation)}
+                  disabled={updatingKey === invitation.invitationId}
+                  className="inline-flex min-h-9 items-center justify-center gap-2 rounded-md border border-zinc-300 px-3 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800"
+                >
+                  {updatingKey === invitation.invitationId ? <Loader2 size={14} className="animate-spin" /> : <X size={14} />}
+                  Cancel
+                </motion.button>
+              </div>
             ) : null}
           </div>
         ))}
@@ -605,4 +632,17 @@ function getInvitationNotice(response: SendRoleInvitationResponse | null) {
   if (response?.emailSkipped) return response.emailSkipped
   if (response?.emailSent) return 'Role invitation recorded and email sent.'
   return 'Role invitation recorded.'
+}
+
+function sendRoleInvitation(email: string, roleCode: string) {
+  return supabase.functions.invoke<SendRoleInvitationResponse>(
+    'send-role-invitation',
+    {
+      body: {
+        email,
+        roleCode,
+        expiresDays: 14,
+      },
+    },
+  )
 }

@@ -1,11 +1,11 @@
 # Graph Report - RaceDocV1Github  (2026-05-13)
 
 ## Corpus Check
-- 37 files · ~42,272 words
+- 37 files · ~42,374 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 168 nodes · 159 edges · 12 communities detected
+- 170 nodes · 164 edges · 12 communities detected
 - Extraction: 91% EXTRACTED · 9% INFERRED · 0% AMBIGUOUS · INFERRED: 14 edges (avg confidence: 0.81)
 - Token cost: 0 input · 0 output
 
@@ -58,8 +58,8 @@ Cohesion: 0.15
 Nodes (7): getAuthErrorMessage(), handleEmailLogin(), handleGoogleLogin(), handleSubmit(), validateIdentity(), handleSignUp(), handleSubmit()
 
 ### Community 3 - "Community 3"
-Cohesion: 0.18
-Nodes (2): getInvitationNotice(), inviteRoleByEmail()
+Cohesion: 0.19
+Nodes (4): getInvitationNotice(), inviteRoleByEmail(), resendInvitation(), sendRoleInvitation()
 
 ### Community 5 - "Community 5"
 Cohesion: 0.29
@@ -100,8 +100,6 @@ Nodes (1): Branding
 ## Knowledge Gaps
 - **8 isolated node(s):** `Entry Form`, `Success Ballast`, `Audit Trail`, `RBAC`, `Competitor Request` (+3 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Community 3`** (12 nodes): `assignRole()`, `cancelInvitation()`, `deactivateRole()`, `filterAssignableUsers()`, `getFirstElevatedRoleCode()`, `getInvitationNotice()`, `inviteRoleByEmail()`, `keepElevatedRoleCode()`, `normalizePayload()`, `run()`, `userMatchesRoleFilter()`, `UserRolePage.tsx`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 31`** (1 nodes): `Audit Trail`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 32`** (1 nodes): `RBAC`
