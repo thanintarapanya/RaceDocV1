@@ -457,7 +457,7 @@ function ResultEditor({
       ) : null}
       {!loading && entries.length > 0 ? (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[980px] border-collapse text-left">
+          <table className="w-full min-w-[1060px] border-collapse text-left">
             <thead className="border-b border-zinc-200 text-sm text-zinc-500 dark:border-zinc-800">
               <tr>
                 <th className="px-4 py-3 font-medium">Car</th>
@@ -467,6 +467,7 @@ function ResultEditor({
                 <th className="px-4 py-3 font-medium">Code</th>
                 <th className="px-4 py-3 font-medium">Bonus</th>
                 <th className="px-4 py-3 font-medium">Points</th>
+                <th className="px-4 py-3 font-medium">Next Ballast</th>
                 <th className="px-4 py-3 font-medium">Action</th>
               </tr>
             </thead>
@@ -507,6 +508,7 @@ function ResultEditor({
                       </label>
                     </td>
                     <td className="px-4 py-4 font-mono text-lg font-semibold tabular-nums">{entry.points}</td>
+                    <td className="px-4 py-4 font-mono text-lg font-semibold tabular-nums">{formatKg(entry.success_ballast_delta_kg)}</td>
                     <td className="px-4 py-4">
                       <motion.button
                         whileTap={{ scale: 0.98 }}
@@ -626,4 +628,8 @@ function formatDateTime(value: string | null) {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(new Date(value))
+}
+
+function formatKg(value: number) {
+  return `${Number(value || 0).toFixed(1)} kg`
 }

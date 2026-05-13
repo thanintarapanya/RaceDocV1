@@ -1,7 +1,7 @@
 # Graph Report - RaceDocV1Github  (2026-05-13)
 
 ## Corpus Check
-- 35 files · ~39,113 words
+- 35 files · ~39,135 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -75,11 +75,11 @@ Nodes (5): loadOptions(), uniqueValues(), updateSeason(), updateSeries(), update
 
 ### Community 15 - "Community 15"
 Cohesion: 0.67
-Nodes (3): createInitialEntryFormState(), createPersonalSnapshot(), handleSubmitBatch()
+Nodes (3): draw(), getCanvasPoint(), startDrawing()
 
 ### Community 16 - "Community 16"
 Cohesion: 0.67
-Nodes (3): draw(), getCanvasPoint(), startDrawing()
+Nodes (3): createInitialEntryFormState(), createPersonalSnapshot(), handleSubmitBatch()
 
 ### Community 30 - "Community 30"
 Cohesion: 1.0
