@@ -630,6 +630,10 @@ function RequestRow({
   onReviewDraftChange: (approvalId: string, changes: Partial<ReviewDraft>) => void
   onSubmitReview: (approval: RequestApproval) => Promise<void>
 }) {
+  const assignedReviewerKeys = request.approvals.map((approval) => getApprovalReviewerKey(approval))
+  const availableReviewers = reviewers.filter((reviewer) => !assignedReviewerKeys.includes(getReviewerKey(reviewer)))
+  const reviewerDraftKeys = reviewerDraft.reviewerKeys.filter((reviewerKey) => !assignedReviewerKeys.includes(reviewerKey))
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 8 }}
@@ -684,8 +688,8 @@ function RequestRow({
                 className="mt-2 min-h-11 w-full rounded-md border border-zinc-300 bg-zinc-50 px-3 text-base outline-none transition focus:border-primary dark:border-zinc-800 dark:bg-zinc-950"
               >
                 <option value="">Select reviewer</option>
-                {reviewers.map((reviewer) => (
-                  <option key={getReviewerKey(reviewer)} value={getReviewerKey(reviewer)} disabled={reviewerDraft.reviewerKeys.includes(getReviewerKey(reviewer))}>
+                {availableReviewers.map((reviewer) => (
+                  <option key={getReviewerKey(reviewer)} value={getReviewerKey(reviewer)} disabled={reviewerDraftKeys.includes(getReviewerKey(reviewer))}>
                     {reviewer.display_name} / {reviewer.role_name}
                   </option>
                 ))}
@@ -693,15 +697,20 @@ function RequestRow({
             </label>
             <div className="flex flex-wrap gap-2">
               <SmallAction label="Add Reviewer" disabled={active || !reviewerDraft.selectedKey} onClick={onAddReviewer} icon={<Plus size={15} />} />
-              <SmallAction label={`Send ${reviewerDraft.reviewerKeys.length || ''} Review${reviewerDraft.reviewerKeys.length === 1 ? '' : 's'}`} disabled={active || reviewerDraft.reviewerKeys.length === 0} onClick={() => onAssignReviewer(request)} primary icon={<Send size={15} />} />
+              <SmallAction label={`Send ${reviewerDraftKeys.length || ''} Review${reviewerDraftKeys.length === 1 ? '' : 's'}`} disabled={active || reviewerDraftKeys.length === 0} onClick={() => onAssignReviewer(request)} primary icon={<Send size={15} />} />
             </div>
-            {reviewerDraft.reviewerKeys.length > 0 ? (
-              <ReviewerChips reviewerKeys={reviewerDraft.reviewerKeys} reviewers={reviewers} onRemove={onRemoveReviewer} />
+            {reviewerDraftKeys.length > 0 ? (
+              <ReviewerChips reviewerKeys={reviewerDraftKeys} reviewers={availableReviewers} onRemove={onRemoveReviewer} />
             ) : null}
           </div>
           {reviewers.length === 0 ? (
             <p className="mt-3 text-sm text-amber-700 dark:text-amber-400">
               No eligible official reviewer account exists yet. Add roles in User & Role first.
+            </p>
+          ) : null}
+          {reviewers.length > 0 && availableReviewers.length === 0 ? (
+            <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
+              All eligible reviewers are already assigned to this request.
             </p>
           ) : null}
         </div>
@@ -1082,6 +1091,10 @@ function formatTopicLabel(topic: RequestTopicSelection) {
 
 function getReviewerKey(reviewer: ReviewerOption) {
   return `${reviewer.profile_id}:${reviewer.role_code}`
+}
+
+function getApprovalReviewerKey(approval: RequestApproval) {
+  return `${approval.approverProfileId}:${approval.approverRoleCode}`
 }
 
 function calculateTotals(requests: CompetitorRequest[]) {
