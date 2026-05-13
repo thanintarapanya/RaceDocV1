@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react'
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/auth/useAuth'
 import { getAuthErrorMessage } from '@/lib/auth-errors'
@@ -34,6 +34,14 @@ type OnboardingRpcPayload = {
   p_blood_type: string | null
   p_nationality: string | null
   p_requested_role: SelectedRole | null
+}
+
+type PendingRoleInvitation = {
+  invitation_id: string
+  email: string
+  role_code: string
+  role_name: string
+  expires_at: string | null
 }
 
 const bloodTypes = ['A', 'B', 'AB', 'O', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
@@ -73,6 +81,8 @@ export function OnboardingPage() {
   const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [selectedRole, setSelectedRole] = useState<SelectedRole | null>(null)
+  const [pendingInvitation, setPendingInvitation] = useState<PendingRoleInvitation | null>(null)
+  const [invitationLoading, setInvitationLoading] = useState(true)
   const [form, setForm] = useState<ProfileForm>(() => ({
     ...initialForm,
     first_name_th: profile?.first_name_th ?? '',
@@ -88,6 +98,25 @@ export function OnboardingPage() {
   }))
   const [errorMessage, setErrorMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
+
+  useEffect(() => {
+    let active = true
+
+    async function loadPendingInvitation() {
+      const { data } = await supabase.rpc('get_pending_role_invitation')
+
+      if (!active) return
+
+      setPendingInvitation(((data ?? []) as PendingRoleInvitation[])[0] ?? null)
+      setInvitationLoading(false)
+    }
+
+    loadPendingInvitation()
+
+    return () => {
+      active = false
+    }
+  }, [])
 
   if (profile?.onboarding_status === 'Ready') {
     return <Navigate to="/dashboard" replace />
@@ -110,7 +139,7 @@ export function OnboardingPage() {
       return
     }
 
-    if (!selectedRole) {
+    if (!selectedRole && !pendingInvitation) {
       setErrorMessage('Please select Competitor or Team Manager.')
       setStep(1)
       return
@@ -126,13 +155,13 @@ export function OnboardingPage() {
     try {
       const { error } = await supabase.rpc(
         'complete_user_onboarding',
-        createOnboardingPayload(form, selectedRole),
+        createOnboardingPayload(form, selectedRole, pendingInvitation),
       )
 
       if (error) throw error
 
       await refreshAuth()
-      navigate(selectedRole === 'Team Manager' ? '/onboarding/team' : '/entry-forms', {
+      navigate(getPostOnboardingPath(selectedRole, pendingInvitation), {
         replace: true,
       })
     } catch (error) {
@@ -189,6 +218,12 @@ export function OnboardingPage() {
             </div>
           ) : null}
 
+          {pendingInvitation ? (
+            <div className="mb-5 border border-emerald-200 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-900/60 dark:text-emerald-400">
+              Official invitation detected: {pendingInvitation.role_name}. Complete your profile to activate this role.
+            </div>
+          ) : null}
+
           <AnimatePresence mode="wait">
             {step === 1 ? (
               <motion.div
@@ -199,7 +234,15 @@ export function OnboardingPage() {
                 transition={{ duration: 0.16 }}
                 className="space-y-3"
               >
-                {roleCards.map((roleCard) => {
+                {pendingInvitation ? (
+                  <div className="rounded-md border border-zinc-200 p-4 dark:border-zinc-800">
+                    <p className="font-semibold">Invited official role</p>
+                    <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+                      Your email is pre-authorized for {pendingInvitation.role_name}. You do not need to select Competitor or Team Manager.
+                    </p>
+                  </div>
+                ) : null}
+                {!pendingInvitation && !invitationLoading ? roleCards.map((roleCard) => {
                   const active = selectedRole === roleCard.role
 
                   return (
@@ -225,7 +268,7 @@ export function OnboardingPage() {
                       </span>
                     </motion.button>
                   )
-                })}
+                }) : null}
               </motion.div>
             ) : (
               <motion.div
@@ -288,7 +331,7 @@ export function OnboardingPage() {
                 whileTap={{ scale: 0.98 }}
                 type="button"
                 onClick={() => {
-                  if (!selectedRole) {
+                  if (!selectedRole && !pendingInvitation) {
                     setErrorMessage('Please select Competitor or Team Manager.')
                     return
                   }
@@ -324,6 +367,7 @@ function nullableText(value: string | null | undefined) {
 function createOnboardingPayload(
   form: ProfileForm,
   selectedRole: SelectedRole | null,
+  pendingInvitation: PendingRoleInvitation | null,
 ): OnboardingRpcPayload {
   return {
     p_first_name_th: nullableText(form.first_name_th),
@@ -336,8 +380,17 @@ function createOnboardingPayload(
     p_date_of_birth: nullableText(form.date_of_birth),
     p_blood_type: nullableText(form.blood_type),
     p_nationality: nullableText(form.nationality),
-    p_requested_role: selectedRole,
+    p_requested_role: pendingInvitation ? null : selectedRole,
   }
+}
+
+function getPostOnboardingPath(
+  selectedRole: SelectedRole | null,
+  pendingInvitation: PendingRoleInvitation | null,
+) {
+  if (selectedRole === 'Team Manager') return '/onboarding/team'
+  if (pendingInvitation) return '/dashboard'
+  return '/entry-forms'
 }
 
 function getOnboardingErrorMessage(error: unknown) {

@@ -1,20 +1,20 @@
 # Graph Report - RaceDocV1Github  (2026-05-13)
 
 ## Corpus Check
-- 36 files · ~40,935 words
+- 36 files · ~41,832 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 157 nodes · 148 edges · 11 communities detected
+- 164 nodes · 155 edges · 11 communities detected
 - Extraction: 91% EXTRACTED · 9% INFERRED · 0% AMBIGUOUS · INFERRED: 14 edges (avg confidence: 0.81)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
 - [[_COMMUNITY_Community 1|Community 1]]
 - [[_COMMUNITY_Community 2|Community 2]]
-- [[_COMMUNITY_Community 4|Community 4]]
 - [[_COMMUNITY_Community 5|Community 5]]
-- [[_COMMUNITY_Community 9|Community 9]]
+- [[_COMMUNITY_Community 6|Community 6]]
+- [[_COMMUNITY_Community 10|Community 10]]
 - [[_COMMUNITY_Community 15|Community 15]]
 - [[_COMMUNITY_Community 16|Community 16]]
 - [[_COMMUNITY_Community 30|Community 30]]
@@ -53,18 +53,18 @@ Cohesion: 0.11
 Nodes (10): AuthRedirect(), OnboardingRoute(), ProtectedRoute(), AdminOrSecretaryRoute(), ScrutineerReportRoute(), useAuth(), CompetitorRequestPage(), canSeeAdminNavigation() (+2 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.16
+Cohesion: 0.15
 Nodes (7): getAuthErrorMessage(), handleEmailLogin(), handleGoogleLogin(), handleSubmit(), validateIdentity(), handleSignUp(), handleSubmit()
 
-### Community 4 - "Community 4"
+### Community 5 - "Community 5"
 Cohesion: 0.29
 Nodes (8): Graphify, Balance of Performance (BOP), Entry Form, Inspection Form, RacedocV1, Success Ballast, Supabase, Weight-In
 
-### Community 5 - "Community 5"
+### Community 6 - "Community 6"
 Cohesion: 0.33
 Nodes (6): handleDocumentUpload(), handleSignatureUpload(), sanitizeFileName(), updateConsent(), updateDocumentAsset(), uploadEntryAsset()
 
-### Community 9 - "Community 9"
+### Community 10 - "Community 10"
 Cohesion: 0.5
 Nodes (5): loadOptions(), uniqueValues(), updateSeason(), updateSeries(), updateStep1()
 

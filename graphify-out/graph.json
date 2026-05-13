@@ -396,7 +396,7 @@
       "source_file": "src/pages/InspectionFormPage.tsx",
       "source_location": "L1",
       "id": "src_pages_inspectionformpage_tsx",
-      "community": 8,
+      "community": 9,
       "norm_label": "inspectionformpage.tsx"
     },
     {
@@ -405,7 +405,7 @@
       "source_file": "src/pages/InspectionFormPage.tsx",
       "source_location": "L79",
       "id": "pages_inspectionformpage_run",
-      "community": 8,
+      "community": 9,
       "norm_label": "run()"
     },
     {
@@ -414,7 +414,7 @@
       "source_file": "src/pages/InspectionFormPage.tsx",
       "source_location": "L94",
       "id": "pages_inspectionformpage_createinspectionform",
-      "community": 8,
+      "community": 9,
       "norm_label": "createinspectionform()"
     },
     {
@@ -423,7 +423,7 @@
       "source_file": "src/pages/InspectionFormPage.tsx",
       "source_location": "L113",
       "id": "pages_inspectionformpage_submitstatus",
-      "community": 8,
+      "community": 9,
       "norm_label": "submitstatus()"
     },
     {
@@ -432,7 +432,7 @@
       "source_file": "src/pages/InspectionFormPage.tsx",
       "source_location": "L140",
       "id": "pages_inspectionformpage_updatedraft",
-      "community": 8,
+      "community": 9,
       "norm_label": "updatedraft()"
     },
     {
@@ -504,7 +504,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L1",
       "id": "src_pages_checklistpage_tsx",
-      "community": 3,
+      "community": 4,
       "norm_label": "checklistpage.tsx"
     },
     {
@@ -513,7 +513,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L136",
       "id": "pages_checklistpage_run",
-      "community": 3,
+      "community": 4,
       "norm_label": "run()"
     },
     {
@@ -522,7 +522,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L173",
       "id": "pages_checklistpage_handleeventchange",
-      "community": 3,
+      "community": 4,
       "norm_label": "handleeventchange()"
     },
     {
@@ -531,7 +531,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L179",
       "id": "pages_checklistpage_createtopic",
-      "community": 3,
+      "community": 4,
       "norm_label": "createtopic()"
     },
     {
@@ -540,7 +540,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L204",
       "id": "pages_checklistpage_movetopic",
-      "community": 3,
+      "community": 4,
       "norm_label": "movetopic()"
     },
     {
@@ -549,7 +549,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L223",
       "id": "pages_checklistpage_deletetopic",
-      "community": 3,
+      "community": 4,
       "norm_label": "deletetopic()"
     },
     {
@@ -558,7 +558,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L244",
       "id": "pages_checklistpage_updatechecklistitem",
-      "community": 3,
+      "community": 4,
       "norm_label": "updatechecklistitem()"
     },
     {
@@ -567,7 +567,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L265",
       "id": "pages_checklistpage_bulkupdatechecklistitems",
-      "community": 3,
+      "community": 4,
       "norm_label": "bulkupdatechecklistitems()"
     },
     {
@@ -576,7 +576,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L291",
       "id": "pages_checklistpage_savenotes",
-      "community": 3,
+      "community": 4,
       "norm_label": "savenotes()"
     },
     {
@@ -585,7 +585,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L315",
       "id": "pages_checklistpage_openaudit",
-      "community": 3,
+      "community": 4,
       "norm_label": "openaudit()"
     },
     {
@@ -648,7 +648,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L997",
       "id": "pages_entryformpage_loadoptions",
-      "community": 9,
+      "community": 10,
       "norm_label": "loadoptions()"
     },
     {
@@ -666,7 +666,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L1122",
       "id": "pages_entryformpage_updatestep1",
-      "community": 9,
+      "community": 10,
       "norm_label": "updatestep1()"
     },
     {
@@ -720,7 +720,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L1167",
       "id": "pages_entryformpage_updatedocumentasset",
-      "community": 5,
+      "community": 6,
       "norm_label": "updatedocumentasset()"
     },
     {
@@ -729,7 +729,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L1180",
       "id": "pages_entryformpage_updateconsent",
-      "community": 5,
+      "community": 6,
       "norm_label": "updateconsent()"
     },
     {
@@ -738,7 +738,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L1184",
       "id": "pages_entryformpage_uploadentryasset",
-      "community": 5,
+      "community": 6,
       "norm_label": "uploadentryasset()"
     },
     {
@@ -747,7 +747,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L1215",
       "id": "pages_entryformpage_handledocumentupload",
-      "community": 5,
+      "community": 6,
       "norm_label": "handledocumentupload()"
     },
     {
@@ -756,7 +756,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L1232",
       "id": "pages_entryformpage_handlesignatureupload",
-      "community": 5,
+      "community": 6,
       "norm_label": "handlesignatureupload()"
     },
     {
@@ -774,7 +774,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L1279",
       "id": "pages_entryformpage_updateseason",
-      "community": 9,
+      "community": 10,
       "norm_label": "updateseason()"
     },
     {
@@ -783,7 +783,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L1290",
       "id": "pages_entryformpage_updateseries",
-      "community": 9,
+      "community": 10,
       "norm_label": "updateseries()"
     },
     {
@@ -945,7 +945,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L2308",
       "id": "pages_entryformpage_sanitizefilename",
-      "community": 5,
+      "community": 6,
       "norm_label": "sanitizefilename()"
     },
     {
@@ -981,7 +981,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L2345",
       "id": "pages_entryformpage_uniquevalues",
-      "community": 9,
+      "community": 10,
       "norm_label": "uniquevalues()"
     },
     {
@@ -999,7 +999,7 @@
       "source_file": "src/pages/TeamPage.tsx",
       "source_location": "L1",
       "id": "src_pages_teampage_tsx",
-      "community": 6,
+      "community": 7,
       "norm_label": "teampage.tsx"
     },
     {
@@ -1008,7 +1008,7 @@
       "source_file": "src/pages/TeamPage.tsx",
       "source_location": "L101",
       "id": "pages_teampage_run",
-      "community": 6,
+      "community": 7,
       "norm_label": "run()"
     },
     {
@@ -1017,7 +1017,7 @@
       "source_file": "src/pages/TeamPage.tsx",
       "source_location": "L117",
       "id": "pages_teampage_handlesubmit",
-      "community": 6,
+      "community": 7,
       "norm_label": "handlesubmit()"
     },
     {
@@ -1026,7 +1026,7 @@
       "source_file": "src/pages/TeamPage.tsx",
       "source_location": "L139",
       "id": "pages_teampage_respondtoinvitation",
-      "community": 6,
+      "community": 7,
       "norm_label": "respondtoinvitation()"
     },
     {
@@ -1035,7 +1035,7 @@
       "source_file": "src/pages/TeamPage.tsx",
       "source_location": "L159",
       "id": "pages_teampage_cancelinvitation",
-      "community": 6,
+      "community": 7,
       "norm_label": "cancelinvitation()"
     },
     {
@@ -1044,7 +1044,7 @@
       "source_file": "src/pages/TeamPage.tsx",
       "source_location": "L178",
       "id": "pages_teampage_revokemembership",
-      "community": 6,
+      "community": 7,
       "norm_label": "revokemembership()"
     },
     {
@@ -1147,10 +1147,19 @@
       "norm_label": "onboardingpage.tsx"
     },
     {
+      "label": "loadPendingInvitation()",
+      "file_type": "code",
+      "source_file": "src/pages/OnboardingPage.tsx",
+      "source_location": "L105",
+      "id": "pages_onboardingpage_loadpendinginvitation",
+      "community": 2,
+      "norm_label": "loadpendinginvitation()"
+    },
+    {
       "label": "updateField()",
       "file_type": "code",
       "source_file": "src/pages/OnboardingPage.tsx",
-      "source_location": "L96",
+      "source_location": "L125",
       "id": "pages_onboardingpage_updatefield",
       "community": 2,
       "norm_label": "updatefield()"
@@ -1159,7 +1168,7 @@
       "label": "validateIdentity()",
       "file_type": "code",
       "source_file": "src/pages/OnboardingPage.tsx",
-      "source_location": "L100",
+      "source_location": "L129",
       "id": "pages_onboardingpage_validateidentity",
       "community": 2,
       "norm_label": "validateidentity()"
@@ -1168,7 +1177,7 @@
       "label": "handleSubmit()",
       "file_type": "code",
       "source_file": "src/pages/OnboardingPage.tsx",
-      "source_location": "L104",
+      "source_location": "L133",
       "id": "pages_onboardingpage_handlesubmit",
       "community": 2,
       "norm_label": "handlesubmit()"
@@ -1179,7 +1188,7 @@
       "source_file": "src/pages/RaceResultPage.tsx",
       "source_location": "L1",
       "id": "src_pages_raceresultpage_tsx",
-      "community": 7,
+      "community": 8,
       "norm_label": "raceresultpage.tsx"
     },
     {
@@ -1188,7 +1197,7 @@
       "source_file": "src/pages/RaceResultPage.tsx",
       "source_location": "L161",
       "id": "pages_raceresultpage_run",
-      "community": 7,
+      "community": 8,
       "norm_label": "run()"
     },
     {
@@ -1197,7 +1206,7 @@
       "source_file": "src/pages/RaceResultPage.tsx",
       "source_location": "L199",
       "id": "pages_raceresultpage_createraceresult",
-      "community": 7,
+      "community": 8,
       "norm_label": "createraceresult()"
     },
     {
@@ -1206,7 +1215,7 @@
       "source_file": "src/pages/RaceResultPage.tsx",
       "source_location": "L221",
       "id": "pages_raceresultpage_saveentry",
-      "community": 7,
+      "community": 8,
       "norm_label": "saveentry()"
     },
     {
@@ -1215,7 +1224,7 @@
       "source_file": "src/pages/RaceResultPage.tsx",
       "source_location": "L249",
       "id": "pages_raceresultpage_publishresult",
-      "community": 7,
+      "community": 8,
       "norm_label": "publishresult()"
     },
     {
@@ -1224,7 +1233,7 @@
       "source_file": "src/pages/RaceResultPage.tsx",
       "source_location": "L272",
       "id": "pages_raceresultpage_updatedraft",
-      "community": 7,
+      "community": 8,
       "norm_label": "updatedraft()"
     },
     {
@@ -1233,44 +1242,98 @@
       "source_file": "src/pages/UserRolePage.tsx",
       "source_location": "L1",
       "id": "src_pages_userrolepage_tsx",
-      "community": 10,
+      "community": 3,
       "norm_label": "userrolepage.tsx"
     },
     {
       "label": "run()",
       "file_type": "code",
       "source_file": "src/pages/UserRolePage.tsx",
-      "source_location": "L90",
+      "source_location": "L110",
       "id": "pages_userrolepage_run",
-      "community": 10,
+      "community": 3,
       "norm_label": "run()"
     },
     {
       "label": "assignRole()",
       "file_type": "code",
       "source_file": "src/pages/UserRolePage.tsx",
-      "source_location": "L111",
+      "source_location": "L140",
       "id": "pages_userrolepage_assignrole",
-      "community": 10,
+      "community": 3,
       "norm_label": "assignrole()"
+    },
+    {
+      "label": "inviteRoleByEmail()",
+      "file_type": "code",
+      "source_file": "src/pages/UserRolePage.tsx",
+      "source_location": "L164",
+      "id": "pages_userrolepage_inviterolebyemail",
+      "community": 3,
+      "norm_label": "inviterolebyemail()"
+    },
+    {
+      "label": "cancelInvitation()",
+      "file_type": "code",
+      "source_file": "src/pages/UserRolePage.tsx",
+      "source_location": "L188",
+      "id": "pages_userrolepage_cancelinvitation",
+      "community": 3,
+      "norm_label": "cancelinvitation()"
     },
     {
       "label": "deactivateRole()",
       "file_type": "code",
       "source_file": "src/pages/UserRolePage.tsx",
-      "source_location": "L135",
+      "source_location": "L210",
       "id": "pages_userrolepage_deactivaterole",
-      "community": 10,
+      "community": 3,
       "norm_label": "deactivaterole()"
     },
     {
       "label": "normalizePayload()",
       "file_type": "code",
       "source_file": "src/pages/UserRolePage.tsx",
-      "source_location": "L349",
+      "source_location": "L551",
       "id": "pages_userrolepage_normalizepayload",
-      "community": 10,
+      "community": 3,
       "norm_label": "normalizepayload()"
+    },
+    {
+      "label": "getFirstElevatedRoleCode()",
+      "file_type": "code",
+      "source_file": "src/pages/UserRolePage.tsx",
+      "source_location": "L561",
+      "id": "pages_userrolepage_getfirstelevatedrolecode",
+      "community": 3,
+      "norm_label": "getfirstelevatedrolecode()"
+    },
+    {
+      "label": "keepElevatedRoleCode()",
+      "file_type": "code",
+      "source_file": "src/pages/UserRolePage.tsx",
+      "source_location": "L565",
+      "id": "pages_userrolepage_keepelevatedrolecode",
+      "community": 3,
+      "norm_label": "keepelevatedrolecode()"
+    },
+    {
+      "label": "filterAssignableUsers()",
+      "file_type": "code",
+      "source_file": "src/pages/UserRolePage.tsx",
+      "source_location": "L571",
+      "id": "pages_userrolepage_filterassignableusers",
+      "community": 3,
+      "norm_label": "filterassignableusers()"
+    },
+    {
+      "label": "userMatchesRoleFilter()",
+      "file_type": "code",
+      "source_file": "src/pages/UserRolePage.tsx",
+      "source_location": "L583",
+      "id": "pages_userrolepage_usermatchesrolefilter",
+      "community": 3,
+      "norm_label": "usermatchesrolefilter()"
     },
     {
       "label": "DashboardPage.tsx",
@@ -1312,7 +1375,7 @@
       "label": "RacedocV1",
       "file_type": "document",
       "source_file": "RaceDocV1_Architecture.md",
-      "community": 4,
+      "community": 5,
       "norm_label": "racedocv1",
       "id": "racedocv1_architecture_racedocv1"
     },
@@ -1320,7 +1383,7 @@
       "label": "Entry Form",
       "file_type": "document",
       "source_file": "RaceDocV1_Architecture.md",
-      "community": 4,
+      "community": 5,
       "norm_label": "entry form",
       "id": "racedocv1_architecture_entryform"
     },
@@ -1328,7 +1391,7 @@
       "label": "Inspection Form",
       "file_type": "document",
       "source_file": "RaceDocV1_Architecture.md",
-      "community": 4,
+      "community": 5,
       "norm_label": "inspection form",
       "id": "racedocv1_architecture_inspectionform"
     },
@@ -1336,7 +1399,7 @@
       "label": "Weight-In",
       "file_type": "document",
       "source_file": "RaceDocV1_Architecture.md",
-      "community": 4,
+      "community": 5,
       "norm_label": "weight-in",
       "id": "racedocv1_architecture_weightin"
     },
@@ -1344,7 +1407,7 @@
       "label": "Success Ballast",
       "file_type": "document",
       "source_file": "RaceDocV1_Architecture.md",
-      "community": 4,
+      "community": 5,
       "norm_label": "success ballast",
       "id": "racedocv1_architecture_successballast"
     },
@@ -1352,7 +1415,7 @@
       "label": "Balance of Performance (BOP)",
       "file_type": "document",
       "source_file": "RaceDocV1_Architecture.md",
-      "community": 4,
+      "community": 5,
       "norm_label": "balance of performance (bop)",
       "id": "racedocv1_architecture_bop"
     },
@@ -1384,7 +1447,7 @@
       "label": "Supabase",
       "file_type": "document",
       "source_file": "RaceDocV1_Architecture.md",
-      "community": 4,
+      "community": 5,
       "norm_label": "supabase",
       "id": "racedocv1_architecture_supabase"
     },
@@ -1392,7 +1455,7 @@
       "label": "Graphify",
       "file_type": "document",
       "source_file": "AGENTS.md",
-      "community": 4,
+      "community": 5,
       "norm_label": "graphify",
       "id": "agents_graphify"
     },
@@ -2910,7 +2973,19 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OnboardingPage.tsx",
-      "source_location": "L96",
+      "source_location": "L105",
+      "weight": 1.0,
+      "_src": "src_pages_onboardingpage_tsx",
+      "_tgt": "pages_onboardingpage_loadpendinginvitation",
+      "source": "src_pages_onboardingpage_tsx",
+      "target": "pages_onboardingpage_loadpendinginvitation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/OnboardingPage.tsx",
+      "source_location": "L125",
       "weight": 1.0,
       "_src": "src_pages_onboardingpage_tsx",
       "_tgt": "pages_onboardingpage_updatefield",
@@ -2922,7 +2997,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OnboardingPage.tsx",
-      "source_location": "L100",
+      "source_location": "L129",
       "weight": 1.0,
       "_src": "src_pages_onboardingpage_tsx",
       "_tgt": "pages_onboardingpage_validateidentity",
@@ -2934,7 +3009,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OnboardingPage.tsx",
-      "source_location": "L104",
+      "source_location": "L133",
       "weight": 1.0,
       "_src": "src_pages_onboardingpage_tsx",
       "_tgt": "pages_onboardingpage_handlesubmit",
@@ -2946,7 +3021,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OnboardingPage.tsx",
-      "source_location": "L119",
+      "source_location": "L148",
       "weight": 1.0,
       "_src": "pages_onboardingpage_handlesubmit",
       "_tgt": "pages_onboardingpage_validateidentity",
@@ -3018,7 +3093,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/UserRolePage.tsx",
-      "source_location": "L90",
+      "source_location": "L110",
       "weight": 1.0,
       "_src": "src_pages_userrolepage_tsx",
       "_tgt": "pages_userrolepage_run",
@@ -3030,7 +3105,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/UserRolePage.tsx",
-      "source_location": "L111",
+      "source_location": "L140",
       "weight": 1.0,
       "_src": "src_pages_userrolepage_tsx",
       "_tgt": "pages_userrolepage_assignrole",
@@ -3042,7 +3117,31 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/UserRolePage.tsx",
-      "source_location": "L135",
+      "source_location": "L164",
+      "weight": 1.0,
+      "_src": "src_pages_userrolepage_tsx",
+      "_tgt": "pages_userrolepage_inviterolebyemail",
+      "source": "src_pages_userrolepage_tsx",
+      "target": "pages_userrolepage_inviterolebyemail",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/UserRolePage.tsx",
+      "source_location": "L188",
+      "weight": 1.0,
+      "_src": "src_pages_userrolepage_tsx",
+      "_tgt": "pages_userrolepage_cancelinvitation",
+      "source": "src_pages_userrolepage_tsx",
+      "target": "pages_userrolepage_cancelinvitation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/UserRolePage.tsx",
+      "source_location": "L210",
       "weight": 1.0,
       "_src": "src_pages_userrolepage_tsx",
       "_tgt": "pages_userrolepage_deactivaterole",
@@ -3054,12 +3153,60 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/UserRolePage.tsx",
-      "source_location": "L349",
+      "source_location": "L551",
       "weight": 1.0,
       "_src": "src_pages_userrolepage_tsx",
       "_tgt": "pages_userrolepage_normalizepayload",
       "source": "src_pages_userrolepage_tsx",
       "target": "pages_userrolepage_normalizepayload",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/UserRolePage.tsx",
+      "source_location": "L561",
+      "weight": 1.0,
+      "_src": "src_pages_userrolepage_tsx",
+      "_tgt": "pages_userrolepage_getfirstelevatedrolecode",
+      "source": "src_pages_userrolepage_tsx",
+      "target": "pages_userrolepage_getfirstelevatedrolecode",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/UserRolePage.tsx",
+      "source_location": "L565",
+      "weight": 1.0,
+      "_src": "src_pages_userrolepage_tsx",
+      "_tgt": "pages_userrolepage_keepelevatedrolecode",
+      "source": "src_pages_userrolepage_tsx",
+      "target": "pages_userrolepage_keepelevatedrolecode",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/UserRolePage.tsx",
+      "source_location": "L571",
+      "weight": 1.0,
+      "_src": "src_pages_userrolepage_tsx",
+      "_tgt": "pages_userrolepage_filterassignableusers",
+      "source": "src_pages_userrolepage_tsx",
+      "target": "pages_userrolepage_filterassignableusers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/UserRolePage.tsx",
+      "source_location": "L583",
+      "weight": 1.0,
+      "_src": "src_pages_userrolepage_tsx",
+      "_tgt": "pages_userrolepage_usermatchesrolefilter",
+      "source": "src_pages_userrolepage_tsx",
+      "target": "pages_userrolepage_usermatchesrolefilter",
       "confidence_score": 1.0
     },
     {
