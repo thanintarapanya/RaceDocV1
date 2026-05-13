@@ -7,7 +7,6 @@ import { AdminOrSecretaryRoute, ScrutineerReportRoute } from './auth/RoleGate'
 import {
   ArchiveRestore,
   Settings,
-  Trophy,
   Wrench,
 } from 'lucide-react'
 import { AppLayout } from './layout/AppLayout'
@@ -20,6 +19,7 @@ import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { InspectionFormPage } from './pages/InspectionFormPage'
 import { LoginPage } from './pages/LoginPage'
 import { OnboardingPage } from './pages/OnboardingPage'
+import { RaceResultPage } from './pages/RaceResultPage'
 import { SignUpPage } from './pages/SignUpPage'
 import { ScrutineerReportPage } from './pages/ScrutineerReportPage'
 import { TabPlaceholderPage } from './pages/TabPlaceholderPage'
@@ -99,13 +99,7 @@ const router = createBrowserRouter([
       },
       {
         path: 'race-results',
-        element: (
-          <TabPlaceholderPage
-            title="Race Result"
-            description="Race results and championship standings routes are ready for the Race Result phase."
-            icon={Trophy}
-          />
-        ),
+        element: <RaceResultPage />,
       },
       {
         path: 'competitor-requests',
