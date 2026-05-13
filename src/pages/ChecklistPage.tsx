@@ -9,6 +9,7 @@ import {
   Plus,
   RefreshCcw,
   Save,
+  Search,
   Settings2,
   Trash2,
   X,
@@ -93,6 +94,7 @@ export function ChecklistPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [updatingKey, setUpdatingKey] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
   const [selectedEventId, setSelectedEventId] = useState('')
   const [selectedSeries, setSelectedSeries] = useState('all')
   const [topicTitleEn, setTopicTitleEn] = useState('')
@@ -153,8 +155,8 @@ export function ChecklistPage() {
   )
   const seriesOptions = useMemo(() => getSeriesRaceOptions(eventEntries), [eventEntries])
   const visibleEntries = useMemo(
-    () => filterBySeriesRace(eventEntries, selectedSeries),
-    [eventEntries, selectedSeries],
+    () => filterChecklistEntries(filterBySeriesRace(eventEntries, selectedSeries), searchQuery),
+    [eventEntries, selectedSeries, searchQuery],
   )
   const totals = useMemo(() => calculateTotals(eventEntries, eventTopics), [eventEntries, eventTopics])
 
@@ -378,12 +380,16 @@ export function ChecklistPage() {
 
       <div className="mt-6">
         {!loading && eventEntries.length > 0 ? (
-          <div className="mb-4 grid gap-3 border border-zinc-200 p-4 sm:grid-cols-[minmax(0,22rem)_1fr] sm:items-end dark:border-zinc-800">
+          <div className="mb-4 grid gap-3 border border-zinc-200 p-4 lg:grid-cols-[minmax(0,22rem)_minmax(0,24rem)_1fr] lg:items-end dark:border-zinc-800">
             <SeriesRaceFilter value={selectedSeries} options={seriesOptions} onChange={setSelectedSeries} />
+            <ChecklistSearch value={searchQuery} onChange={setSearchQuery} />
             <FilterResultSummary
               visible={visibleEntries.length}
               total={eventEntries.length}
-              onClear={() => setSelectedSeries('all')}
+              onClear={() => {
+                setSelectedSeries('all')
+                setSearchQuery('')
+              }}
             />
           </div>
         ) : null}
@@ -392,7 +398,10 @@ export function ChecklistPage() {
         {!loading && selectedEventId && eventTopics.length === 0 ? <ChecklistEmpty title="No checklist topics configured." description="Admin or Secretary can add the first topic from the topic settings panel." /> : null}
         {!loading && selectedEventId && eventTopics.length > 0 && eventEntries.length === 0 ? <ChecklistEmpty title="No active entries for this event." description="Entries appear here after Secretary/Admin approval changes their status to Active." /> : null}
         {!loading && eventEntries.length > 0 && visibleEntries.length === 0 ? (
-          <ChecklistFilteredEmpty onClear={() => setSelectedSeries('all')} />
+          <ChecklistFilteredEmpty onClear={() => {
+            setSelectedSeries('all')
+            setSearchQuery('')
+          }} />
         ) : null}
         {!loading && visibleEntries.length > 0 && eventTopics.length > 0 ? (
           <ChecklistTable
@@ -445,6 +454,35 @@ function EventFilter({
           </option>
         ))}
       </select>
+    </label>
+  )
+}
+
+function ChecklistSearch({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+  return (
+    <label className="block min-w-0">
+      <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">Search</span>
+      <div className="mt-2 flex min-h-11 items-center gap-2 rounded-md border border-zinc-300 bg-zinc-50 px-3 transition focus-within:border-primary dark:border-zinc-800 dark:bg-zinc-950">
+        <Search size={16} className="shrink-0 text-zinc-500" />
+        <input
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className="min-h-10 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-zinc-500"
+          placeholder="Car number, name, email"
+          autoComplete="off"
+        />
+        {value ? (
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+            type="button"
+            onClick={() => onChange('')}
+            className="inline-flex min-h-8 min-w-8 items-center justify-center rounded-md border border-zinc-300 text-zinc-600 dark:border-zinc-800 dark:text-zinc-400"
+            aria-label="Clear checklist search"
+          >
+            <X size={14} />
+          </motion.button>
+        ) : null}
+      </div>
     </label>
   )
 }
@@ -989,6 +1027,23 @@ function getEntryItem(entry: ChecklistEntry, topicId: string): ChecklistItem {
     updatedByName: null,
     updatedAt: null,
   }
+}
+
+function filterChecklistEntries(entries: ChecklistEntry[], searchQuery: string) {
+  const query = searchQuery.trim().toLowerCase()
+  if (!query) return entries
+
+  return entries.filter((entry) => {
+    const haystack = [
+      entry.carNumber ?? '',
+      entry.competitorName,
+      entry.competitorEmail,
+      entry.seriesClass,
+      entry.eventName,
+    ].join(' ').toLowerCase()
+
+    return haystack.includes(query)
+  })
 }
 
 function calculateTotals(entries: ChecklistEntry[], topics: ChecklistTopic[]) {
