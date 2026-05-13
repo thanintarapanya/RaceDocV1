@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { CheckCircle2, FilePlus2, FileText, Loader2, RefreshCcw, Scale, XCircle } from 'lucide-react'
+import { CheckCircle2, FilePlus2, FileText, Loader2, RefreshCcw, Scale, Send, UserCheck, XCircle } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react'
 import { useAuth } from '@/auth/useAuth'
 import {
@@ -41,8 +41,29 @@ type CompetitorRequest = {
   final_comment: string | null
   created_at: string
   updated_at: string
+  approvals: RequestApproval[]
   can_racer_consent: boolean
   can_final_decide: boolean
+  can_assign_reviewers: boolean
+}
+
+type RequestApproval = {
+  approvalId: string
+  approverProfileId: string
+  approverRoleCode: string
+  approverName: string
+  status: 'Pending' | 'Approved' | 'Rejected' | 'Skipped'
+  comment: string | null
+  decidedAt: string | null
+  canDecideApproval: boolean
+}
+
+type ReviewerOption = {
+  profile_id: string
+  role_code: string
+  role_name: string
+  display_name: string
+  email: string
 }
 
 type FinalDecisionDraft = {
@@ -52,11 +73,17 @@ type FinalDecisionDraft = {
   gridPenalty: string
 }
 
+type ReviewDraft = {
+  approve: boolean
+  comment: string
+}
+
 export function CompetitorRequestPage() {
   const { roles } = useAuth()
   const canFinalize = canSeeAdminNavigation(roles)
   const [entries, setEntries] = useState<EntryOption[]>([])
   const [requests, setRequests] = useState<CompetitorRequest[]>([])
+  const [reviewerOptions, setReviewerOptions] = useState<ReviewerOption[]>([])
   const [selectedSeries, setSelectedSeries] = useState('all')
   const [selectedEntryId, setSelectedEntryId] = useState('')
   const [topic, setTopic] = useState('')
@@ -65,7 +92,10 @@ export function CompetitorRequestPage() {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [activeRequestId, setActiveRequestId] = useState<string | null>(null)
+  const [activeApprovalId, setActiveApprovalId] = useState<string | null>(null)
   const [decisionDrafts, setDecisionDrafts] = useState<Record<string, FinalDecisionDraft>>({})
+  const [reviewerDrafts, setReviewerDrafts] = useState<Record<string, string>>({})
+  const [reviewDrafts, setReviewDrafts] = useState<Record<string, ReviewDraft>>({})
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
 
@@ -73,9 +103,10 @@ export function CompetitorRequestPage() {
     setLoading(true)
     setError(null)
 
-    const [entryResult, requestResult] = await Promise.all([
+    const [entryResult, requestResult, reviewerResult] = await Promise.all([
       supabase.rpc('get_competitor_request_entry_options'),
       supabase.rpc('get_competitor_requests'),
+      supabase.rpc('get_competitor_request_reviewer_options'),
     ])
 
     if (!isActive()) return
@@ -85,13 +116,21 @@ export function CompetitorRequestPage() {
     } else if (requestResult.error) {
       setRequests([])
       setError(requestResult.error.message)
+    } else if (reviewerResult.error) {
+      setReviewerOptions([])
+      setError(reviewerResult.error.message)
     } else {
       const nextEntries = (entryResult.data ?? []) as EntryOption[]
-      const nextRequests = (requestResult.data ?? []) as CompetitorRequest[]
+      const nextRequests = ((requestResult.data ?? []) as CompetitorRequest[]).map((request) => ({
+        ...request,
+        approvals: request.approvals ?? [],
+      }))
       setEntries(nextEntries)
+      setReviewerOptions((reviewerResult.data ?? []) as ReviewerOption[])
       setSelectedEntryId((current) => current || nextEntries[0]?.entry_id || '')
       setRequests(nextRequests)
       setDecisionDrafts(Object.fromEntries(nextRequests.map((request) => [request.request_id, createDecisionDraft(request)])))
+      setReviewDrafts(createReviewDrafts(nextRequests))
     }
 
     setLoading(false)
@@ -192,11 +231,70 @@ export function CompetitorRequestPage() {
     setActiveRequestId(null)
   }
 
+  async function assignReviewers(request: CompetitorRequest) {
+    const selectedKey = reviewerDrafts[request.request_id]
+    const selected = reviewerOptions.find((reviewer) => getReviewerKey(reviewer) === selectedKey)
+    if (!selected) {
+      setError('Select an official reviewer first.')
+      return
+    }
+
+    setActiveRequestId(request.request_id)
+    setError(null)
+    setNotice(null)
+
+    const { error } = await supabase.rpc('assign_competitor_request_reviewers', {
+      p_request_id: request.request_id,
+      p_reviewers: [{ profileId: selected.profile_id, roleCode: selected.role_code }],
+    })
+
+    if (error) {
+      setError(error.message)
+    } else {
+      setNotice('Request sent to official reviewer.')
+      await loadData()
+    }
+
+    setActiveRequestId(null)
+  }
+
+  async function submitReview(approval: RequestApproval) {
+    const draft = reviewDrafts[approval.approvalId] ?? createReviewDraft(null)
+    setActiveApprovalId(approval.approvalId)
+    setError(null)
+    setNotice(null)
+
+    const { error } = await supabase.rpc('submit_competitor_request_review', {
+      p_approval_id: approval.approvalId,
+      p_approve: draft.approve,
+      p_comment: draft.comment.trim(),
+    })
+
+    if (error) {
+      setError(error.message)
+    } else {
+      setNotice('Review recommendation submitted.')
+      await loadData()
+    }
+
+    setActiveApprovalId(null)
+  }
+
   function updateDecisionDraft(requestId: string, changes: Partial<FinalDecisionDraft>) {
     setDecisionDrafts((current) => ({
       ...current,
       [requestId]: {
         ...(current[requestId] ?? createDecisionDraft(null)),
+        ...changes,
+      },
+    }))
+  }
+
+  function updateReviewDraft(approvalId: string, changes: Partial<ReviewDraft>) {
+    setReviewDrafts((current) => ({
+      ...current,
+      [approvalId]: {
+        ...(current[approvalId] ?? createReviewDraft(null)),
         ...changes,
       },
     }))
@@ -326,11 +424,19 @@ export function CompetitorRequestPage() {
                   request={request}
                   index={index}
                   canFinalize={canFinalize}
+                  reviewers={reviewerOptions}
+                  selectedReviewerKey={reviewerDrafts[request.request_id] ?? ''}
                   active={activeRequestId === request.request_id}
+                  activeApprovalId={activeApprovalId}
                   draft={decisionDrafts[request.request_id] ?? createDecisionDraft(request)}
+                  reviewDrafts={reviewDrafts}
                   onConsent={respondConsent}
                   onFinalize={finalizeRequest}
+                  onAssignReviewer={assignReviewers}
                   onDraftChange={updateDecisionDraft}
+                  onReviewerChange={(value) => setReviewerDrafts((current) => ({ ...current, [request.request_id]: value }))}
+                  onReviewDraftChange={updateReviewDraft}
+                  onSubmitReview={submitReview}
                 />
               ))}
             </div>
@@ -345,20 +451,36 @@ function RequestRow({
   request,
   index,
   canFinalize,
+  reviewers,
+  selectedReviewerKey,
   active,
+  activeApprovalId,
   draft,
+  reviewDrafts,
   onConsent,
   onFinalize,
+  onAssignReviewer,
   onDraftChange,
+  onReviewerChange,
+  onReviewDraftChange,
+  onSubmitReview,
 }: {
   request: CompetitorRequest
   index: number
   canFinalize: boolean
+  reviewers: ReviewerOption[]
+  selectedReviewerKey: string
   active: boolean
+  activeApprovalId: string | null
   draft: FinalDecisionDraft
+  reviewDrafts: Record<string, ReviewDraft>
   onConsent: (request: CompetitorRequest, accept: boolean) => Promise<void>
   onFinalize: (request: CompetitorRequest, approve: boolean) => Promise<void>
+  onAssignReviewer: (request: CompetitorRequest) => Promise<void>
   onDraftChange: (requestId: string, changes: Partial<FinalDecisionDraft>) => void
+  onReviewerChange: (value: string) => void
+  onReviewDraftChange: (approvalId: string, changes: Partial<ReviewDraft>) => void
+  onSubmitReview: (approval: RequestApproval) => Promise<void>
 }) {
   return (
     <motion.article
@@ -397,6 +519,56 @@ function RequestRow({
         </div>
       ) : null}
 
+      {request.can_assign_reviewers ? (
+        <div className="mt-5 border border-zinc-200 p-4 dark:border-zinc-800">
+          <p className="text-sm font-semibold">Request Review</p>
+          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+            Ask Steward, President, Clerk, or Head Scrutineer to recommend before final decision.
+          </p>
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-end">
+            <label className="block min-w-0 flex-1">
+              <span className="text-sm font-medium">Official reviewer</span>
+              <select
+                value={selectedReviewerKey}
+                onChange={(event) => onReviewerChange(event.target.value)}
+                className="mt-2 min-h-11 w-full rounded-md border border-zinc-300 bg-zinc-50 px-3 text-base outline-none transition focus:border-primary dark:border-zinc-800 dark:bg-zinc-950"
+              >
+                <option value="">Select reviewer</option>
+                {reviewers.map((reviewer) => (
+                  <option key={getReviewerKey(reviewer)} value={getReviewerKey(reviewer)}>
+                    {reviewer.display_name} / {reviewer.role_name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <SmallAction label="Send Review" disabled={active || !selectedReviewerKey} onClick={() => onAssignReviewer(request)} primary icon={<Send size={15} />} />
+          </div>
+          {reviewers.length === 0 ? (
+            <p className="mt-3 text-sm text-amber-700 dark:text-amber-400">
+              No eligible official reviewer account exists yet. Add roles in User & Role first.
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
+      {request.approvals.length > 0 ? (
+        <div className="mt-5 border border-zinc-200 p-4 dark:border-zinc-800">
+          <p className="text-sm font-semibold">Official Recommendations</p>
+          <div className="mt-3 grid gap-3">
+            {request.approvals.map((approval) => (
+              <ApprovalRow
+                key={approval.approvalId}
+                approval={approval}
+                active={activeApprovalId === approval.approvalId}
+                draft={reviewDrafts[approval.approvalId] ?? createReviewDraft(approval)}
+                onDraftChange={onReviewDraftChange}
+                onSubmit={onSubmitReview}
+              />
+            ))}
+          </div>
+        </div>
+      ) : null}
+
       {canFinalize && request.can_final_decide ? (
         <div className="mt-5 border border-zinc-200 p-4 dark:border-zinc-800">
           <p className="text-sm font-semibold">Secretary Final Decision</p>
@@ -426,6 +598,53 @@ function RequestRow({
         </div>
       ) : null}
     </motion.article>
+  )
+}
+
+function ApprovalRow({
+  approval,
+  active,
+  draft,
+  onDraftChange,
+  onSubmit,
+}: {
+  approval: RequestApproval
+  active: boolean
+  draft: ReviewDraft
+  onDraftChange: (approvalId: string, changes: Partial<ReviewDraft>) => void
+  onSubmit: (approval: RequestApproval) => Promise<void>
+}) {
+  return (
+    <div className="border border-zinc-200 p-3 dark:border-zinc-800">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="font-medium">{approval.approverName}</p>
+          <p className="mt-1 font-mono text-xs uppercase tracking-[0.12em] text-zinc-500">{approval.approverRoleCode}</p>
+        </div>
+        <RecommendationBadge status={approval.status} />
+      </div>
+      {approval.comment ? (
+        <p className="mt-3 text-sm leading-6 text-zinc-700 dark:text-zinc-300">{approval.comment}</p>
+      ) : null}
+      {approval.canDecideApproval ? (
+        <div className="mt-3 grid gap-3 sm:grid-cols-[minmax(0,12rem)_1fr_auto] sm:items-end">
+          <label className="block">
+            <span className="text-sm font-medium">Recommendation</span>
+            <select
+              value={draft.approve ? 'approve' : 'reject'}
+              onChange={(event) => onDraftChange(approval.approvalId, { approve: event.target.value === 'approve' })}
+              className="mt-2 min-h-11 w-full rounded-md border border-zinc-300 bg-zinc-50 px-3 text-base outline-none transition focus:border-primary dark:border-zinc-800 dark:bg-zinc-950"
+            >
+              <option value="approve">Recommend Approve</option>
+              <option value="reject">Recommend Reject</option>
+            </select>
+          </label>
+          <TextField label="Reviewer comment" value={draft.comment} onChange={(value) => onDraftChange(approval.approvalId, { comment: value })} />
+          <SmallAction label="Submit" disabled={active || !draft.comment.trim()} onClick={() => onSubmit(approval)} primary icon={<UserCheck size={15} />} />
+        </div>
+      ) : null}
+      {approval.decidedAt ? <p className="mt-2 font-mono text-xs text-zinc-500 tabular-nums">{formatDateTime(approval.decidedAt)}</p> : null}
+    </div>
   )
 }
 
@@ -517,6 +736,14 @@ function StatusBadge({ status }: { status: CompetitorRequest['status'] }) {
   )
 }
 
+function RecommendationBadge({ status }: { status: RequestApproval['status'] }) {
+  return (
+    <span className={`inline-flex min-h-8 items-center rounded-md border px-2 text-xs font-semibold ${getRecommendationBadgeClass(status)}`}>
+      {status}
+    </span>
+  )
+}
+
 function Alert({ tone, message }: { tone: 'success' | 'danger'; message: string }) {
   const className =
     tone === 'success'
@@ -572,6 +799,23 @@ function createDecisionDraft(request: CompetitorRequest | null): FinalDecisionDr
   }
 }
 
+function createReviewDraft(approval: RequestApproval | null): ReviewDraft {
+  return {
+    approve: approval?.status !== 'Rejected',
+    comment: approval?.comment ?? '',
+  }
+}
+
+function createReviewDrafts(requests: CompetitorRequest[]) {
+  return Object.fromEntries(
+    requests.flatMap((request) => request.approvals.map((approval) => [approval.approvalId, createReviewDraft(approval)])),
+  )
+}
+
+function getReviewerKey(reviewer: ReviewerOption) {
+  return `${reviewer.profile_id}:${reviewer.role_code}`
+}
+
 function calculateTotals(requests: CompetitorRequest[]) {
   return {
     needRacer: requests.filter((request) => request.status === 'Need Racer Approval').length,
@@ -592,6 +836,13 @@ function getStatusBadgeClass(status: CompetitorRequest['status']) {
   if (status === 'Rejected' || status === 'Cancelled') return 'border-red-200 bg-red-500/10 text-red-700 dark:border-red-900/60 dark:text-red-400'
   if (status === 'Need Racer Approval') return 'border-amber-200 bg-amber-500/10 text-amber-700 dark:border-amber-900/60 dark:text-amber-400'
   return 'border-zinc-200 text-zinc-600 dark:border-zinc-800 dark:text-zinc-400'
+}
+
+function getRecommendationBadgeClass(status: RequestApproval['status']) {
+  if (status === 'Approved') return 'border-emerald-200 bg-emerald-500/10 text-emerald-700 dark:border-emerald-900/60 dark:text-emerald-400'
+  if (status === 'Rejected') return 'border-red-200 bg-red-500/10 text-red-700 dark:border-red-900/60 dark:text-red-400'
+  if (status === 'Skipped') return 'border-zinc-200 bg-zinc-100 text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400'
+  return 'border-amber-200 bg-amber-500/10 text-amber-700 dark:border-amber-900/60 dark:text-amber-400'
 }
 
 function formatDateTime(value: string | null) {

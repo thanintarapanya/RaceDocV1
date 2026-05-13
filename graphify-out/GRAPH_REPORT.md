@@ -1,18 +1,18 @@
 # Graph Report - RaceDocV1Github  (2026-05-13)
 
 ## Corpus Check
-- 35 files · ~39,088 words
+- 35 files · ~39,823 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 151 nodes · 143 edges · 12 communities detected
+- 152 nodes · 144 edges · 12 communities detected
 - Extraction: 90% EXTRACTED · 10% INFERRED · 0% AMBIGUOUS · INFERRED: 14 edges (avg confidence: 0.81)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
 - [[_COMMUNITY_Community 1|Community 1]]
 - [[_COMMUNITY_Community 2|Community 2]]
-- [[_COMMUNITY_Community 4|Community 4]]
+- [[_COMMUNITY_Community 3|Community 3]]
 - [[_COMMUNITY_Community 5|Community 5]]
 - [[_COMMUNITY_Community 6|Community 6]]
 - [[_COMMUNITY_Community 10|Community 10]]
@@ -57,8 +57,8 @@ Nodes (7): getAuthErrorMessage(), handleEmailLogin(), handleGoogleLogin(), handl
 Cohesion: 0.2
 Nodes (6): AuthRedirect(), OnboardingRoute(), ProtectedRoute(), AdminOrSecretaryRoute(), ScrutineerReportRoute(), useAuth()
 
-### Community 4 - "Community 4"
-Cohesion: 0.24
+### Community 3 - "Community 3"
+Cohesion: 0.22
 Nodes (4): CompetitorRequestPage(), canSeeAdminNavigation(), canSeeScrutineerReportNavigation(), getNavigationItems()
 
 ### Community 5 - "Community 5"
@@ -75,11 +75,11 @@ Nodes (5): loadOptions(), uniqueValues(), updateSeason(), updateSeries(), update
 
 ### Community 15 - "Community 15"
 Cohesion: 0.67
-Nodes (3): createInitialEntryFormState(), createPersonalSnapshot(), handleSubmitBatch()
+Nodes (3): draw(), getCanvasPoint(), startDrawing()
 
 ### Community 16 - "Community 16"
 Cohesion: 0.67
-Nodes (3): draw(), getCanvasPoint(), startDrawing()
+Nodes (3): createInitialEntryFormState(), createPersonalSnapshot(), handleSubmitBatch()
 
 ### Community 30 - "Community 30"
 Cohesion: 1.0
@@ -112,11 +112,11 @@ Nodes (1): Branding
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `useAuth()` connect `Community 2` to `Community 4`?**
-  _High betweenness centrality (0.011) - this node is a cross-community bridge._
-- **Why does `CompetitorRequestPage()` connect `Community 4` to `Community 2`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
-- **Why does `canSeeAdminNavigation()` connect `Community 4` to `Community 2`?**
+- **Why does `useAuth()` connect `Community 2` to `Community 3`?**
+  _High betweenness centrality (0.012) - this node is a cross-community bridge._
+- **Why does `CompetitorRequestPage()` connect `Community 3` to `Community 2`?**
+  _High betweenness centrality (0.009) - this node is a cross-community bridge._
+- **Why does `canSeeAdminNavigation()` connect `Community 3` to `Community 2`?**
   _High betweenness centrality (0.006) - this node is a cross-community bridge._
 - **Are the 6 inferred relationships involving `useAuth()` (e.g. with `ProtectedRoute()` and `AdminOrSecretaryRoute()`) actually correct?**
   _`useAuth()` has 6 INFERRED edges - model-reasoned connections that need verification._
