@@ -611,21 +611,16 @@ function CompletionWarning({
 }) {
   if (visibleIncompleteCount === 0) {
     return (
-      <div className="mb-4 border border-emerald-200 bg-emerald-500/10 p-4 text-sm text-emerald-700 dark:border-emerald-900/60 dark:text-emerald-400">
+      <div className="mb-3 inline-flex border border-emerald-200 bg-emerald-500/10 px-3 py-2 text-xs font-medium text-emerald-700 dark:border-emerald-900/60 dark:text-emerald-400">
         All {visibleCount} visible row(s) are 100% complete.
       </div>
     )
   }
 
   return (
-    <div className="mb-4 flex items-start gap-3 border border-amber-200 bg-amber-500/10 p-4 text-sm text-amber-700 dark:border-amber-900/60 dark:text-amber-500">
-      <AlertTriangle size={18} className="mt-0.5 shrink-0" />
-      <div>
-        <p className="font-semibold">{visibleIncompleteCount} of {visibleCount} visible row(s) are incomplete.</p>
-        <p className="mt-1 text-amber-800/80 dark:text-amber-300/80">
-          This is a warning only. Checklist completion does not change race eligibility or other modules.
-        </p>
-      </div>
+    <div className="mb-3 inline-flex items-center gap-2 border border-amber-200 bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-700 dark:border-amber-900/60 dark:text-amber-500">
+      <AlertTriangle size={14} className="shrink-0" />
+      <span>{visibleIncompleteCount}/{visibleCount} incomplete visible row(s)</span>
     </div>
   )
 }
@@ -667,39 +662,37 @@ function TopicSettingsPanel({
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.16 }}
-        className="max-h-[86vh] w-full max-w-4xl overflow-y-auto border border-zinc-200 bg-zinc-50 p-5 dark:border-zinc-800 dark:bg-zinc-950"
+        className="max-h-[82vh] w-full max-w-3xl overflow-y-auto border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-950"
       >
-        <div className="flex items-start justify-between gap-4 border-b border-zinc-200 pb-4 dark:border-zinc-800">
+        <div className="flex items-start justify-between gap-4 border-b border-zinc-200 pb-3 dark:border-zinc-800">
           <div className="flex items-start gap-3">
-            <span className="mt-1 inline-flex h-9 w-9 items-center justify-center rounded-md border border-zinc-300 text-primary dark:border-zinc-800">
-              <Settings2 size={18} />
+            <span className="mt-1 inline-flex h-8 w-8 items-center justify-center rounded-md border border-zinc-300 text-primary dark:border-zinc-800">
+              <Settings2 size={16} />
             </span>
             <div>
               <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Column configuration</p>
-              <h2 className="mt-2 text-xl font-semibold">Checklist Topic Settings</h2>
-              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-                {eventName}. Add, reorder, or deactivate columns. Historical item logs remain available.
-              </p>
+              <h2 className="mt-1 text-lg font-semibold">Topic Settings</h2>
+              <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">{eventName}</p>
             </div>
           </div>
           <motion.button
             whileTap={{ scale: 0.98 }}
             type="button"
             onClick={onClose}
-            className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-md border border-zinc-300 dark:border-zinc-800"
+            className="inline-flex min-h-9 min-w-9 items-center justify-center rounded-md border border-zinc-300 dark:border-zinc-800"
             aria-label="Close topic settings"
           >
             <X size={17} />
           </motion.button>
         </div>
 
-      <div className="mt-5 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto] lg:items-end">
+        <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto] lg:items-end">
         <label className="block">
           <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">Topic title English</span>
           <input
             value={titleEn}
             onChange={(event) => onTitleEnChange(event.target.value)}
-            className="mt-2 min-h-11 w-full rounded-md border border-zinc-300 bg-transparent px-3 text-base outline-none transition focus:border-primary dark:border-zinc-800"
+            className="mt-2 min-h-10 w-full rounded-md border border-zinc-300 bg-transparent px-3 text-sm outline-none transition focus:border-primary dark:border-zinc-800"
             placeholder="Briefing attended"
           />
         </label>
@@ -708,11 +701,11 @@ function TopicSettingsPanel({
           <input
             value={titleTh}
             onChange={(event) => onTitleThChange(event.target.value)}
-            className="mt-2 min-h-11 w-full rounded-md border border-zinc-300 bg-transparent px-3 text-base outline-none transition focus:border-primary dark:border-zinc-800"
+            className="mt-2 min-h-10 w-full rounded-md border border-zinc-300 bg-transparent px-3 text-sm outline-none transition focus:border-primary dark:border-zinc-800"
             placeholder="เข้าประชุมนักแข่ง"
           />
         </label>
-        <label className="flex min-h-11 items-center gap-2 rounded-md border border-zinc-300 px-3 text-sm font-medium dark:border-zinc-800">
+        <label className="flex min-h-10 items-center gap-2 rounded-md border border-zinc-300 px-3 text-sm font-medium dark:border-zinc-800">
           <input
             type="checkbox"
             checked={required}
@@ -726,7 +719,7 @@ function TopicSettingsPanel({
           type="button"
           onClick={onCreate}
           disabled={creating || !titleEn.trim()}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-primary px-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
         >
           {creating ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
           Add Topic
@@ -735,11 +728,11 @@ function TopicSettingsPanel({
 
       <div className="mt-4 grid gap-2">
         {topics.map((topic, index) => (
-          <div key={topic.topicId} className="flex flex-col gap-3 border border-zinc-200 p-3 sm:flex-row sm:items-center sm:justify-between dark:border-zinc-800">
+          <div key={topic.topicId} className="flex flex-col gap-2 border border-zinc-200 px-3 py-2 sm:flex-row sm:items-center sm:justify-between dark:border-zinc-800">
             <div>
-              <p className="font-medium">{topic.title}</p>
-              <p className="mt-1 text-sm text-zinc-500">
-                {topic.titleTh || 'No Thai title'} / order {topic.sortOrder}{topic.isRequired ? ' / required' : ''}
+              <p className="text-sm font-medium">{topic.title}</p>
+              <p className="mt-0.5 text-xs text-zinc-500">
+                order {topic.sortOrder}{topic.isRequired ? ' / required' : ''}{topic.titleTh ? ` / ${topic.titleTh}` : ''}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -781,7 +774,7 @@ function TopicActionButton({
       disabled={disabled}
       onClick={onClick}
       aria-label={label}
-      className={`inline-flex min-h-10 min-w-10 items-center justify-center rounded-md border disabled:cursor-not-allowed disabled:opacity-50 ${
+        className={`inline-flex min-h-9 min-w-9 items-center justify-center rounded-md border disabled:cursor-not-allowed disabled:opacity-50 ${
         danger
           ? 'border-red-200 text-red-700 dark:border-red-900/60 dark:text-red-400'
           : 'border-zinc-300 text-zinc-700 dark:border-zinc-800 dark:text-zinc-300'
@@ -970,7 +963,7 @@ function EntryCompletionStatus({ entry, topics }: { entry: ChecklistEntry; topic
     <div className="mt-2 flex max-w-72 items-start gap-2 text-xs text-amber-700 dark:text-amber-500">
       <AlertTriangle size={14} className="mt-0.5 shrink-0" />
       <p>
-        Missing {missingTopics.length}: {missingTopics.slice(0, 2).map((topic) => topic.title).join(', ')}{missingTopics.length > 2 ? ` +${missingTopics.length - 2}` : ''}
+        Missing {missingTopics.length}
       </p>
     </div>
   )
