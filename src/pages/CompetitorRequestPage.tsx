@@ -104,6 +104,7 @@ export function CompetitorRequestPage() {
   const [topicOptions, setTopicOptions] = useState<RequestTopicOption[]>([])
   const [reviewerOptions, setReviewerOptions] = useState<ReviewerOption[]>([])
   const [selectedSeries, setSelectedSeries] = useState('all')
+  const [selectedRequestTopicFilter, setSelectedRequestTopicFilter] = useState('all')
   const [selectedEntryId, setSelectedEntryId] = useState('')
   const [selectedTopicCode, setSelectedTopicCode] = useState('')
   const [selectedTopics, setSelectedTopics] = useState<RequestTopicSelection[]>([])
@@ -182,7 +183,11 @@ export function CompetitorRequestPage() {
 
   const totals = useMemo(() => calculateTotals(requests), [requests])
   const seriesOptions = useMemo(() => getSeriesRaceOptions(requests), [requests])
-  const visibleRequests = useMemo(() => filterBySeriesRace(requests, selectedSeries), [requests, selectedSeries])
+  const filteredBySeries = useMemo(() => filterBySeriesRace(requests, selectedSeries), [requests, selectedSeries])
+  const visibleRequests = useMemo(
+    () => filterByRequestTopic(filteredBySeries, selectedRequestTopicFilter),
+    [filteredBySeries, selectedRequestTopicFilter],
+  )
 
   function addTopicSelection(topicCode: string) {
     const option = topicOptions.find((current) => current.code === topicCode)
@@ -504,15 +509,22 @@ export function CompetitorRequestPage() {
 
         <div>
           {!loading && requests.length > 0 ? (
-            <div className="mb-4 grid gap-3 border border-zinc-200 p-4 sm:grid-cols-[minmax(0,22rem)_1fr] sm:items-end dark:border-zinc-800">
+            <div className="mb-4 grid gap-3 border border-zinc-200 p-4 lg:grid-cols-[minmax(0,20rem)_minmax(0,20rem)_1fr] lg:items-end dark:border-zinc-800">
               <SeriesRaceFilter value={selectedSeries} options={seriesOptions} onChange={setSelectedSeries} />
-              <FilterResultSummary visible={visibleRequests.length} total={requests.length} onClear={() => setSelectedSeries('all')} />
+              <RequestTopicFilter value={selectedRequestTopicFilter} options={topicOptions} onChange={setSelectedRequestTopicFilter} />
+              <FilterResultSummary visible={visibleRequests.length} total={requests.length} onClear={() => {
+                setSelectedSeries('all')
+                setSelectedRequestTopicFilter('all')
+              }} />
             </div>
           ) : null}
           {loading ? <RequestSkeleton /> : null}
           {!loading && requests.length === 0 ? <RequestEmpty /> : null}
           {!loading && requests.length > 0 && visibleRequests.length === 0 ? (
-            <RequestFilteredEmpty onClear={() => setSelectedSeries('all')} />
+            <RequestFilteredEmpty onClear={() => {
+              setSelectedSeries('all')
+              setSelectedRequestTopicFilter('all')
+            }} />
           ) : null}
           {!loading && visibleRequests.length > 0 ? (
             <div className="space-y-4">
@@ -762,6 +774,32 @@ function TopicChips({ topics }: { topics: RequestTopicSelection[] }) {
   )
 }
 
+function RequestTopicFilter({
+  value,
+  options,
+  onChange,
+}: {
+  value: string
+  options: RequestTopicOption[]
+  onChange: (value: string) => void
+}) {
+  return (
+    <label className="block">
+      <span className="text-sm font-medium">Request Topic</span>
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="mt-2 min-h-11 w-full rounded-md border border-zinc-300 bg-zinc-50 px-3 text-base outline-none transition focus:border-primary dark:border-zinc-800 dark:bg-zinc-950"
+      >
+        <option value="all">All topics</option>
+        {options.map((option) => (
+          <option key={option.code} value={option.code}>{option.display_label}</option>
+        ))}
+      </select>
+    </label>
+  )
+}
+
 function TextField({
   label,
   value,
@@ -963,6 +1001,11 @@ function calculateTotals(requests: CompetitorRequest[]) {
     pending: requests.filter((request) => request.status === 'Pending' || request.status === 'In Review').length,
     approved: requests.filter((request) => request.status === 'Approved').length,
   }
+}
+
+function filterByRequestTopic(requests: CompetitorRequest[], selectedTopicCode: string) {
+  if (selectedTopicCode === 'all') return requests
+  return requests.filter((request) => request.request_topics.some((topic) => topic.code === selectedTopicCode))
 }
 
 function getStatusSurface(status: CompetitorRequest['status']) {
