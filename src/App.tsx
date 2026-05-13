@@ -26,6 +26,7 @@ import { TabPlaceholderPage } from './pages/TabPlaceholderPage'
 import { TeamPage } from './pages/TeamPage'
 import { TeamRequiredPage } from './pages/TeamRequiredPage'
 import { UpdatePasswordPage } from './pages/UpdatePasswordPage'
+import { UserRolePage } from './pages/UserRolePage'
 import { WeightInPage } from './pages/WeightInPage'
 
 const router = createBrowserRouter([
@@ -142,6 +143,14 @@ const router = createBrowserRouter([
         element: (
           <AdminOrSecretaryRoute>
             <AuthHealthPage />
+          </AdminOrSecretaryRoute>
+        ),
+      },
+      {
+        path: 'settings/user-roles',
+        element: (
+          <AdminOrSecretaryRoute>
+            <UserRolePage />
           </AdminOrSecretaryRoute>
         ),
       },

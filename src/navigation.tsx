@@ -42,6 +42,7 @@ export const adminNavItems: AppNavItem[] = [
 ]
 
 export const settingsNavItems: AppNavItem[] = [
+  { label: 'User & Role', path: '/settings/user-roles', icon: ShieldCheck },
   { label: 'Profile', path: '/settings/profile', icon: Settings },
   { label: 'Privacy', path: '/settings/privacy', icon: Gauge },
 ]
@@ -74,7 +75,7 @@ export function getNavigationItems(roles: RoleCode[]) {
     ...baseNavItems,
     ...scrutineerReportItem,
     ...adminOnlyItems,
-    ...settingsNavItems,
+    ...(canSeeAdminNavigation(roles) ? settingsNavItems : settingsNavItems.slice(1)),
   ]
 }
 

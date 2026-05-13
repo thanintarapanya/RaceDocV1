@@ -1,21 +1,20 @@
 # Graph Report - RaceDocV1Github  (2026-05-13)
 
 ## Corpus Check
-- 35 files · ~39,823 words
+- 36 files · ~40,935 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 152 nodes · 144 edges · 12 communities detected
-- Extraction: 90% EXTRACTED · 10% INFERRED · 0% AMBIGUOUS · INFERRED: 14 edges (avg confidence: 0.81)
+- 157 nodes · 148 edges · 11 communities detected
+- Extraction: 91% EXTRACTED · 9% INFERRED · 0% AMBIGUOUS · INFERRED: 14 edges (avg confidence: 0.81)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
 - [[_COMMUNITY_Community 1|Community 1]]
 - [[_COMMUNITY_Community 2|Community 2]]
-- [[_COMMUNITY_Community 3|Community 3]]
+- [[_COMMUNITY_Community 4|Community 4]]
 - [[_COMMUNITY_Community 5|Community 5]]
-- [[_COMMUNITY_Community 6|Community 6]]
-- [[_COMMUNITY_Community 10|Community 10]]
+- [[_COMMUNITY_Community 9|Community 9]]
 - [[_COMMUNITY_Community 15|Community 15]]
 - [[_COMMUNITY_Community 16|Community 16]]
 - [[_COMMUNITY_Community 30|Community 30]]
@@ -38,48 +37,44 @@
 ## Surprising Connections (you probably didn't know these)
 - `RacedocV1` --indexes--> `Graphify`  [INFERRED]
   RaceDocV1_Architecture.md → AGENTS.md
-- `canSeeAdminNavigation()` --calls--> `AdminOrSecretaryRoute()`  [INFERRED]
-  src/navigation.tsx → src/auth/RoleGate.tsx
 - `ProtectedRoute()` --calls--> `useAuth()`  [INFERRED]
   src/auth/ProtectedRoute.tsx → src/auth/useAuth.ts
 - `useAuth()` --calls--> `ScrutineerReportRoute()`  [INFERRED]
   src/auth/useAuth.ts → src/auth/RoleGate.tsx
 - `useAuth()` --calls--> `OnboardingRoute()`  [INFERRED]
   src/auth/useAuth.ts → src/auth/OnboardingRoute.tsx
+- `useAuth()` --calls--> `AuthRedirect()`  [INFERRED]
+  src/auth/useAuth.ts → src/auth/AuthRedirect.tsx
 
 ## Communities
 
 ### Community 1 - "Community 1"
+Cohesion: 0.11
+Nodes (10): AuthRedirect(), OnboardingRoute(), ProtectedRoute(), AdminOrSecretaryRoute(), ScrutineerReportRoute(), useAuth(), CompetitorRequestPage(), canSeeAdminNavigation() (+2 more)
+
+### Community 2 - "Community 2"
 Cohesion: 0.16
 Nodes (7): getAuthErrorMessage(), handleEmailLogin(), handleGoogleLogin(), handleSubmit(), validateIdentity(), handleSignUp(), handleSubmit()
 
-### Community 2 - "Community 2"
-Cohesion: 0.2
-Nodes (6): AuthRedirect(), OnboardingRoute(), ProtectedRoute(), AdminOrSecretaryRoute(), ScrutineerReportRoute(), useAuth()
-
-### Community 3 - "Community 3"
-Cohesion: 0.22
-Nodes (4): CompetitorRequestPage(), canSeeAdminNavigation(), canSeeScrutineerReportNavigation(), getNavigationItems()
-
-### Community 5 - "Community 5"
+### Community 4 - "Community 4"
 Cohesion: 0.29
 Nodes (8): Graphify, Balance of Performance (BOP), Entry Form, Inspection Form, RacedocV1, Success Ballast, Supabase, Weight-In
 
-### Community 6 - "Community 6"
+### Community 5 - "Community 5"
 Cohesion: 0.33
 Nodes (6): handleDocumentUpload(), handleSignatureUpload(), sanitizeFileName(), updateConsent(), updateDocumentAsset(), uploadEntryAsset()
 
-### Community 10 - "Community 10"
+### Community 9 - "Community 9"
 Cohesion: 0.5
 Nodes (5): loadOptions(), uniqueValues(), updateSeason(), updateSeries(), updateStep1()
 
 ### Community 15 - "Community 15"
 Cohesion: 0.67
-Nodes (3): draw(), getCanvasPoint(), startDrawing()
+Nodes (3): createInitialEntryFormState(), createPersonalSnapshot(), handleSubmitBatch()
 
 ### Community 16 - "Community 16"
 Cohesion: 0.67
-Nodes (3): createInitialEntryFormState(), createPersonalSnapshot(), handleSubmitBatch()
+Nodes (3): draw(), getCanvasPoint(), startDrawing()
 
 ### Community 30 - "Community 30"
 Cohesion: 1.0
@@ -112,12 +107,6 @@ Nodes (1): Branding
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `useAuth()` connect `Community 2` to `Community 3`?**
-  _High betweenness centrality (0.012) - this node is a cross-community bridge._
-- **Why does `CompetitorRequestPage()` connect `Community 3` to `Community 2`?**
-  _High betweenness centrality (0.009) - this node is a cross-community bridge._
-- **Why does `canSeeAdminNavigation()` connect `Community 3` to `Community 2`?**
-  _High betweenness centrality (0.006) - this node is a cross-community bridge._
 - **Are the 6 inferred relationships involving `useAuth()` (e.g. with `ProtectedRoute()` and `AdminOrSecretaryRoute()`) actually correct?**
   _`useAuth()` has 6 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 5 inferred relationships involving `getAuthErrorMessage()` (e.g. with `handleEmailLogin()` and `handleGoogleLogin()`) actually correct?**
@@ -126,3 +115,7 @@ _Questions this graph is uniquely positioned to answer:_
   _`canSeeAdminNavigation()` has 2 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `Entry Form`, `Success Ballast`, `Audit Trail` to the rest of the system?**
   _8 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `Community 0` be split into smaller, more focused modules?**
+  _Cohesion score 0.07 - nodes in this community are weakly interconnected._
+- **Should `Community 1` be split into smaller, more focused modules?**
+  _Cohesion score 0.11 - nodes in this community are weakly interconnected._

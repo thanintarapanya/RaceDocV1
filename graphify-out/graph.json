@@ -45,43 +45,43 @@
       "source_file": "src/navigation.tsx",
       "source_location": "L1",
       "id": "src_navigation_tsx",
-      "community": 3,
+      "community": 1,
       "norm_label": "navigation.tsx"
     },
     {
       "label": "canSeeAdminNavigation()",
       "file_type": "code",
       "source_file": "src/navigation.tsx",
-      "source_location": "L61",
+      "source_location": "L62",
       "id": "src_navigation_canseeadminnavigation",
-      "community": 3,
+      "community": 1,
       "norm_label": "canseeadminnavigation()"
     },
     {
       "label": "canSeeScrutineerReportNavigation()",
       "file_type": "code",
       "source_file": "src/navigation.tsx",
-      "source_location": "L65",
+      "source_location": "L66",
       "id": "src_navigation_canseescrutineerreportnavigation",
-      "community": 3,
+      "community": 1,
       "norm_label": "canseescrutineerreportnavigation()"
     },
     {
       "label": "getNavigationItems()",
       "file_type": "code",
       "source_file": "src/navigation.tsx",
-      "source_location": "L69",
+      "source_location": "L70",
       "id": "src_navigation_getnavigationitems",
-      "community": 3,
+      "community": 1,
       "norm_label": "getnavigationitems()"
     },
     {
       "label": "getPrimaryRoleLabel()",
       "file_type": "code",
       "source_file": "src/navigation.tsx",
-      "source_location": "L81",
+      "source_location": "L82",
       "id": "src_navigation_getprimaryrolelabel",
-      "community": 3,
+      "community": 1,
       "norm_label": "getprimaryrolelabel()"
     },
     {
@@ -90,7 +90,7 @@
       "source_file": "src/auth/ProtectedRoute.tsx",
       "source_location": "L1",
       "id": "src_auth_protectedroute_tsx",
-      "community": 2,
+      "community": 1,
       "norm_label": "protectedroute.tsx"
     },
     {
@@ -99,7 +99,7 @@
       "source_file": "src/auth/ProtectedRoute.tsx",
       "source_location": "L6",
       "id": "auth_protectedroute_protectedroute",
-      "community": 2,
+      "community": 1,
       "norm_label": "protectedroute()"
     },
     {
@@ -117,7 +117,7 @@
       "source_file": "src/auth/useAuth.ts",
       "source_location": "L1",
       "id": "src_auth_useauth_ts",
-      "community": 2,
+      "community": 1,
       "norm_label": "useauth.ts"
     },
     {
@@ -126,7 +126,7 @@
       "source_file": "src/auth/useAuth.ts",
       "source_location": "L4",
       "id": "auth_useauth_useauth",
-      "community": 2,
+      "community": 1,
       "norm_label": "useauth()"
     },
     {
@@ -135,7 +135,7 @@
       "source_file": "src/auth/RoleGate.tsx",
       "source_location": "L1",
       "id": "src_auth_rolegate_tsx",
-      "community": 2,
+      "community": 1,
       "norm_label": "rolegate.tsx"
     },
     {
@@ -144,7 +144,7 @@
       "source_file": "src/auth/RoleGate.tsx",
       "source_location": "L7",
       "id": "auth_rolegate_adminorsecretaryroute",
-      "community": 2,
+      "community": 1,
       "norm_label": "adminorsecretaryroute()"
     },
     {
@@ -153,7 +153,7 @@
       "source_file": "src/auth/RoleGate.tsx",
       "source_location": "L28",
       "id": "auth_rolegate_scrutineerreportroute",
-      "community": 2,
+      "community": 1,
       "norm_label": "scrutineerreportroute()"
     },
     {
@@ -180,7 +180,7 @@
       "source_file": "src/auth/OnboardingRoute.tsx",
       "source_location": "L1",
       "id": "src_auth_onboardingroute_tsx",
-      "community": 2,
+      "community": 1,
       "norm_label": "onboardingroute.tsx"
     },
     {
@@ -189,7 +189,7 @@
       "source_file": "src/auth/OnboardingRoute.tsx",
       "source_location": "L6",
       "id": "auth_onboardingroute_onboardingroute",
-      "community": 2,
+      "community": 1,
       "norm_label": "onboardingroute()"
     },
     {
@@ -198,7 +198,7 @@
       "source_file": "src/auth/AuthRedirect.tsx",
       "source_location": "L1",
       "id": "src_auth_authredirect_tsx",
-      "community": 2,
+      "community": 1,
       "norm_label": "authredirect.tsx"
     },
     {
@@ -207,7 +207,7 @@
       "source_file": "src/auth/AuthRedirect.tsx",
       "source_location": "L5",
       "id": "auth_authredirect_authredirect",
-      "community": 2,
+      "community": 1,
       "norm_label": "authredirect()"
     },
     {
@@ -261,7 +261,7 @@
       "source_file": "src/lib/auth-errors.ts",
       "source_location": "L1",
       "id": "src_lib_auth_errors_ts",
-      "community": 1,
+      "community": 2,
       "norm_label": "auth-errors.ts"
     },
     {
@@ -270,7 +270,7 @@
       "source_file": "src/lib/auth-errors.ts",
       "source_location": "L1",
       "id": "lib_auth_errors_getautherrormessage",
-      "community": 1,
+      "community": 2,
       "norm_label": "getautherrormessage()"
     },
     {
@@ -333,7 +333,7 @@
       "source_file": "src/pages/LoginPage.tsx",
       "source_location": "L1",
       "id": "src_pages_loginpage_tsx",
-      "community": 1,
+      "community": 2,
       "norm_label": "loginpage.tsx"
     },
     {
@@ -342,7 +342,7 @@
       "source_file": "src/pages/LoginPage.tsx",
       "source_location": "L34",
       "id": "pages_loginpage_handleemaillogin",
-      "community": 1,
+      "community": 2,
       "norm_label": "handleemaillogin()"
     },
     {
@@ -351,7 +351,7 @@
       "source_file": "src/pages/LoginPage.tsx",
       "source_location": "L51",
       "id": "pages_loginpage_handlegooglelogin",
-      "community": 1,
+      "community": 2,
       "norm_label": "handlegooglelogin()"
     },
     {
@@ -396,7 +396,7 @@
       "source_file": "src/pages/InspectionFormPage.tsx",
       "source_location": "L1",
       "id": "src_pages_inspectionformpage_tsx",
-      "community": 9,
+      "community": 8,
       "norm_label": "inspectionformpage.tsx"
     },
     {
@@ -405,7 +405,7 @@
       "source_file": "src/pages/InspectionFormPage.tsx",
       "source_location": "L79",
       "id": "pages_inspectionformpage_run",
-      "community": 9,
+      "community": 8,
       "norm_label": "run()"
     },
     {
@@ -414,7 +414,7 @@
       "source_file": "src/pages/InspectionFormPage.tsx",
       "source_location": "L94",
       "id": "pages_inspectionformpage_createinspectionform",
-      "community": 9,
+      "community": 8,
       "norm_label": "createinspectionform()"
     },
     {
@@ -423,7 +423,7 @@
       "source_file": "src/pages/InspectionFormPage.tsx",
       "source_location": "L113",
       "id": "pages_inspectionformpage_submitstatus",
-      "community": 9,
+      "community": 8,
       "norm_label": "submitstatus()"
     },
     {
@@ -432,7 +432,7 @@
       "source_file": "src/pages/InspectionFormPage.tsx",
       "source_location": "L140",
       "id": "pages_inspectionformpage_updatedraft",
-      "community": 9,
+      "community": 8,
       "norm_label": "updatedraft()"
     },
     {
@@ -441,7 +441,7 @@
       "source_file": "src/pages/TeamRequiredPage.tsx",
       "source_location": "L1",
       "id": "src_pages_teamrequiredpage_tsx",
-      "community": 1,
+      "community": 2,
       "norm_label": "teamrequiredpage.tsx"
     },
     {
@@ -450,7 +450,7 @@
       "source_file": "src/pages/TeamRequiredPage.tsx",
       "source_location": "L37",
       "id": "pages_teamrequiredpage_updatefield",
-      "community": 1,
+      "community": 2,
       "norm_label": "updatefield()"
     },
     {
@@ -459,7 +459,7 @@
       "source_file": "src/pages/TeamRequiredPage.tsx",
       "source_location": "L41",
       "id": "pages_teamrequiredpage_handlesubmit",
-      "community": 1,
+      "community": 2,
       "norm_label": "handlesubmit()"
     },
     {
@@ -504,7 +504,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L1",
       "id": "src_pages_checklistpage_tsx",
-      "community": 4,
+      "community": 3,
       "norm_label": "checklistpage.tsx"
     },
     {
@@ -513,7 +513,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L136",
       "id": "pages_checklistpage_run",
-      "community": 4,
+      "community": 3,
       "norm_label": "run()"
     },
     {
@@ -522,7 +522,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L173",
       "id": "pages_checklistpage_handleeventchange",
-      "community": 4,
+      "community": 3,
       "norm_label": "handleeventchange()"
     },
     {
@@ -531,7 +531,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L179",
       "id": "pages_checklistpage_createtopic",
-      "community": 4,
+      "community": 3,
       "norm_label": "createtopic()"
     },
     {
@@ -540,7 +540,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L204",
       "id": "pages_checklistpage_movetopic",
-      "community": 4,
+      "community": 3,
       "norm_label": "movetopic()"
     },
     {
@@ -549,7 +549,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L223",
       "id": "pages_checklistpage_deletetopic",
-      "community": 4,
+      "community": 3,
       "norm_label": "deletetopic()"
     },
     {
@@ -558,7 +558,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L244",
       "id": "pages_checklistpage_updatechecklistitem",
-      "community": 4,
+      "community": 3,
       "norm_label": "updatechecklistitem()"
     },
     {
@@ -567,7 +567,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L265",
       "id": "pages_checklistpage_bulkupdatechecklistitems",
-      "community": 4,
+      "community": 3,
       "norm_label": "bulkupdatechecklistitems()"
     },
     {
@@ -576,7 +576,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L291",
       "id": "pages_checklistpage_savenotes",
-      "community": 4,
+      "community": 3,
       "norm_label": "savenotes()"
     },
     {
@@ -585,7 +585,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L315",
       "id": "pages_checklistpage_openaudit",
-      "community": 4,
+      "community": 3,
       "norm_label": "openaudit()"
     },
     {
@@ -648,7 +648,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L997",
       "id": "pages_entryformpage_loadoptions",
-      "community": 10,
+      "community": 9,
       "norm_label": "loadoptions()"
     },
     {
@@ -666,7 +666,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L1122",
       "id": "pages_entryformpage_updatestep1",
-      "community": 10,
+      "community": 9,
       "norm_label": "updatestep1()"
     },
     {
@@ -720,7 +720,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L1167",
       "id": "pages_entryformpage_updatedocumentasset",
-      "community": 6,
+      "community": 5,
       "norm_label": "updatedocumentasset()"
     },
     {
@@ -729,7 +729,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L1180",
       "id": "pages_entryformpage_updateconsent",
-      "community": 6,
+      "community": 5,
       "norm_label": "updateconsent()"
     },
     {
@@ -738,7 +738,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L1184",
       "id": "pages_entryformpage_uploadentryasset",
-      "community": 6,
+      "community": 5,
       "norm_label": "uploadentryasset()"
     },
     {
@@ -747,7 +747,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L1215",
       "id": "pages_entryformpage_handledocumentupload",
-      "community": 6,
+      "community": 5,
       "norm_label": "handledocumentupload()"
     },
     {
@@ -756,7 +756,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L1232",
       "id": "pages_entryformpage_handlesignatureupload",
-      "community": 6,
+      "community": 5,
       "norm_label": "handlesignatureupload()"
     },
     {
@@ -765,7 +765,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L1251",
       "id": "pages_entryformpage_handlesubmitbatch",
-      "community": 16,
+      "community": 15,
       "norm_label": "handlesubmitbatch()"
     },
     {
@@ -774,7 +774,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L1279",
       "id": "pages_entryformpage_updateseason",
-      "community": 10,
+      "community": 9,
       "norm_label": "updateseason()"
     },
     {
@@ -783,7 +783,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L1290",
       "id": "pages_entryformpage_updateseries",
-      "community": 10,
+      "community": 9,
       "norm_label": "updateseries()"
     },
     {
@@ -810,7 +810,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L1921",
       "id": "pages_entryformpage_getcanvaspoint",
-      "community": 15,
+      "community": 16,
       "norm_label": "getcanvaspoint()"
     },
     {
@@ -819,7 +819,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L1931",
       "id": "pages_entryformpage_startdrawing",
-      "community": 15,
+      "community": 16,
       "norm_label": "startdrawing()"
     },
     {
@@ -828,7 +828,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L1943",
       "id": "pages_entryformpage_draw",
-      "community": 15,
+      "community": 16,
       "norm_label": "draw()"
     },
     {
@@ -873,7 +873,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L2208",
       "id": "pages_entryformpage_createinitialentryformstate",
-      "community": 16,
+      "community": 15,
       "norm_label": "createinitialentryformstate()"
     },
     {
@@ -882,7 +882,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L2223",
       "id": "pages_entryformpage_createpersonalsnapshot",
-      "community": 16,
+      "community": 15,
       "norm_label": "createpersonalsnapshot()"
     },
     {
@@ -945,7 +945,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L2308",
       "id": "pages_entryformpage_sanitizefilename",
-      "community": 6,
+      "community": 5,
       "norm_label": "sanitizefilename()"
     },
     {
@@ -981,7 +981,7 @@
       "source_file": "src/pages/EntryFormPage.tsx",
       "source_location": "L2345",
       "id": "pages_entryformpage_uniquevalues",
-      "community": 10,
+      "community": 9,
       "norm_label": "uniquevalues()"
     },
     {
@@ -999,7 +999,7 @@
       "source_file": "src/pages/TeamPage.tsx",
       "source_location": "L1",
       "id": "src_pages_teampage_tsx",
-      "community": 7,
+      "community": 6,
       "norm_label": "teampage.tsx"
     },
     {
@@ -1008,7 +1008,7 @@
       "source_file": "src/pages/TeamPage.tsx",
       "source_location": "L101",
       "id": "pages_teampage_run",
-      "community": 7,
+      "community": 6,
       "norm_label": "run()"
     },
     {
@@ -1017,7 +1017,7 @@
       "source_file": "src/pages/TeamPage.tsx",
       "source_location": "L117",
       "id": "pages_teampage_handlesubmit",
-      "community": 7,
+      "community": 6,
       "norm_label": "handlesubmit()"
     },
     {
@@ -1026,7 +1026,7 @@
       "source_file": "src/pages/TeamPage.tsx",
       "source_location": "L139",
       "id": "pages_teampage_respondtoinvitation",
-      "community": 7,
+      "community": 6,
       "norm_label": "respondtoinvitation()"
     },
     {
@@ -1035,7 +1035,7 @@
       "source_file": "src/pages/TeamPage.tsx",
       "source_location": "L159",
       "id": "pages_teampage_cancelinvitation",
-      "community": 7,
+      "community": 6,
       "norm_label": "cancelinvitation()"
     },
     {
@@ -1044,7 +1044,7 @@
       "source_file": "src/pages/TeamPage.tsx",
       "source_location": "L178",
       "id": "pages_teampage_revokemembership",
-      "community": 7,
+      "community": 6,
       "norm_label": "revokemembership()"
     },
     {
@@ -1071,7 +1071,7 @@
       "source_file": "src/pages/CompetitorRequestPage.tsx",
       "source_location": "L1",
       "id": "src_pages_competitorrequestpage_tsx",
-      "community": 3,
+      "community": 1,
       "norm_label": "competitorrequestpage.tsx"
     },
     {
@@ -1080,7 +1080,7 @@
       "source_file": "src/pages/CompetitorRequestPage.tsx",
       "source_location": "L81",
       "id": "pages_competitorrequestpage_competitorrequestpage",
-      "community": 3,
+      "community": 1,
       "norm_label": "competitorrequestpage()"
     },
     {
@@ -1089,7 +1089,7 @@
       "source_file": "src/pages/CompetitorRequestPage.tsx",
       "source_location": "L699",
       "id": "pages_competitorrequestpage_smallaction",
-      "community": 3,
+      "community": 1,
       "norm_label": "smallaction()"
     },
     {
@@ -1098,7 +1098,7 @@
       "source_file": "src/pages/CompetitorRequestPage.tsx",
       "source_location": "L730",
       "id": "pages_competitorrequestpage_statusbadge",
-      "community": 3,
+      "community": 1,
       "norm_label": "statusbadge()"
     },
     {
@@ -1107,7 +1107,7 @@
       "source_file": "src/pages/CompetitorRequestPage.tsx",
       "source_location": "L739",
       "id": "pages_competitorrequestpage_recommendationbadge",
-      "community": 3,
+      "community": 1,
       "norm_label": "recommendationbadge()"
     },
     {
@@ -1116,7 +1116,7 @@
       "source_file": "src/pages/CompetitorRequestPage.tsx",
       "source_location": "L747",
       "id": "pages_competitorrequestpage_alert",
-      "community": 3,
+      "community": 1,
       "norm_label": "alert()"
     },
     {
@@ -1125,7 +1125,7 @@
       "source_file": "src/pages/SignUpPage.tsx",
       "source_location": "L1",
       "id": "src_pages_signuppage_tsx",
-      "community": 1,
+      "community": 2,
       "norm_label": "signuppage.tsx"
     },
     {
@@ -1134,7 +1134,7 @@
       "source_file": "src/pages/SignUpPage.tsx",
       "source_location": "L22",
       "id": "pages_signuppage_handlesignup",
-      "community": 1,
+      "community": 2,
       "norm_label": "handlesignup()"
     },
     {
@@ -1143,7 +1143,7 @@
       "source_file": "src/pages/OnboardingPage.tsx",
       "source_location": "L1",
       "id": "src_pages_onboardingpage_tsx",
-      "community": 1,
+      "community": 2,
       "norm_label": "onboardingpage.tsx"
     },
     {
@@ -1152,7 +1152,7 @@
       "source_file": "src/pages/OnboardingPage.tsx",
       "source_location": "L96",
       "id": "pages_onboardingpage_updatefield",
-      "community": 1,
+      "community": 2,
       "norm_label": "updatefield()"
     },
     {
@@ -1161,7 +1161,7 @@
       "source_file": "src/pages/OnboardingPage.tsx",
       "source_location": "L100",
       "id": "pages_onboardingpage_validateidentity",
-      "community": 1,
+      "community": 2,
       "norm_label": "validateidentity()"
     },
     {
@@ -1170,7 +1170,7 @@
       "source_file": "src/pages/OnboardingPage.tsx",
       "source_location": "L104",
       "id": "pages_onboardingpage_handlesubmit",
-      "community": 1,
+      "community": 2,
       "norm_label": "handlesubmit()"
     },
     {
@@ -1179,7 +1179,7 @@
       "source_file": "src/pages/RaceResultPage.tsx",
       "source_location": "L1",
       "id": "src_pages_raceresultpage_tsx",
-      "community": 8,
+      "community": 7,
       "norm_label": "raceresultpage.tsx"
     },
     {
@@ -1188,7 +1188,7 @@
       "source_file": "src/pages/RaceResultPage.tsx",
       "source_location": "L161",
       "id": "pages_raceresultpage_run",
-      "community": 8,
+      "community": 7,
       "norm_label": "run()"
     },
     {
@@ -1197,7 +1197,7 @@
       "source_file": "src/pages/RaceResultPage.tsx",
       "source_location": "L199",
       "id": "pages_raceresultpage_createraceresult",
-      "community": 8,
+      "community": 7,
       "norm_label": "createraceresult()"
     },
     {
@@ -1206,7 +1206,7 @@
       "source_file": "src/pages/RaceResultPage.tsx",
       "source_location": "L221",
       "id": "pages_raceresultpage_saveentry",
-      "community": 8,
+      "community": 7,
       "norm_label": "saveentry()"
     },
     {
@@ -1215,7 +1215,7 @@
       "source_file": "src/pages/RaceResultPage.tsx",
       "source_location": "L249",
       "id": "pages_raceresultpage_publishresult",
-      "community": 8,
+      "community": 7,
       "norm_label": "publishresult()"
     },
     {
@@ -1224,8 +1224,53 @@
       "source_file": "src/pages/RaceResultPage.tsx",
       "source_location": "L272",
       "id": "pages_raceresultpage_updatedraft",
-      "community": 8,
+      "community": 7,
       "norm_label": "updatedraft()"
+    },
+    {
+      "label": "UserRolePage.tsx",
+      "file_type": "code",
+      "source_file": "src/pages/UserRolePage.tsx",
+      "source_location": "L1",
+      "id": "src_pages_userrolepage_tsx",
+      "community": 10,
+      "norm_label": "userrolepage.tsx"
+    },
+    {
+      "label": "run()",
+      "file_type": "code",
+      "source_file": "src/pages/UserRolePage.tsx",
+      "source_location": "L90",
+      "id": "pages_userrolepage_run",
+      "community": 10,
+      "norm_label": "run()"
+    },
+    {
+      "label": "assignRole()",
+      "file_type": "code",
+      "source_file": "src/pages/UserRolePage.tsx",
+      "source_location": "L111",
+      "id": "pages_userrolepage_assignrole",
+      "community": 10,
+      "norm_label": "assignrole()"
+    },
+    {
+      "label": "deactivateRole()",
+      "file_type": "code",
+      "source_file": "src/pages/UserRolePage.tsx",
+      "source_location": "L135",
+      "id": "pages_userrolepage_deactivaterole",
+      "community": 10,
+      "norm_label": "deactivaterole()"
+    },
+    {
+      "label": "normalizePayload()",
+      "file_type": "code",
+      "source_file": "src/pages/UserRolePage.tsx",
+      "source_location": "L349",
+      "id": "pages_userrolepage_normalizepayload",
+      "community": 10,
+      "norm_label": "normalizepayload()"
     },
     {
       "label": "DashboardPage.tsx",
@@ -1267,7 +1312,7 @@
       "label": "RacedocV1",
       "file_type": "document",
       "source_file": "RaceDocV1_Architecture.md",
-      "community": 5,
+      "community": 4,
       "norm_label": "racedocv1",
       "id": "racedocv1_architecture_racedocv1"
     },
@@ -1275,7 +1320,7 @@
       "label": "Entry Form",
       "file_type": "document",
       "source_file": "RaceDocV1_Architecture.md",
-      "community": 5,
+      "community": 4,
       "norm_label": "entry form",
       "id": "racedocv1_architecture_entryform"
     },
@@ -1283,7 +1328,7 @@
       "label": "Inspection Form",
       "file_type": "document",
       "source_file": "RaceDocV1_Architecture.md",
-      "community": 5,
+      "community": 4,
       "norm_label": "inspection form",
       "id": "racedocv1_architecture_inspectionform"
     },
@@ -1291,7 +1336,7 @@
       "label": "Weight-In",
       "file_type": "document",
       "source_file": "RaceDocV1_Architecture.md",
-      "community": 5,
+      "community": 4,
       "norm_label": "weight-in",
       "id": "racedocv1_architecture_weightin"
     },
@@ -1299,7 +1344,7 @@
       "label": "Success Ballast",
       "file_type": "document",
       "source_file": "RaceDocV1_Architecture.md",
-      "community": 5,
+      "community": 4,
       "norm_label": "success ballast",
       "id": "racedocv1_architecture_successballast"
     },
@@ -1307,7 +1352,7 @@
       "label": "Balance of Performance (BOP)",
       "file_type": "document",
       "source_file": "RaceDocV1_Architecture.md",
-      "community": 5,
+      "community": 4,
       "norm_label": "balance of performance (bop)",
       "id": "racedocv1_architecture_bop"
     },
@@ -1339,7 +1384,7 @@
       "label": "Supabase",
       "file_type": "document",
       "source_file": "RaceDocV1_Architecture.md",
-      "community": 5,
+      "community": 4,
       "norm_label": "supabase",
       "id": "racedocv1_architecture_supabase"
     },
@@ -1347,7 +1392,7 @@
       "label": "Graphify",
       "file_type": "document",
       "source_file": "AGENTS.md",
-      "community": 5,
+      "community": 4,
       "norm_label": "graphify",
       "id": "agents_graphify"
     },
@@ -1377,7 +1422,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/navigation.tsx",
-      "source_location": "L61",
+      "source_location": "L62",
       "weight": 1.0,
       "_src": "src_navigation_tsx",
       "_tgt": "src_navigation_canseeadminnavigation",
@@ -1389,7 +1434,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/navigation.tsx",
-      "source_location": "L65",
+      "source_location": "L66",
       "weight": 1.0,
       "_src": "src_navigation_tsx",
       "_tgt": "src_navigation_canseescrutineerreportnavigation",
@@ -1401,7 +1446,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/navigation.tsx",
-      "source_location": "L69",
+      "source_location": "L70",
       "weight": 1.0,
       "_src": "src_navigation_tsx",
       "_tgt": "src_navigation_getnavigationitems",
@@ -1413,7 +1458,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/navigation.tsx",
-      "source_location": "L81",
+      "source_location": "L82",
       "weight": 1.0,
       "_src": "src_navigation_tsx",
       "_tgt": "src_navigation_getprimaryrolelabel",
@@ -1425,7 +1470,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/navigation.tsx",
-      "source_location": "L71",
+      "source_location": "L72",
       "weight": 1.0,
       "_src": "src_navigation_getnavigationitems",
       "_tgt": "src_navigation_canseeadminnavigation",
@@ -1461,7 +1506,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/navigation.tsx",
-      "source_location": "L70",
+      "source_location": "L71",
       "weight": 1.0,
       "_src": "src_navigation_getnavigationitems",
       "_tgt": "src_navigation_canseescrutineerreportnavigation",
@@ -2967,6 +3012,54 @@
       "_tgt": "pages_raceresultpage_updatedraft",
       "source": "src_pages_raceresultpage_tsx",
       "target": "pages_raceresultpage_updatedraft",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/UserRolePage.tsx",
+      "source_location": "L90",
+      "weight": 1.0,
+      "_src": "src_pages_userrolepage_tsx",
+      "_tgt": "pages_userrolepage_run",
+      "source": "src_pages_userrolepage_tsx",
+      "target": "pages_userrolepage_run",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/UserRolePage.tsx",
+      "source_location": "L111",
+      "weight": 1.0,
+      "_src": "src_pages_userrolepage_tsx",
+      "_tgt": "pages_userrolepage_assignrole",
+      "source": "src_pages_userrolepage_tsx",
+      "target": "pages_userrolepage_assignrole",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/UserRolePage.tsx",
+      "source_location": "L135",
+      "weight": 1.0,
+      "_src": "src_pages_userrolepage_tsx",
+      "_tgt": "pages_userrolepage_deactivaterole",
+      "source": "src_pages_userrolepage_tsx",
+      "target": "pages_userrolepage_deactivaterole",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/UserRolePage.tsx",
+      "source_location": "L349",
+      "weight": 1.0,
+      "_src": "src_pages_userrolepage_tsx",
+      "_tgt": "pages_userrolepage_normalizepayload",
+      "source": "src_pages_userrolepage_tsx",
+      "target": "pages_userrolepage_normalizepayload",
       "confidence_score": 1.0
     },
     {
