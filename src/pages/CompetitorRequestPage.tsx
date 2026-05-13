@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { CheckCircle2, FilePlus2, FileText, Loader2, RefreshCcw, Scale, Send, UserCheck, XCircle } from 'lucide-react'
+import { CheckCircle2, FilePlus2, FileText, Loader2, Plus, RefreshCcw, Scale, Send, UserCheck, X, XCircle } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react'
 import { useAuth } from '@/auth/useAuth'
 import {
@@ -32,12 +32,13 @@ type CompetitorRequest = {
   competitor_email: string
   queue_no: string
   topic: string
+  request_topics: RequestTopicSelection[]
   status: 'Draft' | 'Need Racer Approval' | 'Pending' | 'In Review' | 'Approved' | 'Rejected' | 'Cancelled'
   racer_consent_status: string
   fine_amount: number | null
   penalty_weight_kg: number | null
   grid_penalty: string | null
-  request_payload: { description?: string; requestedChange?: unknown } | null
+  request_payload: { description?: string; requestedChange?: unknown; topics?: RequestTopicSelection[] } | null
   final_comment: string | null
   created_at: string
   updated_at: string
@@ -45,6 +46,23 @@ type CompetitorRequest = {
   can_racer_consent: boolean
   can_final_decide: boolean
   can_assign_reviewers: boolean
+}
+
+type RequestTopicOption = {
+  code: string
+  thai_label: string
+  english_label: string
+  display_label: string
+  requires_other_detail: boolean
+  sort_order: number
+}
+
+type RequestTopicSelection = {
+  code: string
+  label: string
+  thaiLabel: string
+  englishLabel: string | null
+  otherText: string | null
 }
 
 type RequestApproval = {
@@ -83,10 +101,13 @@ export function CompetitorRequestPage() {
   const canFinalize = canSeeAdminNavigation(roles)
   const [entries, setEntries] = useState<EntryOption[]>([])
   const [requests, setRequests] = useState<CompetitorRequest[]>([])
+  const [topicOptions, setTopicOptions] = useState<RequestTopicOption[]>([])
   const [reviewerOptions, setReviewerOptions] = useState<ReviewerOption[]>([])
   const [selectedSeries, setSelectedSeries] = useState('all')
   const [selectedEntryId, setSelectedEntryId] = useState('')
-  const [topic, setTopic] = useState('')
+  const [selectedTopicCode, setSelectedTopicCode] = useState('')
+  const [selectedTopics, setSelectedTopics] = useState<RequestTopicSelection[]>([])
+  const [otherTopicText, setOtherTopicText] = useState('')
   const [description, setDescription] = useState('')
   const [requestedChange, setRequestedChange] = useState('')
   const [loading, setLoading] = useState(true)
@@ -103,10 +124,11 @@ export function CompetitorRequestPage() {
     setLoading(true)
     setError(null)
 
-    const [entryResult, requestResult, reviewerResult] = await Promise.all([
+    const [entryResult, requestResult, reviewerResult, topicResult] = await Promise.all([
       supabase.rpc('get_competitor_request_entry_options'),
       supabase.rpc('get_competitor_requests'),
       supabase.rpc('get_competitor_request_reviewer_options'),
+      supabase.rpc('get_competitor_request_topic_options'),
     ])
 
     if (!isActive()) return
@@ -119,14 +141,22 @@ export function CompetitorRequestPage() {
     } else if (reviewerResult.error) {
       setReviewerOptions([])
       setError(reviewerResult.error.message)
+    } else if (topicResult.error) {
+      setTopicOptions([])
+      setError(topicResult.error.message)
     } else {
       const nextEntries = (entryResult.data ?? []) as EntryOption[]
       const nextRequests = ((requestResult.data ?? []) as CompetitorRequest[]).map((request) => ({
         ...request,
         approvals: request.approvals ?? [],
+        request_topics: normalizeRequestTopics(request),
       }))
+      const nextReviewerOptions = (reviewerResult.data ?? []) as ReviewerOption[]
+      const nextTopicOptions = (topicResult.data ?? []) as RequestTopicOption[]
       setEntries(nextEntries)
-      setReviewerOptions((reviewerResult.data ?? []) as ReviewerOption[])
+      setReviewerOptions(nextReviewerOptions)
+      setTopicOptions(nextTopicOptions)
+      setSelectedTopicCode((current) => current || nextTopicOptions[0]?.code || '')
       setSelectedEntryId((current) => current || nextEntries[0]?.entry_id || '')
       setRequests(nextRequests)
       setDecisionDrafts(Object.fromEntries(nextRequests.map((request) => [request.request_id, createDecisionDraft(request)])))
@@ -154,27 +184,55 @@ export function CompetitorRequestPage() {
   const seriesOptions = useMemo(() => getSeriesRaceOptions(requests), [requests])
   const visibleRequests = useMemo(() => filterBySeriesRace(requests, selectedSeries), [requests, selectedSeries])
 
+  function addTopicSelection(topicCode: string) {
+    const option = topicOptions.find((current) => current.code === topicCode)
+    if (!option || selectedTopics.some((current) => current.code === topicCode)) return
+
+    const nextTopic = createTopicSelection(option, option.code === 'OTHER' ? otherTopicText : '')
+    setSelectedTopics((current) => [...current, nextTopic])
+  }
+
+  function removeTopicSelection(topicCode: string) {
+    setSelectedTopics((current) => current.filter((topic) => topic.code !== topicCode))
+    if (topicCode === 'OTHER') setOtherTopicText('')
+  }
+
+  function updateOtherTopicText(value: string) {
+    setOtherTopicText(value)
+    setSelectedTopics((current) => current.map((topic) => (
+      topic.code === 'OTHER' ? { ...topic, otherText: value } : topic
+    )))
+  }
+
   async function createRequest(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setSubmitting(true)
     setError(null)
     setNotice(null)
 
+    if (selectedTopics.length === 0) {
+      setError('Select at least one request topic.')
+      setSubmitting(false)
+      return
+    }
+
     const requestedChangePayload = requestedChange.trim()
       ? { text: requestedChange.trim() }
       : {}
     const { error } = await supabase.rpc('create_competitor_request', {
       p_entry_id: selectedEntryId,
-      p_topic: topic.trim(),
+      p_topic: getTopicSummary(selectedTopics),
       p_description: description.trim(),
       p_race_id: null,
       p_requested_change: requestedChangePayload,
+      p_request_topics: selectedTopics.map((topic) => ({ code: topic.code, otherText: topic.otherText })),
     })
 
     if (error) {
       setError(error.message)
     } else {
-      setTopic('')
+      setSelectedTopics([])
+      setOtherTopicText('')
       setDescription('')
       setRequestedChange('')
       setNotice('Competitor Request created.')
@@ -371,7 +429,47 @@ export function CompetitorRequestPage() {
                 ))}
               </select>
             </label>
-            <TextField label="Request topic" value={topic} onChange={setTopic} placeholder="Vehicle data correction" />
+            <div className="space-y-3">
+              <label className="block">
+                <span className="text-sm font-medium">Request topic</span>
+                <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+                  <select
+                    value={selectedTopicCode}
+                    onChange={(event) => setSelectedTopicCode(event.target.value)}
+                    className="min-h-11 min-w-0 flex-1 rounded-md border border-zinc-300 bg-zinc-50 px-3 text-base outline-none transition focus:border-primary dark:border-zinc-800 dark:bg-zinc-950"
+                  >
+                    {topicOptions.map((option) => (
+                      <option key={option.code} value={option.code}>{option.display_label}</option>
+                    ))}
+                  </select>
+                  <motion.button
+                    whileTap={{ scale: 0.98 }}
+                    type="button"
+                    onClick={() => addTopicSelection(selectedTopicCode)}
+                    disabled={!selectedTopicCode || selectedTopics.some((current) => current.code === selectedTopicCode)}
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-zinc-300 px-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800"
+                  >
+                    <Plus size={16} />
+                    Add Topic
+                  </motion.button>
+                </div>
+              </label>
+              {selectedTopics.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {selectedTopics.map((selectedTopic) => (
+                    <span key={selectedTopic.code} className="inline-flex items-center gap-2 rounded-md border border-zinc-200 px-2 py-1 text-xs font-semibold dark:border-zinc-800">
+                      {selectedTopic.label}
+                      <button type="button" onClick={() => removeTopicSelection(selectedTopic.code)} aria-label={`Remove ${selectedTopic.label}`}>
+                        <X size={13} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+              {selectedTopics.some((selectedTopic) => selectedTopic.code === 'OTHER') ? (
+                <TextField label="Other topic detail" value={otherTopicText} onChange={updateOtherTopicText} placeholder="ระบุหัวข้อคำร้อง / Specify request topic" />
+              ) : null}
+            </div>
             <label className="block">
               <span className="text-sm font-medium">Description</span>
               <textarea
@@ -501,6 +599,8 @@ function RequestRow({
         </div>
         <StatusBadge status={request.status} />
       </div>
+
+      <TopicChips topics={request.request_topics} />
 
       <p className="mt-4 text-sm leading-6 text-zinc-700 dark:text-zinc-300">
         {request.request_payload?.description ?? 'No description provided.'}
@@ -644,6 +744,20 @@ function ApprovalRow({
         </div>
       ) : null}
       {approval.decidedAt ? <p className="mt-2 font-mono text-xs text-zinc-500 tabular-nums">{formatDateTime(approval.decidedAt)}</p> : null}
+    </div>
+  )
+}
+
+function TopicChips({ topics }: { topics: RequestTopicSelection[] }) {
+  if (topics.length === 0) return null
+
+  return (
+    <div className="mt-3 flex flex-wrap gap-2">
+      {topics.map((topic) => (
+        <span key={`${topic.code}:${topic.otherText ?? ''}`} className="rounded-md border border-zinc-200 px-2 py-1 text-xs font-semibold dark:border-zinc-800">
+          {formatTopicLabel(topic)}
+        </span>
+      ))}
     </div>
   )
 }
@@ -810,6 +924,33 @@ function createReviewDrafts(requests: CompetitorRequest[]) {
   return Object.fromEntries(
     requests.flatMap((request) => request.approvals.map((approval) => [approval.approvalId, createReviewDraft(approval)])),
   )
+}
+
+function createTopicSelection(option: RequestTopicOption, otherText = ''): RequestTopicSelection {
+  return {
+    code: option.code,
+    label: option.display_label,
+    thaiLabel: option.thai_label,
+    englishLabel: option.english_label,
+    otherText: option.requires_other_detail ? otherText : null,
+  }
+}
+
+function normalizeRequestTopics(request: CompetitorRequest): RequestTopicSelection[] {
+  if (Array.isArray(request.request_topics) && request.request_topics.length > 0) return request.request_topics
+  if (Array.isArray(request.request_payload?.topics) && request.request_payload.topics.length > 0) return request.request_payload.topics as RequestTopicSelection[]
+  return request.topic
+    ? [{ code: 'LEGACY', label: request.topic, thaiLabel: request.topic, englishLabel: null, otherText: null }]
+    : []
+}
+
+function getTopicSummary(topics: RequestTopicSelection[]) {
+  return topics.map(formatTopicLabel).join(', ')
+}
+
+function formatTopicLabel(topic: RequestTopicSelection) {
+  const label = topic.label || [topic.thaiLabel, topic.englishLabel].filter(Boolean).join(' / ')
+  return topic.otherText ? `${label}: ${topic.otherText}` : label
 }
 
 function getReviewerKey(reviewer: ReviewerOption) {
