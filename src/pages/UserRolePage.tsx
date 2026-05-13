@@ -44,6 +44,9 @@ type RoleInvitation = {
   roleCode: string
   roleName: string
   status: 'Pending' | 'Accepted' | 'Rejected' | 'Expired' | 'Revoked' | 'Cancelled'
+  emailDeliveryStatus: 'NotSent' | 'Sent' | 'Failed' | 'Skipped'
+  emailLastAttemptAt: string | null
+  emailLastError: string | null
   expiresAt: string | null
   createdAt: string
   invitedProfileId: string | null
@@ -494,6 +497,7 @@ function InvitationList({
             <div>
               <p className="font-medium">{invitation.email}</p>
               <p className="mt-1 text-sm text-zinc-500">{invitation.roleName} / {invitation.status}</p>
+              <InvitationEmailStatus invitation={invitation} />
             </div>
             {invitation.status === 'Pending' ? (
               <div className="flex flex-wrap gap-2">
@@ -522,6 +526,28 @@ function InvitationList({
           </div>
         ))}
       </div>
+    </div>
+  )
+}
+
+function InvitationEmailStatus({ invitation }: { invitation: RoleInvitation }) {
+  const tone = getEmailDeliveryTone(invitation.emailDeliveryStatus)
+
+  return (
+    <div className="mt-2 space-y-1">
+      <span className={`inline-flex rounded-md border px-2 py-1 text-xs font-semibold ${tone}`}>
+        Email {invitation.emailDeliveryStatus}
+      </span>
+      {invitation.emailLastAttemptAt ? (
+        <p className="font-mono text-xs uppercase tracking-[0.1em] text-zinc-500">
+          Last attempt {formatDateTime(invitation.emailLastAttemptAt)}
+        </p>
+      ) : null}
+      {invitation.emailLastError ? (
+        <p className="max-w-xl text-xs leading-5 text-red-600 dark:text-red-400">
+          {invitation.emailLastError}
+        </p>
+      ) : null}
     </div>
   )
 }
@@ -645,4 +671,18 @@ function sendRoleInvitation(email: string, roleCode: string) {
       },
     },
   )
+}
+
+function getEmailDeliveryTone(status: RoleInvitation['emailDeliveryStatus']) {
+  if (status === 'Sent') return 'border-emerald-200 bg-emerald-500/10 text-emerald-700 dark:border-emerald-900/60 dark:text-emerald-400'
+  if (status === 'Failed') return 'border-red-200 bg-red-500/10 text-red-700 dark:border-red-900/60 dark:text-red-400'
+  if (status === 'Skipped') return 'border-zinc-200 text-zinc-600 dark:border-zinc-800 dark:text-zinc-400'
+  return 'border-amber-200 bg-amber-500/10 text-amber-700 dark:border-amber-900/60 dark:text-amber-400'
+}
+
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat('en-GB', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(new Date(value))
 }

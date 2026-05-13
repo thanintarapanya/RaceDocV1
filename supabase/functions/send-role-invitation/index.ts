@@ -86,6 +86,8 @@ Deno.serve(async (req) => {
     .maybeSingle<InvitationRow>()
 
   if (invitation?.status === 'Accepted') {
+    await recordEmailDelivery(adminClient, invitationId, 'Skipped', null)
+
     return jsonResponse({
       invitationId,
       emailSent: false,
@@ -100,12 +102,16 @@ Deno.serve(async (req) => {
   })
 
   if (emailError) {
+    await recordEmailDelivery(adminClient, invitationId, 'Failed', emailError.message)
+
     return jsonResponse({
       invitationId,
       emailSent: false,
       warning: `Invitation was recorded, but email delivery failed: ${emailError.message}`,
     })
   }
+
+  await recordEmailDelivery(adminClient, invitationId, 'Sent', null)
 
   return jsonResponse({ invitationId, emailSent: true })
 })
@@ -121,4 +127,20 @@ function jsonResponse(body: unknown, status = 200) {
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
+}
+
+function recordEmailDelivery(
+  adminClient: ReturnType<typeof createClient>,
+  invitationId: string,
+  status: 'Sent' | 'Failed' | 'Skipped',
+  errorMessage: string | null,
+) {
+  return adminClient
+    .from('role_invitations')
+    .update({
+      email_delivery_status: status,
+      email_last_attempt_at: new Date().toISOString(),
+      email_last_error: errorMessage,
+    })
+    .eq('id', invitationId)
 }
