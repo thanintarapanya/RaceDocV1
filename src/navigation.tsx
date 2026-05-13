@@ -21,7 +21,6 @@ export type AppNavItem = {
   label: string
   path: string
   icon: LucideIcon
-  adminOnly?: boolean
 }
 
 export const baseNavItems: AppNavItem[] = [
@@ -36,10 +35,10 @@ export const baseNavItems: AppNavItem[] = [
 ]
 
 export const adminNavItems: AppNavItem[] = [
-  { label: 'Scrutineer Report', path: '/scrutineer-reports', icon: ScrollText, adminOnly: true },
-  { label: 'Recently Delete', path: '/recently-delete', icon: ArchiveRestore, adminOnly: true },
-  { label: 'Organizer Settings', path: '/organizer-settings', icon: Wrench, adminOnly: true },
-  { label: 'Auth Health', path: '/auth-health', icon: HeartPulse, adminOnly: true },
+  { label: 'Scrutineer Report', path: '/scrutineer-reports', icon: ScrollText },
+  { label: 'Recently Delete', path: '/recently-delete', icon: ArchiveRestore },
+  { label: 'Organizer Settings', path: '/organizer-settings', icon: Wrench },
+  { label: 'Auth Health', path: '/auth-health', icon: HeartPulse },
 ]
 
 export const settingsNavItems: AppNavItem[] = [
@@ -48,15 +47,33 @@ export const settingsNavItems: AppNavItem[] = [
 ]
 
 const elevatedRoles: RoleCode[] = ['ADMIN', 'SECRETARY']
+const scrutineerReportRoles: RoleCode[] = [
+  'ADMIN',
+  'SECRETARY',
+  'HEAD_SCRUTINEER',
+  'SCRUTINEER_STAFF',
+  'OFFSITE_SCRUTINEER',
+  'CHAIRMAN',
+  'STEWARD',
+  'CLERK',
+]
 
 export function canSeeAdminNavigation(roles: RoleCode[]) {
   return roles.some((role) => elevatedRoles.includes(role))
 }
 
+export function canSeeScrutineerReportNavigation(roles: RoleCode[]) {
+  return roles.some((role) => scrutineerReportRoles.includes(role))
+}
+
 export function getNavigationItems(roles: RoleCode[]) {
+  const scrutineerReportItem = canSeeScrutineerReportNavigation(roles) ? [adminNavItems[0]] : []
+  const adminOnlyItems = canSeeAdminNavigation(roles) ? adminNavItems.slice(1) : []
+
   return [
     ...baseNavItems,
-    ...(canSeeAdminNavigation(roles) ? adminNavItems : []),
+    ...scrutineerReportItem,
+    ...adminOnlyItems,
     ...settingsNavItems,
   ]
 }

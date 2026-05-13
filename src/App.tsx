@@ -3,10 +3,9 @@ import { AuthProvider } from './auth/AuthContext'
 import { AuthRedirect } from './auth/AuthRedirect'
 import { OnboardingRoute } from './auth/OnboardingRoute'
 import { ProtectedRoute } from './auth/ProtectedRoute'
-import { AdminOrSecretaryRoute } from './auth/RoleGate'
+import { AdminOrSecretaryRoute, ScrutineerReportRoute } from './auth/RoleGate'
 import {
   ArchiveRestore,
-  ScrollText,
   Settings,
   Trophy,
   Wrench,
@@ -22,6 +21,7 @@ import { InspectionFormPage } from './pages/InspectionFormPage'
 import { LoginPage } from './pages/LoginPage'
 import { OnboardingPage } from './pages/OnboardingPage'
 import { SignUpPage } from './pages/SignUpPage'
+import { ScrutineerReportPage } from './pages/ScrutineerReportPage'
 import { TabPlaceholderPage } from './pages/TabPlaceholderPage'
 import { TeamPage } from './pages/TeamPage'
 import { TeamRequiredPage } from './pages/TeamRequiredPage'
@@ -114,13 +114,9 @@ const router = createBrowserRouter([
       {
         path: 'scrutineer-reports',
         element: (
-          <AdminOrSecretaryRoute>
-            <TabPlaceholderPage
-              title="Scrutineer Report"
-              description="Official scrutineer reports will be built for Admin and Secretary workflows in a later phase."
-              icon={ScrollText}
-            />
-          </AdminOrSecretaryRoute>
+          <ScrutineerReportRoute>
+            <ScrutineerReportPage />
+          </ScrutineerReportRoute>
         ),
       },
       {
