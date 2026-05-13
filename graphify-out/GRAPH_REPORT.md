@@ -1,11 +1,11 @@
 # Graph Report - RaceDocV1Github  (2026-05-13)
 
 ## Corpus Check
-- 33 files · ~34,845 words
+- 33 files · ~35,167 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 138 nodes · 130 edges · 11 communities detected
+- 139 nodes · 131 edges · 11 communities detected
 - Extraction: 90% EXTRACTED · 10% INFERRED · 0% AMBIGUOUS · INFERRED: 13 edges (avg confidence: 0.81)
 - Token cost: 0 input · 0 output
 

@@ -377,6 +377,77 @@ begin
 end;
 $$;
 
+create or replace function public.bulk_update_checklist_item(
+  p_entry_ids uuid[],
+  p_topic_id uuid,
+  p_is_checked boolean
+)
+returns integer
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_actor_profile_id uuid := public.current_profile_id();
+  v_entry_id uuid;
+  v_previous public.checklist_items%rowtype;
+  v_next public.checklist_items%rowtype;
+  v_updated_count integer := 0;
+begin
+  if not public.is_checklist_operator() then
+    raise exception 'Only Admin or Secretary can bulk update checklist items.';
+  end if;
+
+  if p_entry_ids is null or array_length(p_entry_ids, 1) is null then
+    raise exception 'At least one Entry Form is required.';
+  end if;
+
+  foreach v_entry_id in array p_entry_ids loop
+    if not exists (
+      select 1
+      from public.entry_forms ef
+      join public.checklist_topics ct on ct.id = p_topic_id and ct.event_id = ef.event_id and ct.is_active = true
+      where ef.id = v_entry_id
+        and ef.status = 'Active'::public.entry_form_status
+        and ef.deleted_at is null
+    ) then
+      raise exception 'Active Entry Form or matching checklist topic was not found.';
+    end if;
+
+    select * into v_previous
+    from public.checklist_items
+    where entry_form_id = v_entry_id
+      and checklist_topic_id = p_topic_id;
+
+    insert into public.checklist_items (entry_form_id, checklist_topic_id, is_checked, updated_by_id, updated_at)
+    values (v_entry_id, p_topic_id, coalesce(p_is_checked, false), v_actor_profile_id, now())
+    on conflict (entry_form_id, checklist_topic_id) do update set
+      is_checked = excluded.is_checked,
+      updated_by_id = excluded.updated_by_id,
+      updated_at = excluded.updated_at;
+
+    select * into v_next
+    from public.checklist_items
+    where entry_form_id = v_entry_id
+      and checklist_topic_id = p_topic_id;
+
+    insert into public.audit_logs (entity_type, entity_id, action, old_values, new_values, action_by_id)
+    values (
+      'checklist_item',
+      v_next.id,
+      case when coalesce(v_next.is_checked, false) then 'bulk_check' else 'bulk_uncheck' end,
+      case when v_previous.id is null then null else to_jsonb(v_previous) end,
+      jsonb_build_object('entry_form_id', v_entry_id, 'topic_id', p_topic_id, 'is_checked', v_next.is_checked, 'updated_at', v_next.updated_at),
+      v_actor_profile_id
+    );
+
+    v_updated_count := v_updated_count + 1;
+  end loop;
+
+  return v_updated_count;
+end;
+$$;
+
 create or replace function public.get_checklist_item_audit(p_entry_id uuid, p_topic_id uuid)
 returns table(
   action text,
@@ -443,6 +514,7 @@ revoke execute on function public.create_checklist_topic(uuid, text, text, boole
 revoke execute on function public.move_checklist_topic(uuid, text) from public, anon;
 revoke execute on function public.delete_checklist_topic(uuid) from public, anon;
 revoke execute on function public.update_checklist_item(uuid, uuid, boolean) from public, anon;
+revoke execute on function public.bulk_update_checklist_item(uuid[], uuid, boolean) from public, anon;
 revoke execute on function public.get_checklist_item_audit(uuid, uuid) from public, anon;
 revoke execute on function public.get_checklist_entry_audit(uuid) from public, anon;
 
@@ -452,6 +524,7 @@ grant execute on function public.create_checklist_topic(uuid, text, text, boolea
 grant execute on function public.move_checklist_topic(uuid, text) to authenticated, service_role;
 grant execute on function public.delete_checklist_topic(uuid) to authenticated, service_role;
 grant execute on function public.update_checklist_item(uuid, uuid, boolean) to authenticated, service_role;
+grant execute on function public.bulk_update_checklist_item(uuid[], uuid, boolean) to authenticated, service_role;
 grant execute on function public.get_checklist_item_audit(uuid, uuid) to authenticated, service_role;
 grant execute on function public.get_checklist_entry_audit(uuid) to authenticated, service_role;
 

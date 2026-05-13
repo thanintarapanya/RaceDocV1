@@ -101,6 +101,8 @@ export function ChecklistPage() {
   const [topicTitleTh, setTopicTitleTh] = useState('')
   const [topicRequired, setTopicRequired] = useState(true)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [bulkTopicId, setBulkTopicId] = useState('')
+  const [bulkUpdating, setBulkUpdating] = useState(false)
   const [notesDraft, setNotesDraft] = useState<Record<string, string>>({})
   const [auditTarget, setAuditTarget] = useState<AuditTarget | null>(null)
   const [auditRows, setAuditRows] = useState<AuditRow[]>([])
@@ -159,6 +161,9 @@ export function ChecklistPage() {
     [eventEntries, selectedSeries, searchQuery],
   )
   const totals = useMemo(() => calculateTotals(eventEntries, eventTopics), [eventEntries, eventTopics])
+  const selectedBulkTopicId = eventTopics.some((topic) => topic.topicId === bulkTopicId)
+    ? bulkTopicId
+    : eventTopics[0]?.topicId || ''
 
   function handleEventChange(eventId: string) {
     setSelectedEventId(eventId)
@@ -250,6 +255,32 @@ export function ChecklistPage() {
 
     await loadMatrix()
     setUpdatingKey(null)
+  }
+
+  async function bulkUpdateChecklistItems(checked: boolean) {
+    if (!selectedBulkTopicId || visibleEntries.length === 0) return
+
+    const topic = eventTopics.find((currentTopic) => currentTopic.topicId === selectedBulkTopicId)
+    const confirmed = window.confirm(`${checked ? 'Check' : 'Uncheck'} "${topic?.title ?? 'selected topic'}" for ${visibleEntries.length} visible row(s)?`)
+    if (!confirmed) return
+
+    setBulkUpdating(true)
+    setError(null)
+
+    const { error } = await supabase.rpc('bulk_update_checklist_item', {
+      p_entry_ids: visibleEntries.map((entry) => entry.entryId),
+      p_topic_id: selectedBulkTopicId,
+      p_is_checked: checked,
+    })
+
+    if (error) {
+      setError(error.message)
+      setBulkUpdating(false)
+      return
+    }
+
+    await loadMatrix()
+    setBulkUpdating(false)
   }
 
   async function saveNotes(entry: ChecklistEntry) {
@@ -393,6 +424,16 @@ export function ChecklistPage() {
             />
           </div>
         ) : null}
+        {!loading && matrix.canEdit && visibleEntries.length > 0 && eventTopics.length > 0 ? (
+          <BulkActionBar
+            topics={eventTopics}
+            selectedTopicId={selectedBulkTopicId}
+            visibleCount={visibleEntries.length}
+            updating={bulkUpdating}
+            onTopicChange={setBulkTopicId}
+            onBulkUpdate={bulkUpdateChecklistItems}
+          />
+        ) : null}
         {loading ? <ChecklistSkeleton /> : null}
         {!loading && !selectedEventId ? <ChecklistEmpty title="No event is available." description="Create an Event first before configuring Checklist topics." /> : null}
         {!loading && selectedEventId && eventTopics.length === 0 ? <ChecklistEmpty title="No checklist topics configured." description="Admin or Secretary can add the first topic from the topic settings panel." /> : null}
@@ -484,6 +525,72 @@ function ChecklistSearch({ value, onChange }: { value: string; onChange: (value:
         ) : null}
       </div>
     </label>
+  )
+}
+
+function BulkActionBar({
+  topics,
+  selectedTopicId,
+  visibleCount,
+  updating,
+  onTopicChange,
+  onBulkUpdate,
+}: {
+  topics: ChecklistTopic[]
+  selectedTopicId: string
+  visibleCount: number
+  updating: boolean
+  onTopicChange: (value: string) => void
+  onBulkUpdate: (checked: boolean) => Promise<void>
+}) {
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.16 }}
+      className="mb-4 border border-zinc-200 p-4 dark:border-zinc-800"
+    >
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,18rem)_auto_auto] lg:items-end">
+        <div>
+          <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Bulk action</p>
+          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+            Applies only to the {visibleCount} visible row(s) after Event, Series Race, and Search filters.
+          </p>
+        </div>
+        <label className="block min-w-0">
+          <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">Checklist Topic</span>
+          <select
+            value={selectedTopicId}
+            onChange={(event) => onTopicChange(event.target.value)}
+            className="mt-2 min-h-11 w-full rounded-md border border-zinc-300 bg-zinc-50 px-3 text-base outline-none transition focus:border-primary dark:border-zinc-800 dark:bg-zinc-950"
+          >
+            {topics.map((topic) => (
+              <option key={topic.topicId} value={topic.topicId}>{topic.title}</option>
+            ))}
+          </select>
+        </label>
+        <motion.button
+          whileTap={{ scale: 0.98 }}
+          type="button"
+          disabled={updating || !selectedTopicId}
+          onClick={() => onBulkUpdate(true)}
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {updating ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+          Check Visible
+        </motion.button>
+        <motion.button
+          whileTap={{ scale: 0.98 }}
+          type="button"
+          disabled={updating || !selectedTopicId}
+          onClick={() => onBulkUpdate(false)}
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-zinc-300 px-4 text-sm font-semibold text-zinc-800 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800 dark:text-zinc-100"
+        >
+          <X size={16} />
+          Uncheck Visible
+        </motion.button>
+      </div>
+    </motion.section>
   )
 }
 
