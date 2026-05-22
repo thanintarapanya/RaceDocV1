@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion'
-import { CalendarDays, ClipboardList, Flag, Image, Layers3, Loader2, MapPinned, RefreshCcw, Save, Scale, Trophy, Wrench } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { CalendarDays, ClipboardList, Flag, Image, Layers3, Loader2, MapPinned, RefreshCcw, Save, Scale, Trophy, Wrench, X } from 'lucide-react'
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import {
@@ -244,6 +244,20 @@ type SettingsEditorKey =
   | 'inspectionSection'
   | 'inspectionItem'
 
+type DuplicateMode = 'season' | 'event'
+
+type DuplicateDraft = {
+  mode: DuplicateMode
+  sourceId: string
+  title: string
+  name: string
+  year: string
+  eventOrder: string
+  startsOn: string
+  endsOn: string
+  targetSeasonId: string
+}
+
 type SettingsEditor = {
   key: SettingsEditorKey
   label: string
@@ -256,6 +270,12 @@ type SettingsReadinessItem = {
   label: string
   value: number
   ready: boolean
+}
+
+type SettingsPhaseSummary = {
+  phase: string
+  complete: number
+  total: number
 }
 
 const settingsEditors: SettingsEditor[] = [
@@ -302,6 +322,8 @@ export function OrganizerSettingsPage() {
   const [eventForm, setEventForm] = useState<EventForm>(() => createEmptyEventForm())
   const [raceForm, setRaceForm] = useState<RaceForm>(() => createEmptyRaceForm())
   const [activeEditor, setActiveEditor] = useState<SettingsEditorKey>('season')
+  const [editorOpen, setEditorOpen] = useState(false)
+  const [duplicateDraft, setDuplicateDraft] = useState<DuplicateDraft | null>(null)
 
   const loadData = useCallback(async (isActive: () => boolean = () => true) => {
     setLoading(true)
@@ -377,6 +399,77 @@ export function OrganizerSettingsPage() {
   const inspectionItems = useMemo(() => inspectionSections.flatMap((section) => section.items), [inspectionSections])
   const activeEditorMeta = settingsEditors.find((editor) => editor.key === activeEditor) ?? settingsEditors[0]
   const readiness = useMemo(() => createSettingsReadiness(payload), [payload])
+  const phaseSummaries = useMemo(() => createSettingsPhaseSummaries(readiness), [readiness])
+
+  function openEditor(editor: SettingsEditorKey) {
+    setActiveEditor(editor)
+    setEditorOpen(true)
+  }
+
+  function startDuplicateSeason(season: SeasonRow) {
+    setDuplicateDraft({
+      mode: 'season',
+      sourceId: season.seasonId,
+      title: `${season.year} / ${season.name}`,
+      name: `${season.name} Copy`,
+      year: String(season.year + 1),
+      eventOrder: '',
+      startsOn: '',
+      endsOn: '',
+      targetSeasonId: '',
+    })
+  }
+
+  function startDuplicateEvent(eventRow: EventRow) {
+    const nextOrder = String((eventsBySeason.get(eventRow.seasonId) ?? []).reduce((maxOrder, seasonEvent) => Math.max(maxOrder, seasonEvent.eventOrder), 0) + 1)
+
+    setDuplicateDraft({
+      mode: 'event',
+      sourceId: eventRow.eventId,
+      title: `${eventRow.eventOrder}. ${eventRow.name}`,
+      name: `${eventRow.name} Copy`,
+      year: '',
+      eventOrder: nextOrder,
+      startsOn: eventRow.startsOn ?? '',
+      endsOn: eventRow.endsOn ?? '',
+      targetSeasonId: eventRow.seasonId,
+    })
+  }
+
+  async function submitDuplicate(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    if (!duplicateDraft) return
+
+    setUpdatingKey(`duplicate-${duplicateDraft.mode}`)
+    setError(null)
+    setNotice(null)
+
+    const { error: duplicateError } = duplicateDraft.mode === 'season'
+      ? await supabase.rpc('duplicate_organizer_season', {
+        p_source_season_id: duplicateDraft.sourceId,
+        p_name: duplicateDraft.name || null,
+        p_year: duplicateDraft.year ? Number(duplicateDraft.year) : null,
+      })
+      : await supabase.rpc('duplicate_organizer_event', {
+        p_source_event_id: duplicateDraft.sourceId,
+        p_target_season_id: duplicateDraft.targetSeasonId || null,
+        p_name: duplicateDraft.name || null,
+        p_event_order: duplicateDraft.eventOrder ? Number(duplicateDraft.eventOrder) : null,
+        p_starts_on: duplicateDraft.startsOn || null,
+        p_ends_on: duplicateDraft.endsOn || null,
+      })
+
+    if (duplicateError) {
+      setError(duplicateError.message)
+    } else {
+      setDuplicateDraft(null)
+      setNotice(duplicateDraft.mode === 'season' ? 'Season duplicated with events, rules, assets, and inspection templates.' : 'Event duplicated with races, rules, assets, and inspection templates.')
+      await loadData()
+    }
+
+    setUpdatingKey(null)
+  }
 
   async function saveCircuit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -849,24 +942,23 @@ export function OrganizerSettingsPage() {
       ) : null}
 
       {!loading && payload.canManage ? (
-        <div className="mt-6 grid gap-5 xl:grid-cols-[minmax(0,30rem)_1fr]">
+        <div className="mt-6 grid gap-5 xl:grid-cols-[minmax(18rem,24rem)_1fr]">
           <div className="grid content-start gap-5">
             <SettingsFocusPanel
               editors={settingsEditors}
               activeEditor={activeEditor}
               activeEditorMeta={activeEditorMeta}
               readiness={readiness}
-              onSelect={setActiveEditor}
+              phaseSummaries={phaseSummaries}
+              onSelect={openEditor}
             />
 
-            <div className="border border-zinc-200 dark:border-zinc-800">
-              <div className="border-b border-zinc-200 p-4 dark:border-zinc-800">
-                <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Focused editor</p>
-                <h2 className="mt-2 text-xl font-semibold">{activeEditorMeta.label}</h2>
-                <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">{activeEditorMeta.hint}</p>
-              </div>
-              <div className="p-4">
-            <SettingsForm active={activeEditor === 'circuit'} title="Circuit" icon={MapPinned} onSubmit={saveCircuit} updating={updatingKey === 'circuit'} buttonLabel={circuitForm.circuitId ? 'Update Circuit' : 'Create Circuit'}>
+            <SettingsEditorDrawer
+              open={editorOpen}
+              activeEditorMeta={activeEditorMeta}
+              onClose={() => setEditorOpen(false)}
+            >
+            <SettingsForm active={activeEditor === 'circuit'} editorKey="circuit" title="Circuit" icon={MapPinned} onSubmit={saveCircuit} updating={updatingKey === 'circuit'} buttonLabel={circuitForm.circuitId ? 'Update Circuit' : 'Create Circuit'}>
               <TextField label="Circuit name" value={circuitForm.name} onChange={(name) => setCircuitForm((current) => ({ ...current, name }))} placeholder="Chang International Circuit" />
               <TextField label="Location" value={circuitForm.location} onChange={(location) => setCircuitForm((current) => ({ ...current, location }))} placeholder="Buriram" />
               <TextField label="Country" value={circuitForm.country} onChange={(country) => setCircuitForm((current) => ({ ...current, country }))} placeholder="Thailand" />
@@ -879,7 +971,7 @@ export function OrganizerSettingsPage() {
               />
             </SettingsForm>
 
-            <SettingsForm active={activeEditor === 'season'} title="Season" icon={CalendarDays} onSubmit={saveSeason} updating={updatingKey === 'season'} buttonLabel={seasonForm.seasonId ? 'Update Season' : 'Create Season'}>
+            <SettingsForm active={activeEditor === 'season'} editorKey="season" title="Season" icon={CalendarDays} onSubmit={saveSeason} updating={updatingKey === 'season'} buttonLabel={seasonForm.seasonId ? 'Update Season' : 'Create Season'}>
               <EntitySelect
                 label="Organization"
                 value={seasonForm.organizationId}
@@ -899,7 +991,7 @@ export function OrganizerSettingsPage() {
               />
             </SettingsForm>
 
-            <SettingsForm active={activeEditor === 'seriesRace'} title="Series Race" icon={Trophy} onSubmit={saveSeriesRace} updating={updatingKey === 'seriesRace'} buttonLabel={seriesRaceForm.seriesRaceId ? 'Update Series' : 'Create Series'}>
+            <SettingsForm active={activeEditor === 'seriesRace'} editorKey="seriesRace" title="Series Race" icon={Trophy} onSubmit={saveSeriesRace} updating={updatingKey === 'seriesRace'} buttonLabel={seriesRaceForm.seriesRaceId ? 'Update Series' : 'Create Series'}>
               <EntitySelect
                 label="Organization"
                 value={seriesRaceForm.organizationId}
@@ -919,7 +1011,7 @@ export function OrganizerSettingsPage() {
               />
             </SettingsForm>
 
-            <SettingsForm active={activeEditor === 'grade'} title="Grade" icon={Layers3} onSubmit={saveGrade} updating={updatingKey === 'grade'} buttonLabel={gradeForm.gradeId ? 'Update Grade' : 'Create Grade'}>
+            <SettingsForm active={activeEditor === 'grade'} editorKey="grade" title="Grade" icon={Layers3} onSubmit={saveGrade} updating={updatingKey === 'grade'} buttonLabel={gradeForm.gradeId ? 'Update Grade' : 'Create Grade'}>
               <TextField label="Grade code" value={gradeForm.code} onChange={(code) => setGradeForm((current) => ({ ...current, code }))} placeholder="PRO" />
               <TextField label="Grade name" value={gradeForm.name} onChange={(name) => setGradeForm((current) => ({ ...current, name }))} placeholder="Professional" />
               <TextField label="Sort order" type="number" value={gradeForm.sortOrder} onChange={(sortOrder) => setGradeForm((current) => ({ ...current, sortOrder }))} placeholder="1" />
@@ -932,20 +1024,20 @@ export function OrganizerSettingsPage() {
               />
             </SettingsForm>
 
-            <SettingsForm active={activeEditor === 'seasonSeries'} title="Season Series" icon={Trophy} onSubmit={setSeasonSeries} updating={updatingKey === 'seasonSeries'} buttonLabel="Save Season Series">
+            <SettingsForm active={activeEditor === 'seasonSeries'} editorKey="seasonSeries" title="Season Series" icon={Trophy} onSubmit={setSeasonSeries} updating={updatingKey === 'seasonSeries'} buttonLabel="Save Season Series">
               <EntitySelect label="Season" value={seasonSeriesForm.seasonId} options={payload.seasons.map((season) => ({ value: season.seasonId, label: `${season.year} / ${season.name}` }))} onChange={(seasonId) => setSeasonSeriesForm((current) => ({ ...current, seasonId }))} />
               <EntitySelect label="Series Race" value={seasonSeriesForm.seriesRaceId} options={payload.seriesRaces.map((seriesRace) => ({ value: seriesRace.seriesRaceId, label: `${seriesRace.code} / ${seriesRace.name}` }))} onChange={(seriesRaceId) => setSeasonSeriesForm((current) => ({ ...current, seriesRaceId }))} />
               <CheckboxField label="Activate this series in selected season" checked={seasonSeriesForm.isActive} onChange={(isActive) => setSeasonSeriesForm((current) => ({ ...current, isActive }))} />
             </SettingsForm>
 
-            <SettingsForm active={activeEditor === 'seasonSeriesGrade'} title="Season Grade" icon={Layers3} onSubmit={setSeasonSeriesGrade} updating={updatingKey === 'seasonSeriesGrade'} buttonLabel="Save Season Grade">
+            <SettingsForm active={activeEditor === 'seasonSeriesGrade'} editorKey="seasonSeriesGrade" title="Season Grade" icon={Layers3} onSubmit={setSeasonSeriesGrade} updating={updatingKey === 'seasonSeriesGrade'} buttonLabel="Save Season Grade">
               <EntitySelect label="Season" value={seasonSeriesGradeForm.seasonId} options={payload.seasons.map((season) => ({ value: season.seasonId, label: `${season.year} / ${season.name}` }))} onChange={(seasonId) => setSeasonSeriesGradeForm((current) => ({ ...current, seasonId }))} />
               <EntitySelect label="Series Race" value={seasonSeriesGradeForm.seriesRaceId} options={payload.seriesRaces.map((seriesRace) => ({ value: seriesRace.seriesRaceId, label: `${seriesRace.code} / ${seriesRace.name}` }))} onChange={(seriesRaceId) => setSeasonSeriesGradeForm((current) => ({ ...current, seriesRaceId }))} />
               <EntitySelect label="Grade" value={seasonSeriesGradeForm.gradeId} options={payload.grades.map((grade) => ({ value: grade.gradeId, label: `${grade.code} / ${grade.name}` }))} onChange={(gradeId) => setSeasonSeriesGradeForm((current) => ({ ...current, gradeId }))} />
               <CheckboxField label="Activate this grade for selected season series" checked={seasonSeriesGradeForm.isActive} onChange={(isActive) => setSeasonSeriesGradeForm((current) => ({ ...current, isActive }))} />
             </SettingsForm>
 
-            <SettingsForm active={activeEditor === 'eventSeriesRule'} title="Event Rule" icon={ClipboardList} onSubmit={saveEventSeriesRule} updating={updatingKey === 'eventSeriesRule'} buttonLabel={eventSeriesRuleForm.eventSeriesRuleId ? 'Update Event Rule' : 'Create Event Rule'}>
+            <SettingsForm active={activeEditor === 'eventSeriesRule'} editorKey="eventSeriesRule" title="Event Rule" icon={ClipboardList} onSubmit={saveEventSeriesRule} updating={updatingKey === 'eventSeriesRule'} buttonLabel={eventSeriesRuleForm.eventSeriesRuleId ? 'Update Event Rule' : 'Create Event Rule'}>
               <EntitySelect label="Event" value={eventSeriesRuleForm.eventId} options={payload.events.map((event) => ({ value: event.eventId, label: `${event.eventOrder}. ${event.name}` }))} onChange={(eventId) => setEventSeriesRuleForm((current) => ({ ...current, eventId }))} />
               <EntitySelect label="Series Race" value={eventSeriesRuleForm.seriesRaceId} options={payload.seriesRaces.map((seriesRace) => ({ value: seriesRace.seriesRaceId, label: `${seriesRace.code} / ${seriesRace.name}` }))} onChange={(seriesRaceId) => setEventSeriesRuleForm((current) => ({ ...current, seriesRaceId, gradeId: '' }))} />
               <EntitySelect label="Grade" value={eventSeriesRuleForm.gradeId} options={eventRuleGradeOptions.map((grade) => ({ value: grade.gradeId, label: `${grade.code} / ${grade.name}` }))} onChange={(gradeId) => setEventSeriesRuleForm((current) => ({ ...current, gradeId }))} />
@@ -970,7 +1062,7 @@ export function OrganizerSettingsPage() {
               />
             </SettingsForm>
 
-            <SettingsForm active={activeEditor === 'inspectionTemplate'} title="Inspection Template" icon={ClipboardList} onSubmit={saveInspectionTemplate} updating={updatingKey === 'inspectionTemplate'} buttonLabel={inspectionTemplateForm.templateId ? 'Update Template' : 'Create Template'}>
+            <SettingsForm active={activeEditor === 'inspectionTemplate'} editorKey="inspectionTemplate" title="Inspection Template" icon={ClipboardList} onSubmit={saveInspectionTemplate} updating={updatingKey === 'inspectionTemplate'} buttonLabel={inspectionTemplateForm.templateId ? 'Update Template' : 'Create Template'}>
               <EntitySelect
                 label="Event Rule"
                 value={inspectionTemplateForm.eventSeriesRuleId}
@@ -996,7 +1088,7 @@ export function OrganizerSettingsPage() {
               />
             </SettingsForm>
 
-            <SettingsForm active={activeEditor === 'inspectionSection'} title="Inspection Section" icon={Layers3} onSubmit={saveInspectionSection} updating={updatingKey === 'inspectionSection'} buttonLabel={inspectionSectionForm.sectionId ? 'Update Section' : 'Create Section'}>
+            <SettingsForm active={activeEditor === 'inspectionSection'} editorKey="inspectionSection" title="Inspection Section" icon={Layers3} onSubmit={saveInspectionSection} updating={updatingKey === 'inspectionSection'} buttonLabel={inspectionSectionForm.sectionId ? 'Update Section' : 'Create Section'}>
               <EntitySelect label="Template" value={inspectionSectionForm.templateId} options={payload.inspectionTemplates.map((template) => ({ value: template.templateId, label: `${template.name} / ${template.seriesName} / ${template.gradeName} / v${template.version}` }))} onChange={(templateId) => setInspectionSectionForm((current) => ({ ...current, templateId }))} />
               <TextField label="Section code" value={inspectionSectionForm.code} onChange={(code) => setInspectionSectionForm((current) => ({ ...current, code }))} placeholder="safety" />
               <TextField label="Section title" value={inspectionSectionForm.title} onChange={(title) => setInspectionSectionForm((current) => ({ ...current, title }))} placeholder="Safety" />
@@ -1011,7 +1103,7 @@ export function OrganizerSettingsPage() {
               />
             </SettingsForm>
 
-            <SettingsForm active={activeEditor === 'inspectionItem'} title="Inspection Item" icon={Wrench} onSubmit={saveInspectionItem} updating={updatingKey === 'inspectionItem'} buttonLabel={inspectionItemForm.itemId ? 'Update Item' : 'Create Item'}>
+            <SettingsForm active={activeEditor === 'inspectionItem'} editorKey="inspectionItem" title="Inspection Item" icon={Wrench} onSubmit={saveInspectionItem} updating={updatingKey === 'inspectionItem'} buttonLabel={inspectionItemForm.itemId ? 'Update Item' : 'Create Item'}>
               <EntitySelect label="Section" value={inspectionItemForm.sectionId} options={inspectionSections.map((section) => ({ value: section.sectionId, label: `${section.title} / ${section.code}` }))} onChange={(sectionId) => setInspectionItemForm((current) => ({ ...current, sectionId }))} />
               <TextField label="Label TH" value={inspectionItemForm.labelTh} onChange={(labelTh) => setInspectionItemForm((current) => ({ ...current, labelTh }))} placeholder="น้ำหนัก BOP พื้นฐาน" />
               <TextField label="Label EN" value={inspectionItemForm.labelEn} onChange={(labelEn) => setInspectionItemForm((current) => ({ ...current, labelEn }))} placeholder="Base BOP weight" />
@@ -1032,7 +1124,7 @@ export function OrganizerSettingsPage() {
               />
             </SettingsForm>
 
-            <SettingsForm active={activeEditor === 'weightRule'} title="Weight Rule" icon={Scale} onSubmit={saveWeightRule} updating={updatingKey === 'weightRule'} buttonLabel={weightRuleForm.weightRuleId ? 'Update Weight Rule' : 'Create Weight Rule'}>
+            <SettingsForm active={activeEditor === 'weightRule'} editorKey="weightRule" title="Weight Rule" icon={Scale} onSubmit={saveWeightRule} updating={updatingKey === 'weightRule'} buttonLabel={weightRuleForm.weightRuleId ? 'Update Weight Rule' : 'Create Weight Rule'}>
               <EntitySelect
                 label="Event Rule"
                 value={weightRuleForm.eventSeriesRuleId}
@@ -1059,7 +1151,7 @@ export function OrganizerSettingsPage() {
               />
             </SettingsForm>
 
-            <SettingsForm active={activeEditor === 'ballastRule'} title="Success Ballast" icon={Trophy} onSubmit={saveBallastRule} updating={updatingKey === 'ballastRule'} buttonLabel={ballastRuleForm.ballastRuleId ? 'Update Ballast Rule' : 'Create Ballast Rule'}>
+            <SettingsForm active={activeEditor === 'ballastRule'} editorKey="ballastRule" title="Success Ballast" icon={Trophy} onSubmit={saveBallastRule} updating={updatingKey === 'ballastRule'} buttonLabel={ballastRuleForm.ballastRuleId ? 'Update Ballast Rule' : 'Create Ballast Rule'}>
               <EntitySelect
                 label="Event Rule"
                 value={ballastRuleForm.eventSeriesRuleId}
@@ -1082,7 +1174,7 @@ export function OrganizerSettingsPage() {
               />
             </SettingsForm>
 
-            <SettingsForm active={activeEditor === 'tireRule'} title="Tire Rule" icon={Wrench} onSubmit={saveTireRule} updating={updatingKey === 'tireRule'} buttonLabel={tireRuleForm.tireRuleId ? 'Update Tire Rule' : 'Create Tire Rule'}>
+            <SettingsForm active={activeEditor === 'tireRule'} editorKey="tireRule" title="Tire Rule" icon={Wrench} onSubmit={saveTireRule} updating={updatingKey === 'tireRule'} buttonLabel={tireRuleForm.tireRuleId ? 'Update Tire Rule' : 'Create Tire Rule'}>
               <EntitySelect
                 label="Event Rule"
                 value={tireRuleForm.eventSeriesRuleId}
@@ -1101,7 +1193,7 @@ export function OrganizerSettingsPage() {
               />
             </SettingsForm>
 
-            <SettingsForm active={activeEditor === 'sponsorStickerAsset'} title="Sponsor Sticker" icon={Image} onSubmit={saveSponsorStickerAsset} updating={updatingKey === 'sponsorStickerAsset'} buttonLabel={sponsorStickerAssetForm.sponsorStickerAssetId ? 'Update Sponsor Sticker' : 'Create Sponsor Sticker'}>
+            <SettingsForm active={activeEditor === 'sponsorStickerAsset'} editorKey="sponsorStickerAsset" title="Sponsor Sticker" icon={Image} onSubmit={saveSponsorStickerAsset} updating={updatingKey === 'sponsorStickerAsset'} buttonLabel={sponsorStickerAssetForm.sponsorStickerAssetId ? 'Update Sponsor Sticker' : 'Create Sponsor Sticker'}>
               <EntitySelect
                 label="Event Rule"
                 value={sponsorStickerAssetForm.eventSeriesRuleId}
@@ -1131,7 +1223,7 @@ export function OrganizerSettingsPage() {
               />
             </SettingsForm>
 
-            <SettingsForm active={activeEditor === 'printBackgroundAsset'} title="A4 Background" icon={Image} onSubmit={savePrintBackgroundAsset} updating={updatingKey === 'printBackgroundAsset'} buttonLabel={printBackgroundAssetForm.printBackgroundAssetId ? 'Update A4 Background' : 'Create A4 Background'}>
+            <SettingsForm active={activeEditor === 'printBackgroundAsset'} editorKey="printBackgroundAsset" title="A4 Background" icon={Image} onSubmit={savePrintBackgroundAsset} updating={updatingKey === 'printBackgroundAsset'} buttonLabel={printBackgroundAssetForm.printBackgroundAssetId ? 'Update A4 Background' : 'Create A4 Background'}>
               <EntitySelect
                 label="Event"
                 value={printBackgroundAssetForm.eventId}
@@ -1162,7 +1254,7 @@ export function OrganizerSettingsPage() {
               />
             </SettingsForm>
 
-            <SettingsForm active={activeEditor === 'event'} title="Event" icon={Flag} onSubmit={saveEvent} updating={updatingKey === 'event'} buttonLabel={eventForm.eventId ? 'Update Event' : 'Create Event'}>
+            <SettingsForm active={activeEditor === 'event'} editorKey="event" title="Event" icon={Flag} onSubmit={saveEvent} updating={updatingKey === 'event'} buttonLabel={eventForm.eventId ? 'Update Event' : 'Create Event'}>
               <EntitySelect label="Season" value={eventForm.seasonId} options={payload.seasons.map((season) => ({ value: season.seasonId, label: `${season.year} / ${season.name}` }))} onChange={(seasonId) => setEventForm((current) => ({ ...current, seasonId }))} />
               <EntitySelect label="Circuit" value={eventForm.circuitId} emptyLabel="No circuit" options={payload.circuits.map((circuit) => ({ value: circuit.circuitId, label: circuit.name }))} onChange={(circuitId) => setEventForm((current) => ({ ...current, circuitId }))} />
               <TextField label="Event name" value={eventForm.name} onChange={(name) => setEventForm((current) => ({ ...current, name }))} placeholder="Event 1" />
@@ -1181,7 +1273,7 @@ export function OrganizerSettingsPage() {
               />
             </SettingsForm>
 
-            <SettingsForm active={activeEditor === 'race'} title="Race" icon={Wrench} onSubmit={saveRace} updating={updatingKey === 'race'} buttonLabel={raceForm.raceId ? 'Update Race' : 'Create Race'}>
+            <SettingsForm active={activeEditor === 'race'} editorKey="race" title="Race" icon={Wrench} onSubmit={saveRace} updating={updatingKey === 'race'} buttonLabel={raceForm.raceId ? 'Update Race' : 'Create Race'}>
               <EntitySelect label="Event" value={raceForm.eventId} options={payload.events.map((event) => ({ value: event.eventId, label: `${event.eventOrder}. ${event.name}` }))} onChange={(eventId) => setRaceForm((current) => ({ ...current, eventId }))} />
               <TextField label="Race name" value={raceForm.name} onChange={(name) => setRaceForm((current) => ({ ...current, name }))} placeholder="Race 1" />
               <TextField label="Race order" type="number" value={raceForm.raceOrder} onChange={(raceOrder) => setRaceForm((current) => ({ ...current, raceOrder }))} placeholder="1" />
@@ -1196,14 +1288,16 @@ export function OrganizerSettingsPage() {
                 onChange={(raceId) => setRaceForm(raceId ? createRaceForm(payload.races.find((race) => race.raceId === raceId) ?? null) : createEmptyRaceForm(payload.events[0]?.eventId ?? ''))}
               />
             </SettingsForm>
-              </div>
-            </div>
+            </SettingsEditorDrawer>
           </div>
 
           <section className="border border-zinc-200 dark:border-zinc-800">
             <div className="border-b border-zinc-200 p-4 dark:border-zinc-800">
-              <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Calendar foundation</p>
+              <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Live structure</p>
               <h2 className="mt-2 text-xl font-semibold">Season Structure</h2>
+              <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+                This is the configuration map. Choose a workflow step on the left, or click any existing item here to edit it in the drawer.
+              </p>
             </div>
             <div className="grid gap-3 border-b border-zinc-200 p-4 sm:grid-cols-4 dark:border-zinc-800">
               <SummaryCard label="Seasons" value={payload.seasons.length} />
@@ -1230,56 +1324,67 @@ export function OrganizerSettingsPage() {
                   seasonSeriesGradesBySeries={seasonSeriesGradesBySeries}
                   onEditSeason={() => {
                     setSeasonForm(createSeasonForm(season))
-                    setActiveEditor('season')
+                    openEditor('season')
                   }}
+                  onDuplicateSeason={() => startDuplicateSeason(season)}
                   onEditEvent={(event) => {
                     setEventForm(createEventForm(event))
-                    setActiveEditor('event')
+                    openEditor('event')
                   }}
+                  onDuplicateEvent={startDuplicateEvent}
                   onEditRace={(race) => {
                     setRaceForm(createRaceForm(race))
-                    setActiveEditor('race')
+                    openEditor('race')
                   }}
                   onEditPrintBackgroundAsset={(asset) => {
                     setPrintBackgroundAssetForm(createPrintBackgroundAssetForm(asset))
-                    setActiveEditor('printBackgroundAsset')
+                    openEditor('printBackgroundAsset')
                   }}
                   onEditEventSeriesRule={(rule) => {
                     setEventSeriesRuleForm(createEventSeriesRuleForm(rule))
-                    setActiveEditor('eventSeriesRule')
+                    openEditor('eventSeriesRule')
                   }}
                   onEditWeightRule={(rule) => {
                     setWeightRuleForm(createWeightRuleForm(rule))
-                    setActiveEditor('weightRule')
+                    openEditor('weightRule')
                   }}
                   onEditBallastRule={(rule) => {
                     setBallastRuleForm(createBallastRuleForm(rule))
-                    setActiveEditor('ballastRule')
+                    openEditor('ballastRule')
                   }}
                   onEditTireRule={(rule) => {
                     setTireRuleForm(createTireRuleForm(rule))
-                    setActiveEditor('tireRule')
+                    openEditor('tireRule')
                   }}
                   onEditSponsorStickerAsset={(asset) => {
                     setSponsorStickerAssetForm(createSponsorStickerAssetForm(asset))
-                    setActiveEditor('sponsorStickerAsset')
+                    openEditor('sponsorStickerAsset')
                   }}
                   onEditInspectionTemplate={(template) => {
                     setInspectionTemplateForm(createInspectionTemplateForm(template))
-                    setActiveEditor('inspectionTemplate')
+                    openEditor('inspectionTemplate')
                   }}
                   onEditInspectionSection={(section) => {
                     setInspectionSectionForm(createInspectionSectionForm(section))
-                    setActiveEditor('inspectionSection')
+                    openEditor('inspectionSection')
                   }}
                   onEditInspectionItem={(item) => {
                     setInspectionItemForm(createInspectionItemForm(item))
-                    setActiveEditor('inspectionItem')
+                    openEditor('inspectionItem')
                   }}
                 />
               ))}
             </div>
           </section>
+
+          <DuplicateConfigDialog
+            draft={duplicateDraft}
+            seasons={payload.seasons}
+            updating={updatingKey === 'duplicate-season' || updatingKey === 'duplicate-event'}
+            onChange={setDuplicateDraft}
+            onClose={() => setDuplicateDraft(null)}
+            onSubmit={submitDuplicate}
+          />
         </div>
       ) : null}
     </section>
@@ -1290,6 +1395,7 @@ function SettingsForm({
   active,
   title,
   icon: Icon,
+  editorKey,
   children,
   onSubmit,
   updating,
@@ -1298,6 +1404,7 @@ function SettingsForm({
   active: boolean
   title: string
   icon: typeof Wrench
+  editorKey: SettingsEditorKey
   children: React.ReactNode
   onSubmit: (event: FormEvent<HTMLFormElement>) => void
   updating: boolean
@@ -1313,10 +1420,14 @@ function SettingsForm({
       onSubmit={onSubmit}
       className="border border-zinc-200 p-5 dark:border-zinc-800"
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-3 border-b border-zinc-200 pb-4 dark:border-zinc-800">
         <Icon className="mt-1 text-primary" size={20} />
-        <h2 className="text-xl font-semibold">{title}</h2>
+        <div>
+          <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Configure</p>
+          <h2 className="mt-1 text-xl font-semibold">{title}</h2>
+        </div>
       </div>
+      <EditorGuidance editorKey={editorKey} />
       <div className="mt-5 space-y-4">{children}</div>
       <motion.button
         whileTap={{ scale: 0.98 }}
@@ -1331,17 +1442,299 @@ function SettingsForm({
   )
 }
 
+function EditorGuidance({ editorKey }: { editorKey: SettingsEditorKey }) {
+  const guidance = getEditorGuidance(editorKey)
+
+  return (
+    <div className="mt-4 rounded-md border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-950">
+      <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Configuration path</p>
+      <p className="mt-2 text-sm font-semibold">{guidance.title}</p>
+      <p className="mt-1 text-sm leading-6 text-zinc-600 dark:text-zinc-400">{guidance.body}</p>
+    </div>
+  )
+}
+
+function DuplicateConfigDialog({
+  draft,
+  seasons,
+  updating,
+  onChange,
+  onClose,
+  onSubmit,
+}: {
+  draft: DuplicateDraft | null
+  seasons: SeasonRow[]
+  updating: boolean
+  onChange: (draft: DuplicateDraft | null) => void
+  onClose: () => void
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void
+}) {
+  return (
+    <AnimatePresence>
+      {draft ? (
+        <div className="fixed inset-0 z-50">
+          <motion.button
+            type="button"
+            aria-label="Close duplicate dialog"
+            className="absolute inset-0 bg-zinc-950/35"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.14 }}
+            onClick={onClose}
+          />
+          <motion.form
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 12 }}
+            transition={{ duration: 0.16 }}
+            onSubmit={onSubmit}
+            className="absolute left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 -translate-y-1/2 border border-zinc-200 bg-zinc-50 p-5 text-zinc-950 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="duplicate-dialog-title"
+          >
+            <div className="flex items-start justify-between gap-4 border-b border-zinc-200 pb-4 dark:border-zinc-800">
+              <div>
+                <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Duplicate configuration</p>
+                <h2 id="duplicate-dialog-title" className="mt-1 text-2xl font-semibold">
+                  {draft.mode === 'season' ? 'Duplicate Season' : 'Duplicate Event'}
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+                  Source: {draft.title}. This copies organizer setup only, not competitor submissions, inspection results, weigh-ins, or race results.
+                </p>
+              </div>
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                type="button"
+                onClick={onClose}
+                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-zinc-300 dark:border-zinc-800"
+                aria-label="Close duplicate dialog"
+              >
+                <X size={18} />
+              </motion.button>
+            </div>
+
+            <div className="mt-5 space-y-4">
+              <TextField
+                label={draft.mode === 'season' ? 'New season name' : 'New event name'}
+                value={draft.name}
+                onChange={(name) => onChange({ ...draft, name })}
+              />
+
+              {draft.mode === 'season' ? (
+                <TextField
+                  label="New season year"
+                  type="number"
+                  value={draft.year}
+                  onChange={(year) => onChange({ ...draft, year })}
+                />
+              ) : (
+                <>
+                  <EntitySelect
+                    label="Target season"
+                    value={draft.targetSeasonId}
+                    options={seasons.map((season) => ({ value: season.seasonId, label: `${season.year} / ${season.name}` }))}
+                    onChange={(targetSeasonId) => onChange({ ...draft, targetSeasonId })}
+                  />
+                  <TextField
+                    label="New event order"
+                    type="number"
+                    value={draft.eventOrder}
+                    onChange={(eventOrder) => onChange({ ...draft, eventOrder })}
+                  />
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <TextField label="Starts on" type="date" value={draft.startsOn} onChange={(startsOn) => onChange({ ...draft, startsOn })} />
+                    <TextField label="Ends on" type="date" value={draft.endsOn} onChange={(endsOn) => onChange({ ...draft, endsOn })} />
+                  </div>
+                </>
+              )}
+
+              <div className="rounded-md border border-amber-200 bg-amber-500/10 p-3 text-sm leading-6 text-amber-800 dark:border-amber-900/60 dark:text-amber-300">
+                The copy is created as Draft. Event Rules are unlocked Draft copies linked back to the source rule for traceability.
+              </div>
+            </div>
+
+            <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                type="button"
+                onClick={onClose}
+                className="inline-flex min-h-11 items-center justify-center rounded-md border border-zinc-300 px-4 text-sm font-semibold dark:border-zinc-800"
+              >
+                Cancel
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                type="submit"
+                disabled={updating}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {updating ? <Loader2 size={17} className="animate-spin" /> : <Save size={17} />}
+                Duplicate {draft.mode === 'season' ? 'Season' : 'Event'}
+              </motion.button>
+            </div>
+          </motion.form>
+        </div>
+      ) : null}
+    </AnimatePresence>
+  )
+}
+
+function getEditorGuidance(editorKey: SettingsEditorKey) {
+  const guidance: Record<SettingsEditorKey, { title: string; body: string }> = {
+    season: {
+      title: 'Start with the racing year.',
+      body: 'Create the Season first. You can duplicate a previous Season from the Season Structure to copy all Events, Races, Event Rules, technical rules, assets, and inspection templates into a new Draft Season.',
+    },
+    circuit: {
+      title: 'Circuits are reusable track records.',
+      body: 'Create Circuits before Events so each Event can point to the correct venue. Duplicating Events keeps the same Circuit reference unless you edit it later.',
+    },
+    seriesRace: {
+      title: 'Series defines the competition group.',
+      body: 'Create the Series Race before linking it to a Season. The ballast type here becomes the baseline expectation for technical rule setup.',
+    },
+    grade: {
+      title: 'Grades define class levels.',
+      body: 'Create grades such as PRO or AM once, then activate them per Season Series. Sort order controls how grades appear in admin lists.',
+    },
+    seasonSeries: {
+      title: 'Activate Series inside the Season.',
+      body: 'A Series must be linked to the Season before Event Rules can use it. Duplicating an Event into another Season will auto-enable required Series links for that copied rule package.',
+    },
+    seasonSeriesGrade: {
+      title: 'Activate Grades for each Season Series.',
+      body: 'Event Rules require the selected Series and Grade to be active in that Season. Duplicating an Event also creates missing Grade links when needed.',
+    },
+    event: {
+      title: 'Events are race weekends inside a Season.',
+      body: 'Create or edit Event date/order here. Use Duplicate Event from the Season Structure to copy races, rules, assets, and inspection templates as a new Draft Event.',
+    },
+    race: {
+      title: 'Races are sessions inside an Event.',
+      body: 'Add practice, qualifying, and race sessions after the Event exists. Race results and weigh-in workflows depend on these sessions later.',
+    },
+    eventSeriesRule: {
+      title: 'Event Rule is the rule package anchor.',
+      body: 'Bind Event, Series, Grade, and version here before adding Weight, Ballast, Tire, Sponsor Sticker, and Inspection Template configuration.',
+    },
+    weightRule: {
+      title: 'Weight Rules feed Target Weight.',
+      body: 'Set base weight and optional add-on weight rules for the selected Event Rule. These values drive scrutineering and weigh-in calculations.',
+    },
+    ballastRule: {
+      title: 'Success Ballast controls carried weight.',
+      body: 'Configure ballast type, maximum cap, and position matrix after the Event Rule exists. Keep JSON precise because race result publishing uses it.',
+    },
+    tireRule: {
+      title: 'Tire Rules define allowed equipment.',
+      body: 'Set allowed or disallowed tire brand/model per Event Rule. This becomes part of the official event-specific technical rule package.',
+    },
+    sponsorStickerAsset: {
+      title: 'Sponsor Stickers attach official artwork.',
+      body: 'Upload sticker images per Event Rule. Duplicated Events copy the configuration row and reuse the same uploaded file reference.',
+    },
+    printBackgroundAsset: {
+      title: 'A4 Backgrounds attach printable artwork.',
+      body: 'Upload Event-level print backgrounds for PDF/export layouts. Duplicated Events copy the background configuration and reuse the same uploaded file reference.',
+    },
+    inspectionTemplate: {
+      title: 'Template comes before sections and items.',
+      body: 'Create the inspection form version for an Event Rule first. Duplicating an Event copies templates, sections, and items together.',
+    },
+    inspectionSection: {
+      title: 'Sections group inspection items.',
+      body: 'Add clear sections after the template exists. Use stable codes and sort order so forms remain predictable for scrutineers.',
+    },
+    inspectionItem: {
+      title: 'Items are the actual inspection fields.',
+      body: 'Add fields, options, required status, and weight effect behavior. Weight-effect fields can feed suggested BOP values during inspection.',
+    },
+  }
+
+  return guidance[editorKey]
+}
+
+function SettingsEditorDrawer({
+  open,
+  activeEditorMeta,
+  onClose,
+  children,
+}: {
+  open: boolean
+  activeEditorMeta: SettingsEditor
+  onClose: () => void
+  children: React.ReactNode
+}) {
+  const Icon = activeEditorMeta.icon
+
+  return (
+    <AnimatePresence>
+      {open ? (
+        <div className="fixed inset-0 z-50">
+          <motion.button
+            type="button"
+            aria-label="Close settings editor"
+            className="absolute inset-0 bg-zinc-950/35"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.14 }}
+            onClick={onClose}
+          />
+          <motion.aside
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ duration: 0.18 }}
+            className="absolute right-0 top-0 flex h-full w-full max-w-2xl flex-col border-l border-zinc-200 bg-zinc-50 text-zinc-950 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="settings-editor-title"
+          >
+            <div className="flex items-start justify-between gap-4 border-b border-zinc-200 p-5 dark:border-zinc-800">
+              <div className="flex items-start gap-3">
+                <Icon className="mt-1 text-primary" size={20} />
+                <div>
+                  <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Off-canvas editor</p>
+                  <h2 id="settings-editor-title" className="mt-1 text-2xl font-semibold">{activeEditorMeta.label}</h2>
+                  <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-600 dark:text-zinc-400">{activeEditorMeta.hint}</p>
+                </div>
+              </div>
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                type="button"
+                onClick={onClose}
+                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-zinc-300 dark:border-zinc-800"
+                aria-label="Close editor"
+              >
+                <X size={18} />
+              </motion.button>
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto p-5">
+              {children}
+            </div>
+          </motion.aside>
+        </div>
+      ) : null}
+    </AnimatePresence>
+  )
+}
+
 function SettingsFocusPanel({
   editors,
   activeEditor,
   activeEditorMeta,
   readiness,
+  phaseSummaries,
   onSelect,
 }: {
   editors: SettingsEditor[]
   activeEditor: SettingsEditorKey
   activeEditorMeta: SettingsEditor
   readiness: SettingsReadinessItem[]
+  phaseSummaries: SettingsPhaseSummary[]
   onSelect: (editor: SettingsEditorKey) => void
 }) {
   const phases = [...new Set(editors.map((editor) => editor.phase))]
@@ -1350,15 +1743,15 @@ function SettingsFocusPanel({
     <section className="border border-zinc-200 dark:border-zinc-800">
       <div className="border-b border-zinc-200 p-4 dark:border-zinc-800">
         <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Setup cockpit</p>
-        <h2 className="mt-2 text-xl font-semibold">Work one area at a time</h2>
+        <h2 className="mt-2 text-xl font-semibold">Open one editor, keep the map clean</h2>
         <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">
-          Pick the setting you want to edit. The live season structure stays visible on the right, so you can confirm where every rule and asset belongs.
+          Select a workflow step to open the off-canvas editor. The season structure stays on this page, so you never lose context.
         </p>
       </div>
 
       <div className="border-b border-zinc-200 p-4 dark:border-zinc-800">
         <div className="rounded-md border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-950">
-          <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Current editor</p>
+          <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Selected editor</p>
           <div className="mt-3 flex items-start gap-3">
             <activeEditorMeta.icon className="mt-1 text-primary" size={19} />
             <div>
@@ -1366,6 +1759,31 @@ function SettingsFocusPanel({
               <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{activeEditorMeta.phase} / {activeEditorMeta.hint}</p>
             </div>
           </div>
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+            type="button"
+            onClick={() => onSelect(activeEditor)}
+            className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-white"
+          >
+            Open {activeEditorMeta.label}
+          </motion.button>
+        </div>
+
+        <div className="mt-3 grid gap-2">
+          {phaseSummaries.map((summary) => (
+            <div key={summary.phase} className="rounded-md border border-zinc-200 px-3 py-2 dark:border-zinc-800">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm font-semibold">{summary.phase}</p>
+                <p className="font-mono text-xs text-zinc-500">{summary.complete}/{summary.total}</p>
+              </div>
+              <div className="mt-2 h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-800">
+                <div
+                  className="h-1.5 rounded-full bg-primary"
+                  style={{ width: `${Math.round((summary.complete / summary.total) * 100)}%` }}
+                />
+              </div>
+            </div>
+          ))}
         </div>
 
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -1426,7 +1844,9 @@ function SeasonPanel({
   seasonSeries,
   seasonSeriesGradesBySeries,
   onEditSeason,
+  onDuplicateSeason,
   onEditEvent,
+  onDuplicateEvent,
   onEditRace,
   onEditPrintBackgroundAsset,
   onEditEventSeriesRule,
@@ -1451,7 +1871,9 @@ function SeasonPanel({
   seasonSeries: SeasonSeriesRow[]
   seasonSeriesGradesBySeries: Map<string, SeasonSeriesGradeRow[]>
   onEditSeason: () => void
+  onDuplicateSeason: () => void
   onEditEvent: (event: EventRow) => void
+  onDuplicateEvent: (event: EventRow) => void
   onEditRace: (race: RaceRow) => void
   onEditPrintBackgroundAsset: (asset: PrintBackgroundAssetRow) => void
   onEditEventSeriesRule: (rule: EventSeriesRuleRow) => void
@@ -1464,17 +1886,24 @@ function SeasonPanel({
   onEditInspectionItem: (item: InspectionTemplateItemRow) => void
 }) {
   return (
-    <article className="p-4">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+    <details className="group p-4" open={season.isActive || events.length === 0}>
+      <summary className="flex cursor-pointer list-none flex-col gap-3 rounded-md border border-zinc-200 p-4 transition hover:border-zinc-400 lg:flex-row lg:items-start lg:justify-between dark:border-zinc-800 dark:hover:border-zinc-600">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-lg font-semibold">{season.year} / {season.name}</h3>
+            <span className="text-lg font-semibold">{season.year} / {season.name}</span>
             <StatusBadge label={season.status} tone={season.isActive ? 'success' : 'neutral'} />
           </div>
-          <p className="mt-1 font-mono text-xs uppercase tracking-[0.12em] text-zinc-500">{events.length} event(s)</p>
+          <p className="mt-1 font-mono text-xs uppercase tracking-[0.12em] text-zinc-500">
+            {events.length} event(s) / {seasonSeries.length} series link(s)
+          </p>
         </div>
-        <TextButton label="Edit season" onClick={onEditSeason} />
-      </div>
+        <span className="flex flex-wrap items-center gap-2">
+          <span className="font-mono text-xs uppercase tracking-[0.12em] text-zinc-500 group-open:hidden">Expand</span>
+          <span className="hidden font-mono text-xs uppercase tracking-[0.12em] text-zinc-500 group-open:inline">Collapse</span>
+          <TextButton label="Edit season" onClick={onEditSeason} />
+          <TextButton label="Duplicate season" onClick={onDuplicateSeason} />
+        </span>
+      </summary>
       <div className="mt-4 border border-zinc-200 p-3 dark:border-zinc-800">
         <p className="font-mono text-xs uppercase tracking-[0.12em] text-zinc-500">Series and grades</p>
         <div className="mt-3 flex flex-wrap gap-2">
@@ -1496,18 +1925,24 @@ function SeasonPanel({
           const printBackgroundAssets = printBackgroundAssetsByEvent.get(event.eventId) ?? []
 
           return (
-          <div key={event.eventId} className="border border-zinc-200 p-3 dark:border-zinc-800">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <p className="font-medium">{event.eventOrder}. {event.name}</p>
-                <p className="mt-1 text-sm text-zinc-500">{event.circuitName ?? 'No circuit'} / {formatDateRange(event.startsOn, event.endsOn)}</p>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
+          <details key={event.eventId} className="group/event border border-zinc-200 p-3 dark:border-zinc-800" open={events.length === 1}>
+            <summary className="flex cursor-pointer list-none flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <span>
+                <span className="font-medium">{event.eventOrder}. {event.name}</span>
+                <span className="mt-1 block text-sm text-zinc-500">{event.circuitName ?? 'No circuit'} / {formatDateRange(event.startsOn, event.endsOn)}</span>
+                <span className="mt-2 block font-mono text-xs uppercase tracking-[0.12em] text-zinc-500">
+                  {(racesByEvent.get(event.eventId) ?? []).length} race(s) / {(eventSeriesRulesByEvent.get(event.eventId) ?? []).length} rule package(s)
+                </span>
+              </span>
+              <span className="flex flex-wrap items-center gap-2">
                 <StatusBadge label={event.status} tone={event.status === 'Active' ? 'success' : 'neutral'} />
+                <span className="font-mono text-xs uppercase tracking-[0.12em] text-zinc-500 group-open/event:hidden">Expand</span>
+                <span className="hidden font-mono text-xs uppercase tracking-[0.12em] text-zinc-500 group-open/event:inline">Collapse</span>
                 <TextButton label="Edit event" onClick={() => onEditEvent(event)} />
-              </div>
-            </div>
-            <div className="mt-3 flex flex-wrap gap-2">
+                <TextButton label="Duplicate event" onClick={() => onDuplicateEvent(event)} />
+              </span>
+            </summary>
+            <div className="mt-3 flex flex-wrap gap-2 border-t border-zinc-200 pt-3 dark:border-zinc-800">
               {printBackgroundAssets.length === 0 ? <span className="text-xs text-zinc-500">No A4 background.</span> : null}
               {printBackgroundAssets.map((asset) => (
                 <button
@@ -1520,7 +1955,7 @@ function SeasonPanel({
                 </button>
               ))}
             </div>
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="mt-3 grid gap-2">
               {(eventSeriesRulesByEvent.get(event.eventId) ?? []).map((rule) => {
                 const templates = inspectionTemplatesByEventRule.get(rule.eventSeriesRuleId) ?? []
                 const weightRules = weightRulesByEventRule.get(rule.eventSeriesRuleId) ?? []
@@ -1529,15 +1964,22 @@ function SeasonPanel({
                 const sponsorStickerAssets = sponsorStickerAssetsByEventRule.get(rule.eventSeriesRuleId) ?? []
 
                 return (
-                  <div key={rule.eventSeriesRuleId} className="w-full rounded-md border border-zinc-200 p-2 dark:border-zinc-800">
-                    <button
-                      type="button"
-                      onClick={() => onEditEventSeriesRule(rule)}
-                      className="rounded-md border border-zinc-200 px-2 py-1 text-left text-xs font-semibold transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600"
-                    >
-                      Rule / {rule.seriesName} / {rule.gradeName} / v{rule.version} / {rule.status}
-                    </button>
-                    <div className="mt-2 flex flex-wrap gap-2">
+                  <details key={rule.eventSeriesRuleId} className="group/rule rounded-md border border-zinc-200 p-2 dark:border-zinc-800">
+                    <summary className="flex cursor-pointer list-none flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                      <span>
+                        <span className="text-sm font-semibold">{rule.seriesName} / {rule.gradeName}</span>
+                        <span className="mt-1 block font-mono text-xs uppercase tracking-[0.12em] text-zinc-500">v{rule.version} / {rule.status}</span>
+                        <span className="mt-1 block text-xs text-zinc-500">
+                          {weightRules.length} weight / {ballastRules.length} ballast / {tireRules.length} tire / {templates.length} template
+                        </span>
+                      </span>
+                      <span className="flex flex-wrap items-center gap-2">
+                        <span className="font-mono text-xs uppercase tracking-[0.12em] text-zinc-500 group-open/rule:hidden">Expand</span>
+                        <span className="hidden font-mono text-xs uppercase tracking-[0.12em] text-zinc-500 group-open/rule:inline">Collapse</span>
+                        <TextButton label="Edit rule" onClick={() => onEditEventSeriesRule(rule)} />
+                      </span>
+                    </summary>
+                    <div className="mt-3 flex flex-wrap gap-2 border-t border-zinc-200 pt-3 dark:border-zinc-800">
                       {weightRules.length === 0 ? <span className="text-xs text-zinc-500">No weight rule.</span> : null}
                       {weightRules.map((weightRule) => (
                         <button
@@ -1626,7 +2068,7 @@ function SeasonPanel({
                         ))}
                       </div>
                     ))}
-                  </div>
+                  </details>
                 )
               })}
               {(racesByEvent.get(event.eventId) ?? []).map((race) => (
@@ -1641,11 +2083,11 @@ function SeasonPanel({
               ))}
               {(racesByEvent.get(event.eventId) ?? []).length === 0 ? <span className="text-sm text-zinc-500">No races.</span> : null}
             </div>
-          </div>
+          </details>
           )
         })}
       </div>
-    </article>
+    </details>
   )
 }
 
@@ -1743,7 +2185,11 @@ function TextButton({ label, onClick }: { label: string; onClick: () => void }) 
     <motion.button
       whileTap={{ scale: 0.98 }}
       type="button"
-      onClick={onClick}
+      onClick={(event) => {
+        event.preventDefault()
+        event.stopPropagation()
+        onClick()
+      }}
       className="inline-flex min-h-9 items-center justify-center rounded-md border border-zinc-300 px-3 text-xs font-semibold dark:border-zinc-800"
     >
       {label}
@@ -1781,6 +2227,21 @@ function createSettingsReadiness(payload: OrganizerPayload): SettingsReadinessIt
     { label: 'Rules', value: payload.eventSeriesRules.length, ready: payload.eventSeriesRules.length > 0 },
     { label: 'Templates', value: payload.inspectionTemplates.length, ready: payload.inspectionTemplates.length > 0 },
   ]
+}
+
+function createSettingsPhaseSummaries(readiness: SettingsReadinessItem[]): SettingsPhaseSummary[] {
+  const ready = new Map(readiness.map((item) => [item.label, item.ready]))
+
+  return [
+    { phase: 'Foundation', complete: countReady(ready, ['Seasons']), total: 1 },
+    { phase: 'Classes', complete: countReady(ready, ['Series']), total: 1 },
+    { phase: 'Calendar', complete: countReady(ready, ['Events', 'Races']), total: 2 },
+    { phase: 'Rules', complete: countReady(ready, ['Rules', 'Templates']), total: 2 },
+  ]
+}
+
+function countReady(ready: Map<string, boolean>, labels: string[]) {
+  return labels.filter((label) => ready.get(label)).length
 }
 
 function createEmptyCircuitForm(): CircuitForm {
