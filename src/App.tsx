@@ -1,5 +1,4 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import { Settings } from 'lucide-react'
 import { AuthProvider } from './auth/AuthContext'
 import { AuthRedirect } from './auth/AuthRedirect'
 import { OnboardingRoute } from './auth/OnboardingRoute'
@@ -17,11 +16,11 @@ import { LoginPage } from './pages/LoginPage'
 import { OnboardingPage } from './pages/OnboardingPage'
 import { OrganizerSettingsPage } from './pages/OrganizerSettingsPage'
 import { ProfileSettingsPage } from './pages/ProfileSettingsPage'
+import { PrivacySettingsPage } from './pages/PrivacySettingsPage'
 import { RaceResultPage } from './pages/RaceResultPage'
 import { RecentlyDeletedPage } from './pages/RecentlyDeletedPage'
 import { SignUpPage } from './pages/SignUpPage'
 import { ScrutineerReportPage } from './pages/ScrutineerReportPage'
-import { TabPlaceholderPage } from './pages/TabPlaceholderPage'
 import { TeamPage } from './pages/TeamPage'
 import { TeamRequiredPage } from './pages/TeamRequiredPage'
 import { UpdatePasswordPage } from './pages/UpdatePasswordPage'
@@ -151,13 +150,7 @@ const router = createBrowserRouter([
       },
       {
         path: 'settings/privacy',
-        element: (
-          <TabPlaceholderPage
-            title="Privacy Settings"
-            description="Password and account security controls will be implemented in the settings phase."
-            icon={Settings}
-          />
-        ),
+        element: <PrivacySettingsPage />,
       },
     ],
   },
