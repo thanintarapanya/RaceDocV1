@@ -94,3 +94,42 @@ body {
   background: var(--background);
   color: var(--foreground);
 }
+
+@page {
+  size: A4;
+  margin: 0;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #scrutineer-report-print-sheet,
+  #scrutineer-report-print-sheet * {
+    visibility: visible;
+  }
+
+  #scrutineer-report-print-sheet {
+    position: fixed;
+    inset: 0;
+    display: block !important;
+    width: 210mm;
+    min-height: 297mm;
+    overflow: hidden;
+    background-color: #fafafa;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    color: #18181b;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .print-sheet-content {
+    box-sizing: border-box;
+    min-height: 297mm;
+    padding: 24mm 18mm 18mm;
+    background: rgb(250 250 250 / 0.9);
+  }
+}

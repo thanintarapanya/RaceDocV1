@@ -4,12 +4,14 @@ import {
   FilePlus2,
   Loader2,
   LockOpen,
+  Printer,
   RefreshCcw,
   ScrollText,
   ShieldCheck,
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { getPrintBackgroundAsset, normalizePrintOptions, type PrintOptions } from './scrutineerReportHelpers'
 
 type ReportCar = {
   entryId: string
@@ -101,6 +103,8 @@ export function ScrutineerReportPage() {
   const [classKey, setClassKey] = useState('')
   const [remarks, setRemarks] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [printOptions, setPrintOptions] = useState<PrintOptions | null>(null)
+  const [selectedPrintBackgroundId, setSelectedPrintBackgroundId] = useState('')
 
   const loadData = useCallback(async (isActive: () => boolean = () => true) => {
     setLoading(true)
@@ -201,6 +205,49 @@ export function ScrutineerReportPage() {
     setSubmitting(false)
   }
 
+  async function loadPrintOptions(report: ScrutineerReport) {
+    setSubmitting(true)
+    setError(null)
+
+    const { data, error } = await supabase.rpc('get_scrutineer_report_print_options', {
+      p_report_id: report.report_id,
+    })
+
+    if (error) {
+      setError(error.message)
+      setSubmitting(false)
+      return
+    }
+
+    const nextPrintOptions = normalizePrintOptions(data as PrintOptions | null)
+    setPrintOptions(nextPrintOptions)
+    setSelectedPrintBackgroundId(nextPrintOptions?.selectedBackgroundId ?? nextPrintOptions?.printBackgroundAssets[0]?.printBackgroundAssetId ?? '')
+    setSubmitting(false)
+  }
+
+  async function confirmPrintBackground(report: ScrutineerReport, printBackgroundId: string) {
+    setSubmitting(true)
+    setError(null)
+
+    const { data, error } = await supabase.rpc('set_scrutineer_report_print_background', {
+      p_report_id: report.report_id,
+      p_print_background_id: printBackgroundId || null,
+    })
+
+    if (error) {
+      setError(error.message)
+      setSubmitting(false)
+      return
+    }
+
+    const nextPrintOptions = normalizePrintOptions(data as PrintOptions | null)
+    setPrintOptions(nextPrintOptions)
+    setSelectedPrintBackgroundId(nextPrintOptions?.selectedBackgroundId ?? printBackgroundId)
+    await loadData()
+    window.setTimeout(() => window.print(), 80)
+    setSubmitting(false)
+  }
+
   return (
     <section className="px-5 py-6 sm:px-8 lg:px-10">
       <motion.header
@@ -276,7 +323,16 @@ export function ScrutineerReportPage() {
           selectedReportId={selectedReport?.report_id ?? null}
           onSelect={setSelectedReportId}
         />
-        <ReportPreview report={selectedReport} submitting={submitting} onPublish={publishReport} />
+        <ReportPreview
+          report={selectedReport}
+          submitting={submitting}
+          printOptions={printOptions?.reportId === selectedReport?.report_id ? printOptions : null}
+          selectedPrintBackgroundId={selectedPrintBackgroundId}
+          onPublish={publishReport}
+          onLoadPrintOptions={loadPrintOptions}
+          onSelectedPrintBackgroundIdChange={setSelectedPrintBackgroundId}
+          onConfirmPrintBackground={confirmPrintBackground}
+        />
       </div>
     </section>
   )
@@ -335,11 +391,21 @@ function ReportList({
 function ReportPreview({
   report,
   submitting,
+  printOptions,
+  selectedPrintBackgroundId,
   onPublish,
+  onLoadPrintOptions,
+  onSelectedPrintBackgroundIdChange,
+  onConfirmPrintBackground,
 }: {
   report: ScrutineerReport | null
   submitting: boolean
+  printOptions: PrintOptions | null
+  selectedPrintBackgroundId: string
   onPublish: (report: ScrutineerReport) => Promise<void>
+  onLoadPrintOptions: (report: ScrutineerReport) => Promise<void>
+  onSelectedPrintBackgroundIdChange: (printBackgroundId: string) => void
+  onConfirmPrintBackground: (report: ScrutineerReport, printBackgroundId: string) => Promise<void>
 }) {
   if (!report) {
     return (
@@ -351,6 +417,8 @@ function ReportPreview({
   }
 
   const snapshot = normalizeSnapshot(report.report_snapshot)
+  const printBackground = getPrintBackgroundAsset(printOptions, selectedPrintBackgroundId)
+  const printBackgroundUrl = printBackground ? supabase.storage.from(printBackground.bucket).getPublicUrl(printBackground.path).data.publicUrl : null
 
   return (
     <motion.article
@@ -359,6 +427,13 @@ function ReportPreview({
       transition={{ duration: 0.16 }}
       className="border border-zinc-200 bg-zinc-50 p-5 dark:border-zinc-800 dark:bg-zinc-950"
     >
+      <div
+        id="scrutineer-report-print-sheet"
+        className="hidden"
+        style={printBackgroundUrl ? { backgroundImage: `url(${printBackgroundUrl})` } : undefined}
+      >
+        <PrintableReport report={report} snapshot={snapshot} />
+      </div>
       <header className="flex flex-col gap-4 border-b border-zinc-200 pb-5 sm:flex-row sm:items-start sm:justify-between dark:border-zinc-800">
         <div>
           <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Official technical report</p>
@@ -391,6 +466,64 @@ function ReportPreview({
         <h3 className="text-lg font-semibold">Special Remarks</h3>
         <p className="mt-3 whitespace-pre-wrap text-zinc-700 dark:text-zinc-300">{report.remarks || 'No special technical remarks recorded.'}</p>
       </section>
+
+      {report.status === 'Official' ? (
+        <section className="mt-6 border border-zinc-200 p-4 dark:border-zinc-800">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">A4 print package</p>
+              <h3 className="mt-2 text-lg font-semibold">Official Background</h3>
+              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">Select an Event background before printing the signed technical report.</p>
+            </div>
+            {!printOptions ? (
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                type="button"
+                onClick={() => onLoadPrintOptions(report)}
+                disabled={submitting}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-zinc-300 px-4 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800"
+              >
+                {submitting ? <Loader2 size={17} className="animate-spin" /> : <Printer size={17} />}
+                Prepare Print
+              </motion.button>
+            ) : null}
+          </div>
+
+          {printOptions ? (
+            <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+              <SelectField
+                label="A4 background"
+                value={selectedPrintBackgroundId}
+                onChange={onSelectedPrintBackgroundIdChange}
+                options={printOptions.printBackgroundAssets.map((asset) => ({ value: asset.printBackgroundAssetId, label: `${asset.title}${asset.isDefault ? ' / Default' : ''}` }))}
+              />
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                type="button"
+                onClick={() => {
+                  if (printOptions.canManage) {
+                    onConfirmPrintBackground(report, selectedPrintBackgroundId)
+                    return
+                  }
+
+                  window.print()
+                }}
+                disabled={submitting || !selectedPrintBackgroundId}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {submitting ? <Loader2 size={17} className="animate-spin" /> : <Printer size={17} />}
+                {printOptions.canManage ? 'Confirm & Print' : 'Print'}
+              </motion.button>
+            </div>
+          ) : null}
+
+          {printOptions?.printBackgroundAssets.length === 0 ? (
+            <p className="mt-4 border border-amber-200 bg-amber-500/10 p-3 text-sm text-amber-700 dark:border-amber-900/60 dark:text-amber-500">
+              No image A4 background is configured for this Event. Add a PNG, JPEG, or WebP background in Organizer Settings.
+            </p>
+          ) : null}
+        </section>
+      ) : null}
 
       <footer className="mt-6 flex flex-col gap-3 border-t border-zinc-200 pt-5 sm:flex-row sm:items-center sm:justify-between dark:border-zinc-800">
         <div className="text-sm text-zinc-500">
@@ -434,6 +567,88 @@ function CarList({ cars, empty, passed = false }: { cars: ReportCar[]; empty: st
             <p className="mt-1 font-mono text-xs text-zinc-500 tabular-nums">
               Target {formatKg(car.targetWeightKg)} / Actual {formatKg(car.actualWeightKg)}
             </p>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function PrintableReport({
+  report,
+  snapshot,
+}: {
+  report: ScrutineerReport
+  snapshot: Required<Pick<ReportSnapshot, 'summary' | 'passedCars' | 'failedCars'>>
+}) {
+  return (
+    <div className="print-sheet-content">
+      <header className="border-b border-zinc-300 pb-4">
+        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">Official technical report</p>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight">Scrutineer Report</h1>
+        <p className="mt-2 text-sm text-zinc-700">{report.event_name} / {report.race_name}</p>
+        <p className="text-sm text-zinc-700">{report.series_class} / Season {report.season_year}</p>
+      </header>
+
+      <section className="mt-5 grid grid-cols-3 gap-3">
+        <PrintMetric label="Total" value={snapshot.summary.totalCars} />
+        <PrintMetric label="Passed" value={snapshot.summary.passedCars} />
+        <PrintMetric label="Failed / DQ" value={snapshot.summary.failedCars} />
+      </section>
+
+      <section className="mt-6">
+        <h2 className="text-sm font-semibold uppercase tracking-[0.12em]">Passed Cars</h2>
+        <PrintCarRows cars={snapshot.passedCars} empty="No fully passed cars in this report." passed />
+      </section>
+
+      <section className="mt-6">
+        <h2 className="text-sm font-semibold uppercase tracking-[0.12em]">Failed / Disqualified Cars</h2>
+        <PrintCarRows cars={snapshot.failedCars} empty="No failed cars in this report." />
+      </section>
+
+      <section className="mt-6 border border-zinc-300 p-3">
+        <h2 className="text-sm font-semibold uppercase tracking-[0.12em]">Special Remarks</h2>
+        <p className="mt-2 whitespace-pre-wrap text-sm text-zinc-700">{report.remarks || 'No special technical remarks recorded.'}</p>
+      </section>
+
+      <footer className="mt-8 grid grid-cols-[minmax(0,1fr)_14rem] gap-6 border-t border-zinc-300 pt-5 text-sm text-zinc-700">
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-zinc-500">Race Result Interlock</p>
+          <p className="mt-1">Official technical report published before Race Result import.</p>
+        </div>
+        <div>
+          <p className="border-t border-zinc-400 pt-2">{report.signed_by_name ?? 'Official'}</p>
+          <p className="mt-1 text-xs text-zinc-500">Signed {formatDateTime(report.signed_at)}</p>
+        </div>
+      </footer>
+    </div>
+  )
+}
+
+function PrintMetric({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="border border-zinc-300 p-3">
+      <p className="text-xs uppercase tracking-[0.12em] text-zinc-500">{label}</p>
+      <p className="mt-2 font-mono text-2xl font-semibold tabular-nums">{value}</p>
+    </div>
+  )
+}
+
+function PrintCarRows({ cars, empty, passed = false }: { cars: ReportCar[]; empty: string; passed?: boolean }) {
+  if (cars.length === 0) return <p className="mt-3 border border-zinc-300 p-3 text-sm text-zinc-500">{empty}</p>
+
+  return (
+    <div className="mt-3 divide-y divide-zinc-300 border border-zinc-300">
+      {cars.map((car) => (
+        <div key={car.entryId} className="grid grid-cols-[4.5rem_minmax(0,1fr)_minmax(0,14rem)] gap-3 p-3 text-sm">
+          <p className="font-mono text-base font-semibold tabular-nums">#{car.carNumber ?? '--'}</p>
+          <div>
+            <p className="font-medium">{car.competitorName}</p>
+            <p className="mt-1 text-xs text-zinc-500">{car.competitorEmail || 'No email'}</p>
+          </div>
+          <div>
+            <p>{passed ? 'Inspection and weight passed' : car.issueReason || 'Technical issue recorded'}</p>
+            <p className="mt-1 font-mono text-[11px] text-zinc-500 tabular-nums">Target {formatKg(car.targetWeightKg)} / Actual {formatKg(car.actualWeightKg)}</p>
           </div>
         </div>
       ))}

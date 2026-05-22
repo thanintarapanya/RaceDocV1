@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { CheckCircle2, Gauge, Loader2, RefreshCcw, Scale, XCircle } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
   FilterResultSummary,
   SeriesRaceFilter,
@@ -50,6 +51,8 @@ type WeighInEntry = {
 }
 
 export function WeightInPage() {
+  const [searchParams] = useSearchParams()
+  const linkedSessionId = searchParams.get('weighInSessionId')?.trim() || null
   const [sessions, setSessions] = useState<WeighInSession[]>([])
   const [selectedSessionId, setSelectedSessionId] = useState('')
   const [entries, setEntries] = useState<WeighInEntry[]>([])
@@ -77,11 +80,15 @@ export function WeightInPage() {
     } else {
       const nextSessions = (data ?? []) as WeighInSession[]
       setSessions(nextSessions)
-      setSelectedSessionId((current) => current || nextSessions[0]?.session_id || '')
+      setSelectedSessionId((current) => {
+        if (current) return current
+        if (linkedSessionId && nextSessions.some((session) => session.session_id === linkedSessionId)) return linkedSessionId
+        return nextSessions[0]?.session_id || ''
+      })
     }
 
     setLoadingSessions(false)
-  }, [])
+  }, [linkedSessionId])
 
   const loadEntries = useCallback(async (sessionId: string, isActive: () => boolean = () => true) => {
     if (!sessionId) {
@@ -140,6 +147,10 @@ export function WeightInPage() {
   const totals = useMemo(() => calculateTotals(entries), [entries])
   const seriesOptions = useMemo(() => getSeriesRaceOptions(entries), [entries])
   const visibleEntries = useMemo(() => filterBySeriesRace(entries, selectedSeries), [entries, selectedSeries])
+  const linkedSessionExists = useMemo(
+    () => Boolean(linkedSessionId && sessions.some((session) => session.session_id === linkedSessionId)),
+    [linkedSessionId, sessions],
+  )
 
   async function saveWeight(entry: WeighInEntry, event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -210,6 +221,9 @@ export function WeightInPage() {
 
       {error ? <Alert tone="danger" message={error} /> : null}
       {notice ? <Alert tone="success" message={notice} /> : null}
+      {!loadingSessions && linkedSessionId && !linkedSessionExists ? (
+        <LinkedWeightNotice message="The linked Weight-In session is not visible to your account." />
+      ) : null}
 
       <div className="mt-6 grid gap-3 border border-zinc-200 p-4 xl:grid-cols-[minmax(0,22rem)_minmax(0,22rem)_1fr] xl:items-end dark:border-zinc-800">
         <label className="block min-w-0">
@@ -238,6 +252,9 @@ export function WeightInPage() {
           <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
             Status {selectedSession.status} / scheduled {formatDateTime(selectedSession.scheduled_at)}
           </p>
+          {linkedSessionId === selectedSession.session_id ? (
+            <p className="mt-3 font-mono text-xs uppercase tracking-[0.16em] text-primary">Linked notification context</p>
+          ) : null}
         </div>
       ) : null}
 
@@ -424,6 +441,14 @@ function WeightFilteredEmpty({ onClear }: { onClear: () => void }) {
       >
         Clear filter
       </motion.button>
+    </div>
+  )
+}
+
+function LinkedWeightNotice({ message }: { message: string }) {
+  return (
+    <div className="mt-5 border border-amber-200 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:border-amber-900/60 dark:text-amber-400">
+      {message}
     </div>
   )
 }

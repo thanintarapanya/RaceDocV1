@@ -17,6 +17,7 @@ import {
   X,
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/auth/useAuth'
 import {
   FilterResultSummary,
@@ -306,14 +307,20 @@ const legalConsentEnglish =
 
 export function EntryFormPage() {
   const { roles } = useAuth()
+  const [searchParams] = useSearchParams()
   const [entries, setEntries] = useState<EntryFormRow[]>([])
   const [entriesLoading, setEntriesLoading] = useState(true)
   const [entriesError, setEntriesError] = useState<string | null>(null)
   const [creatorOpen, setCreatorOpen] = useState(false)
   const [selectedSeries, setSelectedSeries] = useState('all')
   const isApprovalRole = roles.includes('ADMIN') || roles.includes('SECRETARY')
+  const linkedEntryFormId = searchParams.get('entryFormId')
   const seriesOptions = useMemo(() => getSeriesRaceOptions(entries), [entries])
   const visibleEntries = useMemo(() => filterBySeriesRace(entries, selectedSeries), [entries, selectedSeries])
+  const linkedEntry = useMemo(
+    () => entries.find((entry) => entry.id === linkedEntryFormId) ?? null,
+    [entries, linkedEntryFormId],
+  )
 
   const loadEntries = useCallback(async (isActive: () => boolean = () => true) => {
     setEntriesLoading(true)
@@ -391,13 +398,20 @@ export function EntryFormPage() {
         ) : null}
         {entriesLoading ? <EntryTableSkeleton /> : null}
         {!entriesLoading && entriesError ? <ErrorPanel message={entriesError} /> : null}
+        {!entriesLoading && !entriesError && linkedEntryFormId && !linkedEntry ? (
+          <div className="mb-4 border border-amber-300 bg-amber-500/10 p-4 text-sm text-amber-800 dark:border-amber-900/70 dark:text-amber-500">
+            This Entry Form notification points to a document that is no longer visible to your account.
+          </div>
+        ) : null}
         {!entriesLoading && !entriesError && entries.length === 0 ? (
           <EmptyState onCreate={() => setCreatorOpen(true)} />
         ) : null}
         {!entriesLoading && !entriesError && entries.length > 0 && visibleEntries.length === 0 ? (
           <FilteredEmptyState onClear={() => setSelectedSeries('all')} />
         ) : null}
-        {!entriesLoading && !entriesError && visibleEntries.length > 0 ? <EntryTable entries={visibleEntries} /> : null}
+        {!entriesLoading && !entriesError && visibleEntries.length > 0 ? (
+          <EntryTable entries={visibleEntries} highlightedEntryId={linkedEntryFormId} />
+        ) : null}
       </section>
 
       {isApprovalRole ? (
@@ -810,7 +824,7 @@ function DocumentReviewLink({ document }: { document: ApprovalDocument }) {
   )
 }
 
-function EntryTable({ entries }: { entries: EntryFormRow[] }) {
+function EntryTable({ entries, highlightedEntryId }: { entries: EntryFormRow[]; highlightedEntryId: string | null }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -833,7 +847,9 @@ function EntryTable({ entries }: { entries: EntryFormRow[] }) {
             {entries.map((entry) => (
               <tr
                 key={entry.id}
-                className="border-b border-zinc-200 last:border-0 hover:bg-zinc-100/70 dark:border-zinc-800 dark:hover:bg-zinc-900"
+                className={`border-b border-zinc-200 last:border-0 hover:bg-zinc-100/70 dark:border-zinc-800 dark:hover:bg-zinc-900 ${
+                  entry.id === highlightedEntryId ? 'border-l-2 border-l-primary bg-orange-500/5' : ''
+                }`}
               >
                 <td className="px-4 py-4">
                   <p className="font-medium">{entry.event_name}</p>
@@ -857,7 +873,10 @@ function EntryTable({ entries }: { entries: EntryFormRow[] }) {
 
       <div className="divide-y divide-zinc-200 md:hidden dark:divide-zinc-800">
         {entries.map((entry) => (
-          <article key={entry.id} className="p-4">
+          <article
+            key={entry.id}
+            className={`p-4 ${entry.id === highlightedEntryId ? 'border-l-2 border-l-primary bg-orange-500/5' : ''}`}
+          >
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="font-semibold">{entry.event_name}</h2>

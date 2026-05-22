@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { CheckCircle2, FilePlus2, FileText, Loader2, Plus, RefreshCcw, Scale, Send, UserCheck, X, XCircle } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/auth/useAuth'
 import {
   FilterResultSummary,
@@ -103,7 +104,9 @@ type ReviewerSelectionDraft = {
 
 export function CompetitorRequestPage() {
   const { roles } = useAuth()
+  const [searchParams] = useSearchParams()
   const canFinalize = canSeeAdminNavigation(roles)
+  const highlightedRequestId = searchParams.get('competitorRequestId')?.trim() || null
   const [entries, setEntries] = useState<EntryOption[]>([])
   const [requests, setRequests] = useState<CompetitorRequest[]>([])
   const [topicOptions, setTopicOptions] = useState<RequestTopicOption[]>([])
@@ -193,6 +196,14 @@ export function CompetitorRequestPage() {
   const visibleRequests = useMemo(
     () => filterByRequestTopic(filteredBySeries, selectedRequestTopicFilter),
     [filteredBySeries, selectedRequestTopicFilter],
+  )
+  const highlightedRequest = useMemo(
+    () => requests.find((request) => request.request_id === highlightedRequestId) ?? null,
+    [highlightedRequestId, requests],
+  )
+  const isHighlightedRequestVisible = useMemo(
+    () => visibleRequests.some((request) => request.request_id === highlightedRequestId),
+    [highlightedRequestId, visibleRequests],
   )
 
   function addTopicSelection(topicCode: string) {
@@ -551,6 +562,12 @@ export function CompetitorRequestPage() {
             </div>
           ) : null}
           {loading ? <RequestSkeleton /> : null}
+          {!loading && highlightedRequestId && requests.length > 0 && !highlightedRequest ? (
+            <LinkedRequestNotice message="The linked Competitor Request is not visible to your account." />
+          ) : null}
+          {!loading && highlightedRequest && !isHighlightedRequestVisible ? (
+            <LinkedRequestNotice message="The linked Competitor Request exists, but your current filters are hiding it." />
+          ) : null}
           {!loading && requests.length === 0 ? <RequestEmpty /> : null}
           {!loading && requests.length > 0 && visibleRequests.length === 0 ? (
             <RequestFilteredEmpty onClear={() => {
@@ -567,6 +584,7 @@ export function CompetitorRequestPage() {
                   index={index}
                   canFinalize={canFinalize}
                   reviewers={reviewerOptions}
+                  highlighted={request.request_id === highlightedRequestId}
                   reviewerDraft={reviewerDrafts[request.request_id] ?? createReviewerDraft()}
                   active={activeRequestId === request.request_id}
                   activeApprovalId={activeApprovalId}
@@ -596,6 +614,7 @@ function RequestRow({
   index,
   canFinalize,
   reviewers,
+  highlighted,
   reviewerDraft,
   active,
   activeApprovalId,
@@ -615,6 +634,7 @@ function RequestRow({
   index: number
   canFinalize: boolean
   reviewers: ReviewerOption[]
+  highlighted: boolean
   reviewerDraft: ReviewerSelectionDraft
   active: boolean
   activeApprovalId: string | null
@@ -639,10 +659,13 @@ function RequestRow({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.14, delay: index * 0.02 }}
-      className={`border p-4 ${getStatusSurface(request.status)}`}
+      className={`border p-4 ${getStatusSurface(request.status)} ${highlighted ? 'border-l-2 border-l-primary bg-orange-500/5' : ''}`}
     >
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
+          {highlighted ? (
+            <p className="mb-2 font-mono text-xs uppercase tracking-[0.16em] text-primary">Linked notification</p>
+          ) : null}
           <p className="font-mono text-xs uppercase tracking-[0.16em] text-zinc-500">
             Queue {request.queue_no} / {request.event_name} / {request.series_class}
           </p>
@@ -1017,6 +1040,14 @@ function RequestFilteredEmpty({ onClear }: { onClear: () => void }) {
       >
         Clear filter
       </motion.button>
+    </div>
+  )
+}
+
+function LinkedRequestNotice({ message }: { message: string }) {
+  return (
+    <div className="mb-4 border border-amber-200 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:border-amber-900/60 dark:text-amber-400">
+      {message}
     </div>
   )
 }
