@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { CheckCircle2, FilePlus2, FileText, Loader2, Plus, RefreshCcw, Scale, Send, UserCheck, X, XCircle } from 'lucide-react'
+import { CheckCircle2, FilePlus2, FileText, Loader2, Plus, RefreshCcw, Scale, Send, Trash2, UserCheck, X, XCircle } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/auth/useAuth'
@@ -106,6 +106,7 @@ export function CompetitorRequestPage() {
   const { roles } = useAuth()
   const [searchParams] = useSearchParams()
   const canFinalize = canSeeAdminNavigation(roles)
+  const canSoftDelete = roles.includes('ADMIN')
   const highlightedRequestId = searchParams.get('competitorRequestId')?.trim() || null
   const [entries, setEntries] = useState<EntryOption[]>([])
   const [requests, setRequests] = useState<CompetitorRequest[]>([])
@@ -122,6 +123,7 @@ export function CompetitorRequestPage() {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [activeRequestId, setActiveRequestId] = useState<string | null>(null)
+  const [deletingRequestId, setDeletingRequestId] = useState<string | null>(null)
   const [activeApprovalId, setActiveApprovalId] = useState<string | null>(null)
   const [decisionDrafts, setDecisionDrafts] = useState<Record<string, FinalDecisionDraft>>({})
   const [reviewerDrafts, setReviewerDrafts] = useState<Record<string, ReviewerSelectionDraft>>({})
@@ -359,6 +361,28 @@ export function CompetitorRequestPage() {
     setActiveApprovalId(null)
   }
 
+  async function deleteRequest(request: CompetitorRequest) {
+    const confirmed = window.confirm(`Delete Competitor Request ${request.queue_no}? You can restore it from Recently Delete within 30 days.`)
+    if (!confirmed) return
+
+    setDeletingRequestId(request.request_id)
+    setError(null)
+    setNotice(null)
+
+    const { error } = await supabase.rpc('soft_delete_competitor_request', {
+      p_request_id: request.request_id,
+    })
+
+    if (error) {
+      setError(error.message)
+    } else {
+      setNotice('Competitor Request moved to Recently Delete.')
+      await loadData()
+    }
+
+    setDeletingRequestId(null)
+  }
+
   function updateDecisionDraft(requestId: string, changes: Partial<FinalDecisionDraft>) {
     setDecisionDrafts((current) => ({
       ...current,
@@ -583,10 +607,12 @@ export function CompetitorRequestPage() {
                   request={request}
                   index={index}
                   canFinalize={canFinalize}
+                  canSoftDelete={canSoftDelete}
                   reviewers={reviewerOptions}
                   highlighted={request.request_id === highlightedRequestId}
                   reviewerDraft={reviewerDrafts[request.request_id] ?? createReviewerDraft()}
                   active={activeRequestId === request.request_id}
+                  deleting={deletingRequestId === request.request_id}
                   activeApprovalId={activeApprovalId}
                   draft={decisionDrafts[request.request_id] ?? createDecisionDraft(request)}
                   reviewDrafts={reviewDrafts}
@@ -599,6 +625,7 @@ export function CompetitorRequestPage() {
                   onRemoveReviewer={(reviewerKey) => removeReviewerDraft(request.request_id, reviewerKey)}
                   onReviewDraftChange={updateReviewDraft}
                   onSubmitReview={submitReview}
+                  onDelete={deleteRequest}
                 />
               ))}
             </div>
@@ -613,10 +640,12 @@ function RequestRow({
   request,
   index,
   canFinalize,
+  canSoftDelete,
   reviewers,
   highlighted,
   reviewerDraft,
   active,
+  deleting,
   activeApprovalId,
   draft,
   reviewDrafts,
@@ -629,14 +658,17 @@ function RequestRow({
   onRemoveReviewer,
   onReviewDraftChange,
   onSubmitReview,
+  onDelete,
 }: {
   request: CompetitorRequest
   index: number
   canFinalize: boolean
+  canSoftDelete: boolean
   reviewers: ReviewerOption[]
   highlighted: boolean
   reviewerDraft: ReviewerSelectionDraft
   active: boolean
+  deleting: boolean
   activeApprovalId: string | null
   draft: FinalDecisionDraft
   reviewDrafts: Record<string, ReviewDraft>
@@ -649,6 +681,7 @@ function RequestRow({
   onRemoveReviewer: (reviewerKey: string) => void
   onReviewDraftChange: (approvalId: string, changes: Partial<ReviewDraft>) => void
   onSubmitReview: (approval: RequestApproval) => Promise<void>
+  onDelete: (request: CompetitorRequest) => Promise<void>
 }) {
   const assignedReviewerKeys = request.approvals.map((approval) => getApprovalReviewerKey(approval))
   const availableReviewers = reviewers.filter((reviewer) => !assignedReviewerKeys.includes(getReviewerKey(reviewer)))
@@ -674,7 +707,21 @@ function RequestRow({
             {request.competitor_name} / updated {formatDateTime(request.updated_at)}
           </p>
         </div>
-        <StatusBadge status={request.status} />
+        <div className="flex flex-wrap items-center gap-2">
+          <StatusBadge status={request.status} />
+          {canSoftDelete ? (
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              type="button"
+              onClick={() => onDelete(request)}
+              disabled={active || deleting}
+              className="inline-flex min-h-9 items-center gap-2 rounded-md border border-red-300 px-3 text-xs font-semibold text-red-700 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-900/70 dark:text-red-400"
+            >
+              {deleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+              Delete
+            </motion.button>
+          ) : null}
+        </div>
       </div>
 
       <TopicChips topics={request.request_topics} />

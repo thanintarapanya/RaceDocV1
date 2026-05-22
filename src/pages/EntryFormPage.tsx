@@ -314,6 +314,8 @@ export function EntryFormPage() {
   const [creatorOpen, setCreatorOpen] = useState(false)
   const [selectedSeries, setSelectedSeries] = useState('all')
   const isApprovalRole = roles.includes('ADMIN') || roles.includes('SECRETARY')
+  const canSoftDelete = roles.includes('ADMIN')
+  const [deletingEntryId, setDeletingEntryId] = useState<string | null>(null)
   const linkedEntryFormId = searchParams.get('entryFormId')
   const seriesOptions = useMemo(() => getSeriesRaceOptions(entries), [entries])
   const visibleEntries = useMemo(() => filterBySeriesRace(entries, selectedSeries), [entries, selectedSeries])
@@ -353,6 +355,24 @@ export function EntryFormPage() {
       active = false
     }
   }, [loadEntries])
+
+  async function deleteEntry(entry: EntryFormRow) {
+    const confirmed = window.confirm(`Delete Entry Form #${entry.car_number || '--'} for ${entry.event_name}? You can restore it from Recently Delete within 30 days.`)
+    if (!confirmed) return
+
+    setDeletingEntryId(entry.id)
+    setEntriesError(null)
+
+    const { error } = await supabase.rpc('soft_delete_entry_form', { p_entry_id: entry.id })
+
+    if (error) {
+      setEntriesError(error.message)
+    } else {
+      await loadEntries()
+    }
+
+    setDeletingEntryId(null)
+  }
 
   return (
     <div className="px-5 py-6 sm:px-8 lg:px-10">
@@ -410,7 +430,13 @@ export function EntryFormPage() {
           <FilteredEmptyState onClear={() => setSelectedSeries('all')} />
         ) : null}
         {!entriesLoading && !entriesError && visibleEntries.length > 0 ? (
-          <EntryTable entries={visibleEntries} highlightedEntryId={linkedEntryFormId} />
+          <EntryTable
+            entries={visibleEntries}
+            highlightedEntryId={linkedEntryFormId}
+            canSoftDelete={canSoftDelete}
+            deletingEntryId={deletingEntryId}
+            onDelete={deleteEntry}
+          />
         ) : null}
       </section>
 
@@ -824,7 +850,19 @@ function DocumentReviewLink({ document }: { document: ApprovalDocument }) {
   )
 }
 
-function EntryTable({ entries, highlightedEntryId }: { entries: EntryFormRow[]; highlightedEntryId: string | null }) {
+function EntryTable({
+  entries,
+  highlightedEntryId,
+  canSoftDelete,
+  deletingEntryId,
+  onDelete,
+}: {
+  entries: EntryFormRow[]
+  highlightedEntryId: string | null
+  canSoftDelete: boolean
+  deletingEntryId: string | null
+  onDelete: (entry: EntryFormRow) => Promise<void>
+}) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -841,6 +879,7 @@ function EntryTable({ entries, highlightedEntryId }: { entries: EntryFormRow[]; 
               <th className="px-4 py-3 font-medium">Car No.</th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium">Created</th>
+              {canSoftDelete ? <th className="px-4 py-3 font-medium">Action</th> : null}
             </tr>
           </thead>
           <tbody>
@@ -865,6 +904,20 @@ function EntryTable({ entries, highlightedEntryId }: { entries: EntryFormRow[]; 
                 <td className="px-4 py-4 font-mono text-sm text-zinc-500 tabular-nums">
                   {formatDate(entry.created_at)}
                 </td>
+                {canSoftDelete ? (
+                  <td className="px-4 py-4">
+                    <motion.button
+                      whileTap={{ scale: 0.98 }}
+                      type="button"
+                      onClick={() => onDelete(entry)}
+                      disabled={deletingEntryId === entry.id}
+                      className="inline-flex min-h-10 items-center gap-2 rounded-md border border-red-300 px-3 text-sm font-semibold text-red-700 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-900/70 dark:text-red-400"
+                    >
+                      {deletingEntryId === entry.id ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
+                      Delete
+                    </motion.button>
+                  </td>
+                ) : null}
               </tr>
             ))}
           </tbody>
@@ -894,6 +947,18 @@ function EntryTable({ entries, highlightedEntryId }: { entries: EntryFormRow[]; 
                 <p className="mt-1 font-mono tabular-nums">{formatDate(entry.created_at)}</p>
               </div>
             </div>
+            {canSoftDelete ? (
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                type="button"
+                onClick={() => onDelete(entry)}
+                disabled={deletingEntryId === entry.id}
+                className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-md border border-red-300 px-3 text-sm font-semibold text-red-700 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-900/70 dark:text-red-400"
+              >
+                {deletingEntryId === entry.id ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
+                Delete
+              </motion.button>
+            ) : null}
           </article>
         ))}
       </div>

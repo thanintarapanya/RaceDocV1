@@ -2,12 +2,22 @@ import type { ReactNode } from 'react'
 import { Navigate } from 'react-router-dom'
 import type { RoleCode } from './auth-context'
 import { useAuth } from './useAuth'
-import { canSeeAdminNavigation } from '@/navigation'
+import { canSeeAdminNavigation, canSeeRecentlyDeleteNavigation } from '@/navigation'
 
 export function AdminOrSecretaryRoute({ children }: { children: ReactNode }) {
   const { roles } = useAuth()
 
   if (!canSeeAdminNavigation(roles)) {
+    return <Navigate to="/dashboard" replace />
+  }
+
+  return children
+}
+
+export function AdminOnlyRoute({ children }: { children: ReactNode }) {
+  const { roles } = useAuth()
+
+  if (!canSeeRecentlyDeleteNavigation(roles)) {
     return <Navigate to="/dashboard" replace />
   }
 

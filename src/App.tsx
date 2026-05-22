@@ -3,11 +3,8 @@ import { AuthProvider } from './auth/AuthContext'
 import { AuthRedirect } from './auth/AuthRedirect'
 import { OnboardingRoute } from './auth/OnboardingRoute'
 import { ProtectedRoute } from './auth/ProtectedRoute'
-import { AdminOrSecretaryRoute, ScrutineerReportRoute } from './auth/RoleGate'
-import {
-  ArchiveRestore,
-  Settings,
-} from 'lucide-react'
+import { AdminOnlyRoute, AdminOrSecretaryRoute, ScrutineerReportRoute } from './auth/RoleGate'
+import { Settings } from 'lucide-react'
 import { AppLayout } from './layout/AppLayout'
 import { AuthHealthPage } from './pages/AuthHealthPage'
 import { ChecklistPage } from './pages/ChecklistPage'
@@ -20,6 +17,7 @@ import { LoginPage } from './pages/LoginPage'
 import { OnboardingPage } from './pages/OnboardingPage'
 import { OrganizerSettingsPage } from './pages/OrganizerSettingsPage'
 import { RaceResultPage } from './pages/RaceResultPage'
+import { RecentlyDeletedPage } from './pages/RecentlyDeletedPage'
 import { SignUpPage } from './pages/SignUpPage'
 import { ScrutineerReportPage } from './pages/ScrutineerReportPage'
 import { TabPlaceholderPage } from './pages/TabPlaceholderPage'
@@ -117,13 +115,9 @@ const router = createBrowserRouter([
       {
         path: 'recently-delete',
         element: (
-          <AdminOrSecretaryRoute>
-            <TabPlaceholderPage
-              title="Recently Delete"
-              description="Soft-deleted form recovery will be implemented for Admin/Secretary operational controls."
-              icon={ArchiveRestore}
-            />
-          </AdminOrSecretaryRoute>
+          <AdminOnlyRoute>
+            <RecentlyDeletedPage />
+          </AdminOnlyRoute>
         ),
       },
       {

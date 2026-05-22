@@ -8,8 +8,10 @@ import {
   RefreshCcw,
   ScrollText,
   ShieldCheck,
+  Trash2,
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useAuth } from '@/auth/useAuth'
 import { supabase } from '@/lib/supabase'
 import { getPrintBackgroundAsset, normalizePrintOptions, type PrintOptions } from './scrutineerReportHelpers'
 
@@ -94,6 +96,7 @@ const emptyOptions: ReportOptions = {
 }
 
 export function ScrutineerReportPage() {
+  const { roles } = useAuth()
   const [reports, setReports] = useState<ScrutineerReport[]>([])
   const [options, setOptions] = useState<ReportOptions>(emptyOptions)
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null)
@@ -103,8 +106,10 @@ export function ScrutineerReportPage() {
   const [classKey, setClassKey] = useState('')
   const [remarks, setRemarks] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [deletingReportId, setDeletingReportId] = useState<string | null>(null)
   const [printOptions, setPrintOptions] = useState<PrintOptions | null>(null)
   const [selectedPrintBackgroundId, setSelectedPrintBackgroundId] = useState('')
+  const canSoftDelete = roles.includes('ADMIN')
 
   const loadData = useCallback(async (isActive: () => boolean = () => true) => {
     setLoading(true)
@@ -203,6 +208,28 @@ export function ScrutineerReportPage() {
 
     await loadData()
     setSubmitting(false)
+  }
+
+  async function deleteReport(report: ScrutineerReport) {
+    const confirmed = window.confirm(`Delete Scrutineer Report for ${report.event_name} / ${report.race_name}? You can restore it from Recently Delete within 30 days.`)
+    if (!confirmed) return
+
+    setDeletingReportId(report.report_id)
+    setError(null)
+
+    const { error } = await supabase.rpc('soft_delete_scrutineer_report', {
+      p_report_id: report.report_id,
+    })
+
+    if (error) {
+      setError(error.message)
+    } else {
+      setSelectedReportId(null)
+      setPrintOptions(null)
+      await loadData()
+    }
+
+    setDeletingReportId(null)
   }
 
   async function loadPrintOptions(report: ScrutineerReport) {
@@ -329,9 +356,12 @@ export function ScrutineerReportPage() {
           printOptions={printOptions?.reportId === selectedReport?.report_id ? printOptions : null}
           selectedPrintBackgroundId={selectedPrintBackgroundId}
           onPublish={publishReport}
+          onDelete={deleteReport}
           onLoadPrintOptions={loadPrintOptions}
           onSelectedPrintBackgroundIdChange={setSelectedPrintBackgroundId}
           onConfirmPrintBackground={confirmPrintBackground}
+          canSoftDelete={canSoftDelete}
+          deletingReportId={deletingReportId}
         />
       </div>
     </section>
@@ -394,18 +424,24 @@ function ReportPreview({
   printOptions,
   selectedPrintBackgroundId,
   onPublish,
+  onDelete,
   onLoadPrintOptions,
   onSelectedPrintBackgroundIdChange,
   onConfirmPrintBackground,
+  canSoftDelete,
+  deletingReportId,
 }: {
   report: ScrutineerReport | null
   submitting: boolean
   printOptions: PrintOptions | null
   selectedPrintBackgroundId: string
   onPublish: (report: ScrutineerReport) => Promise<void>
+  onDelete: (report: ScrutineerReport) => Promise<void>
   onLoadPrintOptions: (report: ScrutineerReport) => Promise<void>
   onSelectedPrintBackgroundIdChange: (printBackgroundId: string) => void
   onConfirmPrintBackground: (report: ScrutineerReport, printBackgroundId: string) => Promise<void>
+  canSoftDelete: boolean
+  deletingReportId: string | null
 }) {
   if (!report) {
     return (
@@ -529,18 +565,32 @@ function ReportPreview({
         <div className="text-sm text-zinc-500">
           {report.status === 'Official' ? `Signed by ${report.signed_by_name ?? 'Official'} at ${formatDateTime(report.signed_at)}` : 'Draft report. Publish to unlock Race Result import.'}
         </div>
-        {report.can_manage && report.status !== 'Official' ? (
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            type="button"
-            onClick={() => onPublish(report)}
-            disabled={submitting}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {submitting ? <Loader2 size={17} className="animate-spin" /> : <CheckCircle2 size={17} />}
-            Publish Official Report
-          </motion.button>
-        ) : null}
+        <div className="flex flex-wrap gap-2">
+          {canSoftDelete ? (
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              type="button"
+              onClick={() => onDelete(report)}
+              disabled={submitting || deletingReportId === report.report_id}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-red-300 px-4 text-sm font-semibold text-red-700 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-900/70 dark:text-red-400"
+            >
+              {deletingReportId === report.report_id ? <Loader2 size={17} className="animate-spin" /> : <Trash2 size={17} />}
+              Delete
+            </motion.button>
+          ) : null}
+          {report.can_manage && report.status !== 'Official' ? (
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              type="button"
+              onClick={() => onPublish(report)}
+              disabled={submitting}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {submitting ? <Loader2 size={17} className="animate-spin" /> : <CheckCircle2 size={17} />}
+              Publish Official Report
+            </motion.button>
+          ) : null}
+        </div>
       </footer>
     </motion.article>
   )

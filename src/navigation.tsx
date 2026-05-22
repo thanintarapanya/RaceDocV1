@@ -63,13 +63,19 @@ export function canSeeAdminNavigation(roles: RoleCode[]) {
   return roles.some((role) => elevatedRoles.includes(role))
 }
 
+export function canSeeRecentlyDeleteNavigation(roles: RoleCode[]) {
+  return roles.includes('ADMIN')
+}
+
 export function canSeeScrutineerReportNavigation(roles: RoleCode[]) {
   return roles.some((role) => scrutineerReportRoles.includes(role))
 }
 
 export function getNavigationItems(roles: RoleCode[]) {
   const scrutineerReportItem = canSeeScrutineerReportNavigation(roles) ? [adminNavItems[0]] : []
-  const adminOnlyItems = canSeeAdminNavigation(roles) ? adminNavItems.slice(1) : []
+  const adminOnlyItems = canSeeAdminNavigation(roles)
+    ? adminNavItems.slice(1).filter((item) => item.path !== '/recently-delete' || canSeeRecentlyDeleteNavigation(roles))
+    : []
 
   return [
     ...baseNavItems,
