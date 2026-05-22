@@ -1,10 +1,10 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { Settings } from 'lucide-react'
 import { AuthProvider } from './auth/AuthContext'
 import { AuthRedirect } from './auth/AuthRedirect'
 import { OnboardingRoute } from './auth/OnboardingRoute'
 import { ProtectedRoute } from './auth/ProtectedRoute'
 import { AdminOnlyRoute, AdminOrSecretaryRoute, ScrutineerReportRoute } from './auth/RoleGate'
-import { Settings } from 'lucide-react'
 import { AppLayout } from './layout/AppLayout'
 import { AuthHealthPage } from './pages/AuthHealthPage'
 import { ChecklistPage } from './pages/ChecklistPage'
@@ -16,6 +16,7 @@ import { InspectionFormPage } from './pages/InspectionFormPage'
 import { LoginPage } from './pages/LoginPage'
 import { OnboardingPage } from './pages/OnboardingPage'
 import { OrganizerSettingsPage } from './pages/OrganizerSettingsPage'
+import { ProfileSettingsPage } from './pages/ProfileSettingsPage'
 import { RaceResultPage } from './pages/RaceResultPage'
 import { RecentlyDeletedPage } from './pages/RecentlyDeletedPage'
 import { SignUpPage } from './pages/SignUpPage'
@@ -146,13 +147,7 @@ const router = createBrowserRouter([
       },
       {
         path: 'settings/profile',
-        element: (
-          <TabPlaceholderPage
-            title="Profile Settings"
-            description="Profile editing route is ready. Profile forms will be implemented after shell navigation is approved."
-            icon={Settings}
-          />
-        ),
+        element: <ProfileSettingsPage />,
       },
       {
         path: 'settings/privacy',
