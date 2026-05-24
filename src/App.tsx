@@ -5,6 +5,7 @@ import { OnboardingRoute } from './auth/OnboardingRoute'
 import { ProtectedRoute } from './auth/ProtectedRoute'
 import { AdminOnlyRoute, AdminOrSecretaryRoute, ScrutineerReportRoute } from './auth/RoleGate'
 import { AppLayout } from './layout/AppLayout'
+import { AuditTrailPage } from './pages/AuditTrailPage'
 import { AuthHealthPage } from './pages/AuthHealthPage'
 import { ChecklistPage } from './pages/ChecklistPage'
 import { CompetitorRequestPage } from './pages/CompetitorRequestPage'
@@ -117,6 +118,14 @@ const router = createBrowserRouter([
         element: (
           <AdminOnlyRoute>
             <RecentlyDeletedPage />
+          </AdminOnlyRoute>
+        ),
+      },
+      {
+        path: 'audit-trail',
+        element: (
+          <AdminOnlyRoute>
+            <AuditTrailPage />
           </AdminOnlyRoute>
         ),
       },

@@ -5,6 +5,7 @@ import {
   FilePenLine,
   FileText,
   Gauge,
+  History,
   HeartPulse,
   LayoutDashboard,
   Scale,
@@ -37,6 +38,7 @@ export const baseNavItems: AppNavItem[] = [
 export const adminNavItems: AppNavItem[] = [
   { label: 'Scrutineer Report', path: '/scrutineer-reports', icon: ScrollText },
   { label: 'Recently Delete', path: '/recently-delete', icon: ArchiveRestore },
+  { label: 'Audit Trail', path: '/audit-trail', icon: History },
   { label: 'Organizer Settings', path: '/organizer-settings', icon: Wrench },
   { label: 'Auth Health', path: '/auth-health', icon: HeartPulse },
 ]
@@ -67,6 +69,10 @@ export function canSeeRecentlyDeleteNavigation(roles: RoleCode[]) {
   return roles.includes('ADMIN')
 }
 
+export function canSeeAuditTrailNavigation(roles: RoleCode[]) {
+  return roles.includes('ADMIN')
+}
+
 export function canSeeScrutineerReportNavigation(roles: RoleCode[]) {
   return roles.some((role) => scrutineerReportRoles.includes(role))
 }
@@ -74,7 +80,11 @@ export function canSeeScrutineerReportNavigation(roles: RoleCode[]) {
 export function getNavigationItems(roles: RoleCode[]) {
   const scrutineerReportItem = canSeeScrutineerReportNavigation(roles) ? [adminNavItems[0]] : []
   const adminOnlyItems = canSeeAdminNavigation(roles)
-    ? adminNavItems.slice(1).filter((item) => item.path !== '/recently-delete' || canSeeRecentlyDeleteNavigation(roles))
+    ? adminNavItems.slice(1).filter((item) => {
+        if (item.path === '/recently-delete') return canSeeRecentlyDeleteNavigation(roles)
+        if (item.path === '/audit-trail') return canSeeAuditTrailNavigation(roles)
+        return true
+      })
     : []
 
   return [
