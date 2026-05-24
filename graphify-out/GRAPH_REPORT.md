@@ -1,11 +1,11 @@
 # Graph Report - RaceDocV1Github  (2026-05-24)
 
 ## Corpus Check
-- 63 files · ~75,822 words
+- 63 files · ~76,181 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 425 nodes · 476 edges · 21 communities detected
+- 426 nodes · 477 edges · 21 communities detected
 - Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 26 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -112,11 +112,11 @@ Nodes (5): getPrintBackgroundAsset(), getPrintBackgroundOptionsForOrientation(),
 
 ### Community 15 - "Community 15"
 Cohesion: 0.29
-Nodes (8): Graphify, Balance of Performance (BOP), Entry Form, Inspection Form, RacedocV1, Success Ballast, Supabase, Weight-In
+Nodes (2): getEntryListFilterOptions(), uniqueSorted()
 
 ### Community 16 - "Community 16"
-Cohesion: 0.33
-Nodes (2): getEntryListFilterOptions(), uniqueSorted()
+Cohesion: 0.29
+Nodes (8): Graphify, Balance of Performance (BOP), Entry Form, Inspection Form, RacedocV1, Success Ballast, Supabase, Weight-In
 
 ### Community 17 - "Community 17"
 Cohesion: 0.38
@@ -145,7 +145,7 @@ Nodes (1): Branding
 ## Knowledge Gaps
 - **8 isolated node(s):** `Entry Form`, `Success Ballast`, `Audit Trail`, `RBAC`, `Competitor Request` (+3 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Community 16`** (7 nodes): `createEmptyEntryListFilters()`, `filterEntryList()`, `getEntryListFilterOptions()`, `getEntryStatusDisplay()`, `hasActiveEntryListFilters()`, `uniqueSorted()`, `entryFormListHelpers.ts`
+- **Thin community `Community 15`** (8 nodes): `createEmptyEntryListFilters()`, `filterEntryList()`, `getEntryListFilterOptions()`, `getEntryStatusDisplay()`, `getPaperEntryReadiness()`, `hasActiveEntryListFilters()`, `uniqueSorted()`, `entryFormListHelpers.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 46`** (1 nodes): `Audit Trail`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
