@@ -1,56 +1,26 @@
 import { motion } from 'framer-motion'
-import { Bell, CheckCircle2, FileClock, RefreshCcw, Scale, ShieldAlert, Trophy } from 'lucide-react'
+import { Bell, CheckCircle2, RefreshCcw } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/auth/useAuth'
-import { canSeeAdminNavigation, getPrimaryRoleLabel } from '@/navigation'
+import { getPrimaryRoleLabel } from '@/navigation'
 import { supabase } from '@/lib/supabase'
-
-type DashboardMetrics = {
-  pendingEntryForms: number
-  activeEntryForms: number
-  rejectedEntryForms: number
-  pendingRequests: number
-  inspectionPending: number
-  inspectionFailed: number
-  weightInFailed: number
-}
-
-type DashboardAlert = {
-  type: string
-  severity: 'info' | 'warning' | 'danger'
-  title: string
-  description: string
-  timestamp: string | null
-}
-
-type DashboardAction = {
-  label: string
-  path: string
-  count: number
-}
-
-type DashboardSummary = {
-  scope: 'official' | 'competitor'
-  metrics: DashboardMetrics
-  alerts: DashboardAlert[]
-  next_actions: DashboardAction[]
-}
-
-const defaultMetrics: DashboardMetrics = {
-  pendingEntryForms: 0,
-  activeEntryForms: 0,
-  rejectedEntryForms: 0,
-  pendingRequests: 0,
-  inspectionPending: 0,
-  inspectionFailed: 0,
-  weightInFailed: 0,
-}
+import {
+  createDashboardCards,
+  defaultMetrics,
+  getFallbackScope,
+  getScopeDescription,
+  getScopeLabel,
+  normalizeDashboardSummary,
+  type DashboardAction,
+  type DashboardAlert,
+  type DashboardCard,
+  type DashboardSummary,
+} from './dashboardHelpers'
 
 export function DashboardPage() {
   const { profile, roles } = useAuth()
   const displayName = getDisplayName(profile)
-  const elevated = canSeeAdminNavigation(roles)
   const [summary, setSummary] = useState<DashboardSummary | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -67,11 +37,11 @@ export function DashboardPage() {
       setSummary(null)
       setError(error.message)
     } else {
-      setSummary(normalizeSummary(data?.[0], elevated))
+      setSummary(normalizeDashboardSummary(data?.[0], roles))
     }
 
     setLoading(false)
-  }, [elevated])
+  }, [roles])
 
   useEffect(() => {
     let active = true
@@ -88,9 +58,10 @@ export function DashboardPage() {
   }, [loadSummary])
 
   const cards = useMemo(
-    () => createCards(summary?.metrics ?? defaultMetrics, elevated),
-    [elevated, summary?.metrics],
+    () => createDashboardCards(summary?.metrics ?? defaultMetrics, summary?.scope ?? getFallbackScope(roles)),
+    [roles, summary?.metrics, summary?.scope],
   )
+  const scopeLabel = getScopeLabel(summary?.scope ?? getFallbackScope(roles))
 
   return (
     <div className="px-5 py-6 sm:px-8 lg:px-10">
@@ -108,20 +79,25 @@ export function DashboardPage() {
             Welcome, {displayName}.
           </h1>
           <p className="mt-3 max-w-3xl text-zinc-600 dark:text-zinc-400">
-            Live race document status, operational alerts, and next actions for your current role.
+            {getScopeDescription(summary?.scope ?? getFallbackScope(roles))}
           </p>
         </div>
+        <div className="flex flex-col items-start gap-3 lg:items-end">
+          <span className="inline-flex rounded-sm border border-zinc-300 px-3 py-1 font-mono text-xs uppercase tracking-[0.14em] text-zinc-600 dark:border-zinc-800 dark:text-zinc-400">
+            {scopeLabel}
+          </span>
 
-        <motion.button
-          whileTap={{ scale: 0.98 }}
-          type="button"
-          onClick={() => loadSummary()}
-          disabled={loading}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-zinc-300 px-4 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800"
-        >
-          <RefreshCcw size={17} />
-          Refresh
-        </motion.button>
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+            type="button"
+            onClick={() => loadSummary()}
+            disabled={loading}
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-zinc-300 px-4 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800"
+          >
+            <RefreshCcw size={17} />
+            Refresh
+          </motion.button>
+        </div>
       </motion.header>
 
       {error ? (
@@ -146,7 +122,7 @@ function MetricCard({
   card,
   index,
 }: {
-  card: ReturnType<typeof createCards>[number]
+  card: DashboardCard
   index: number
 }) {
   const Icon = card.icon
@@ -257,86 +233,14 @@ function NextActionPanel({ actions, loading }: { actions: DashboardAction[]; loa
               </Link>
             ))
           : null}
+        {!loading && actions.length === 0 ? (
+          <div className="border border-zinc-200 p-4 text-sm text-zinc-600 dark:border-zinc-800 dark:text-zinc-400">
+            No immediate actions. Refresh after new Entry Forms, technical checks, or requests are submitted.
+          </div>
+        ) : null}
       </div>
     </motion.section>
   )
-}
-
-function createCards(metrics: DashboardMetrics, elevated: boolean) {
-  if (elevated) {
-    return [
-      {
-        label: 'Pending Entry Forms',
-        value: metrics.pendingEntryForms,
-        note: 'Awaiting Secretary/Admin review',
-        icon: FileClock,
-        emphasis: metrics.pendingEntryForms > 0,
-      },
-      {
-        label: 'Inspection Pending',
-        value: metrics.inspectionPending,
-        note: 'Cars waiting for inspection result',
-        icon: ShieldAlert,
-        emphasis: metrics.inspectionPending > 0,
-      },
-      {
-        label: 'Weight-In Failed',
-        value: metrics.weightInFailed,
-        note: 'Failed non-void weigh-in logs',
-        icon: Scale,
-        emphasis: metrics.weightInFailed > 0,
-      },
-      {
-        label: 'Active Entry Forms',
-        value: metrics.activeEntryForms,
-        note: 'Approved and locked race entries',
-        icon: Trophy,
-        emphasis: false,
-      },
-    ]
-  }
-
-  return [
-    {
-      label: 'Active Entry Forms',
-      value: metrics.activeEntryForms,
-      note: 'Approved and locked race entries',
-      icon: Trophy,
-      emphasis: false,
-    },
-    {
-      label: 'Pending Entry Forms',
-      value: metrics.pendingEntryForms,
-      note: 'Submitted and awaiting review',
-      icon: FileClock,
-      emphasis: metrics.pendingEntryForms > 0,
-    },
-    {
-      label: 'Pending Requests',
-      value: metrics.pendingRequests,
-      note: 'Requests awaiting processing',
-      icon: Bell,
-      emphasis: metrics.pendingRequests > 0,
-    },
-    {
-      label: 'Inspection Issues',
-      value: metrics.inspectionFailed,
-      note: 'Failed inspections visible to you',
-      icon: ShieldAlert,
-      emphasis: metrics.inspectionFailed > 0,
-    },
-  ]
-}
-
-function normalizeSummary(raw: unknown, elevated: boolean): DashboardSummary {
-  const row = (raw ?? {}) as Partial<DashboardSummary>
-
-  return {
-    scope: row.scope ?? (elevated ? 'official' : 'competitor'),
-    metrics: { ...defaultMetrics, ...(row.metrics ?? {}) },
-    alerts: row.alerts ?? [],
-    next_actions: row.next_actions ?? [],
-  }
 }
 
 function getDisplayName(profile: ReturnType<typeof useAuth>['profile']) {
