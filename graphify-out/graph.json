@@ -387,7 +387,7 @@
       "source_file": "src/lib/auth-errors.ts",
       "source_location": "L1",
       "id": "src_lib_auth_errors_ts",
-      "community": 5,
+      "community": 6,
       "norm_label": "auth-errors.ts"
     },
     {
@@ -396,7 +396,7 @@
       "source_file": "src/lib/auth-errors.ts",
       "source_location": "L1",
       "id": "lib_auth_errors_getautherrormessage",
-      "community": 5,
+      "community": 6,
       "norm_label": "getautherrormessage()"
     },
     {
@@ -468,7 +468,7 @@
       "source_file": "src/pages/inspectionFormHelpers.ts",
       "source_location": "L1",
       "id": "src_pages_inspectionformhelpers_ts",
-      "community": 7,
+      "community": 8,
       "norm_label": "inspectionformhelpers.ts"
     },
     {
@@ -477,7 +477,7 @@
       "source_file": "src/pages/inspectionFormHelpers.ts",
       "source_location": "L72",
       "id": "pages_inspectionformhelpers_isanswerfilled",
-      "community": 7,
+      "community": 8,
       "norm_label": "isanswerfilled()"
     },
     {
@@ -486,7 +486,7 @@
       "source_file": "src/pages/inspectionFormHelpers.ts",
       "source_location": "L82",
       "id": "pages_inspectionformhelpers_getmissingrequireditems",
-      "community": 7,
+      "community": 8,
       "norm_label": "getmissingrequireditems()"
     },
     {
@@ -495,7 +495,7 @@
       "source_file": "src/pages/inspectionFormHelpers.ts",
       "source_location": "L88",
       "id": "pages_inspectionformhelpers_calculatesectionprogress",
-      "community": 7,
+      "community": 8,
       "norm_label": "calculatesectionprogress()"
     },
     {
@@ -504,7 +504,7 @@
       "source_file": "src/pages/inspectionFormHelpers.ts",
       "source_location": "L96",
       "id": "pages_inspectionformhelpers_deriveinspectionstatus",
-      "community": 7,
+      "community": 8,
       "norm_label": "deriveinspectionstatus()"
     },
     {
@@ -513,7 +513,7 @@
       "source_file": "src/pages/inspectionFormHelpers.ts",
       "source_location": "L107",
       "id": "pages_inspectionformhelpers_calculateitemweight",
-      "community": 7,
+      "community": 8,
       "norm_label": "calculateitemweight()"
     },
     {
@@ -522,7 +522,7 @@
       "source_file": "src/pages/inspectionFormHelpers.ts",
       "source_location": "L131",
       "id": "pages_inspectionformhelpers_calculatebopweight",
-      "community": 7,
+      "community": 8,
       "norm_label": "calculatebopweight()"
     },
     {
@@ -531,7 +531,7 @@
       "source_file": "src/pages/inspectionFormHelpers.ts",
       "source_location": "L137",
       "id": "pages_inspectionformhelpers_createdefaultreviews",
-      "community": 7,
+      "community": 8,
       "norm_label": "createdefaultreviews()"
     },
     {
@@ -540,7 +540,7 @@
       "source_file": "src/pages/inspectionFormHelpers.ts",
       "source_location": "L151",
       "id": "pages_inspectionformhelpers_getitemlabel",
-      "community": 7,
+      "community": 8,
       "norm_label": "getitemlabel()"
     },
     {
@@ -549,7 +549,7 @@
       "source_file": "src/pages/inspectionFormHelpers.ts",
       "source_location": "L155",
       "id": "pages_inspectionformhelpers_createinspectionversiondiff",
-      "community": 7,
+      "community": 8,
       "norm_label": "createinspectionversiondiff()"
     },
     {
@@ -558,7 +558,7 @@
       "source_file": "src/pages/inspectionFormHelpers.ts",
       "source_location": "L193",
       "id": "pages_inspectionformhelpers_formatinspectionvalue",
-      "community": 7,
+      "community": 8,
       "norm_label": "formatinspectionvalue()"
     },
     {
@@ -567,7 +567,7 @@
       "source_file": "src/pages/inspectionFormHelpers.ts",
       "source_location": "L209",
       "id": "pages_inspectionformhelpers_getselectedvalues",
-      "community": 7,
+      "community": 8,
       "norm_label": "getselectedvalues()"
     },
     {
@@ -576,7 +576,7 @@
       "source_file": "src/pages/inspectionFormHelpers.ts",
       "source_location": "L216",
       "id": "pages_inspectionformhelpers_mapreviews",
-      "community": 7,
+      "community": 8,
       "norm_label": "mapreviews()"
     },
     {
@@ -585,7 +585,7 @@
       "source_file": "src/pages/inspectionFormHelpers.ts",
       "source_location": "L220",
       "id": "pages_inspectionformhelpers_stablevalue",
-      "community": 7,
+      "community": 8,
       "norm_label": "stablevalue()"
     },
     {
@@ -594,7 +594,7 @@
       "source_file": "src/pages/inspectionFormHelpers.ts",
       "source_location": "L225",
       "id": "pages_inspectionformhelpers_getsingleselectedvalue",
-      "community": 7,
+      "community": 8,
       "norm_label": "getsingleselectedvalue()"
     },
     {
@@ -603,7 +603,7 @@
       "source_file": "src/pages/LoginPage.tsx",
       "source_location": "L1",
       "id": "src_pages_loginpage_tsx",
-      "community": 5,
+      "community": 6,
       "norm_label": "loginpage.tsx"
     },
     {
@@ -612,7 +612,7 @@
       "source_file": "src/pages/LoginPage.tsx",
       "source_location": "L34",
       "id": "pages_loginpage_handleemaillogin",
-      "community": 5,
+      "community": 6,
       "norm_label": "handleemaillogin()"
     },
     {
@@ -621,7 +621,7 @@
       "source_file": "src/pages/LoginPage.tsx",
       "source_location": "L51",
       "id": "pages_loginpage_handlegooglelogin",
-      "community": 5,
+      "community": 6,
       "norm_label": "handlegooglelogin()"
     },
     {
@@ -1107,7 +1107,7 @@
       "source_file": "src/pages/TeamRequiredPage.tsx",
       "source_location": "L1",
       "id": "src_pages_teamrequiredpage_tsx",
-      "community": 5,
+      "community": 6,
       "norm_label": "teamrequiredpage.tsx"
     },
     {
@@ -1116,7 +1116,7 @@
       "source_file": "src/pages/TeamRequiredPage.tsx",
       "source_location": "L37",
       "id": "pages_teamrequiredpage_updatefield",
-      "community": 5,
+      "community": 6,
       "norm_label": "updatefield()"
     },
     {
@@ -1125,7 +1125,7 @@
       "source_file": "src/pages/TeamRequiredPage.tsx",
       "source_location": "L41",
       "id": "pages_teamrequiredpage_handlesubmit",
-      "community": 5,
+      "community": 6,
       "norm_label": "handlesubmit()"
     },
     {
@@ -1192,10 +1192,19 @@
       "norm_label": "organizersettingspage.test.ts"
     },
     {
+      "label": "createOrganizerPayload()",
+      "file_type": "code",
+      "source_file": "src/pages/OrganizerSettingsPage.test.ts",
+      "source_location": "L188",
+      "id": "pages_organizersettingspage_test_createorganizerpayload",
+      "community": 14,
+      "norm_label": "createorganizerpayload()"
+    },
+    {
       "label": "createEventRule()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.test.ts",
-      "source_location": "L158",
+      "source_location": "L211",
       "id": "pages_organizersettingspage_test_createeventrule",
       "community": 14,
       "norm_label": "createeventrule()"
@@ -1204,7 +1213,7 @@
       "label": "createInspectionTemplate()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.test.ts",
-      "source_location": "L176",
+      "source_location": "L229",
       "id": "pages_organizersettingspage_test_createinspectiontemplate",
       "community": 14,
       "norm_label": "createinspectiontemplate()"
@@ -1213,7 +1222,7 @@
       "label": "createBallastRule()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.test.ts",
-      "source_location": "L193",
+      "source_location": "L246",
       "id": "pages_organizersettingspage_test_createballastrule",
       "community": 14,
       "norm_label": "createballastrule()"
@@ -1222,7 +1231,7 @@
       "label": "createTireRule()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.test.ts",
-      "source_location": "L211",
+      "source_location": "L264",
       "id": "pages_organizersettingspage_test_createtirerule",
       "community": 14,
       "norm_label": "createtirerule()"
@@ -1231,7 +1240,7 @@
       "label": "createSponsorStickerAsset()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.test.ts",
-      "source_location": "L227",
+      "source_location": "L280",
       "id": "pages_organizersettingspage_test_createsponsorstickerasset",
       "community": 14,
       "norm_label": "createsponsorstickerasset()"
@@ -1240,7 +1249,7 @@
       "label": "createPrintBackgroundAsset()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.test.ts",
-      "source_location": "L247",
+      "source_location": "L300",
       "id": "pages_organizersettingspage_test_createprintbackgroundasset",
       "community": 14,
       "norm_label": "createprintbackgroundasset()"
@@ -1249,7 +1258,7 @@
       "label": "createWeightRule()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.test.ts",
-      "source_location": "L266",
+      "source_location": "L319",
       "id": "pages_organizersettingspage_test_createweightrule",
       "community": 14,
       "norm_label": "createweightrule()"
@@ -1260,7 +1269,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L1",
       "id": "src_pages_checklistpage_tsx",
-      "community": 10,
+      "community": 11,
       "norm_label": "checklistpage.tsx"
     },
     {
@@ -1269,7 +1278,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L137",
       "id": "pages_checklistpage_run",
-      "community": 10,
+      "community": 11,
       "norm_label": "run()"
     },
     {
@@ -1278,7 +1287,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L184",
       "id": "pages_checklistpage_handleeventchange",
-      "community": 10,
+      "community": 11,
       "norm_label": "handleeventchange()"
     },
     {
@@ -1287,7 +1296,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L191",
       "id": "pages_checklistpage_toggleentryselection",
-      "community": 10,
+      "community": 11,
       "norm_label": "toggleentryselection()"
     },
     {
@@ -1296,7 +1305,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L198",
       "id": "pages_checklistpage_togglevisibleentryselection",
-      "community": 10,
+      "community": 11,
       "norm_label": "togglevisibleentryselection()"
     },
     {
@@ -1305,7 +1314,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L209",
       "id": "pages_checklistpage_createtopic",
-      "community": 10,
+      "community": 11,
       "norm_label": "createtopic()"
     },
     {
@@ -1314,7 +1323,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L234",
       "id": "pages_checklistpage_movetopic",
-      "community": 10,
+      "community": 11,
       "norm_label": "movetopic()"
     },
     {
@@ -1323,7 +1332,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L253",
       "id": "pages_checklistpage_deletetopic",
-      "community": 10,
+      "community": 11,
       "norm_label": "deletetopic()"
     },
     {
@@ -1332,7 +1341,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L274",
       "id": "pages_checklistpage_updatechecklistitem",
-      "community": 10,
+      "community": 11,
       "norm_label": "updatechecklistitem()"
     },
     {
@@ -1341,7 +1350,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L295",
       "id": "pages_checklistpage_bulkupdatechecklistitems",
-      "community": 10,
+      "community": 11,
       "norm_label": "bulkupdatechecklistitems()"
     },
     {
@@ -1350,7 +1359,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L322",
       "id": "pages_checklistpage_savenotes",
-      "community": 10,
+      "community": 11,
       "norm_label": "savenotes()"
     },
     {
@@ -1359,7 +1368,7 @@
       "source_file": "src/pages/ChecklistPage.tsx",
       "source_location": "L346",
       "id": "pages_checklistpage_openaudit",
-      "community": 10,
+      "community": 11,
       "norm_label": "openaudit()"
     },
     {
@@ -1368,7 +1377,7 @@
       "source_file": "src/pages/auditTrailHelpers.ts",
       "source_location": "L1",
       "id": "src_pages_audittrailhelpers_ts",
-      "community": 9,
+      "community": 10,
       "norm_label": "audittrailhelpers.ts"
     },
     {
@@ -1377,7 +1386,7 @@
       "source_file": "src/pages/auditTrailHelpers.ts",
       "source_location": "L31",
       "id": "pages_audittrailhelpers_normalizeaudittrailpayload",
-      "community": 9,
+      "community": 10,
       "norm_label": "normalizeaudittrailpayload()"
     },
     {
@@ -1386,7 +1395,7 @@
       "source_file": "src/pages/auditTrailHelpers.ts",
       "source_location": "L45",
       "id": "pages_audittrailhelpers_getauditentitylabel",
-      "community": 9,
+      "community": 10,
       "norm_label": "getauditentitylabel()"
     },
     {
@@ -1395,7 +1404,7 @@
       "source_file": "src/pages/auditTrailHelpers.ts",
       "source_location": "L53",
       "id": "pages_audittrailhelpers_getauditactionlabel",
-      "community": 9,
+      "community": 10,
       "norm_label": "getauditactionlabel()"
     },
     {
@@ -1404,7 +1413,7 @@
       "source_file": "src/pages/auditTrailHelpers.ts",
       "source_location": "L61",
       "id": "pages_audittrailhelpers_getauditpagerange",
-      "community": 9,
+      "community": 10,
       "norm_label": "getauditpagerange()"
     },
     {
@@ -1413,7 +1422,7 @@
       "source_file": "src/pages/auditTrailHelpers.ts",
       "source_location": "L69",
       "id": "pages_audittrailhelpers_buildaudittrailcsv",
-      "community": 9,
+      "community": 10,
       "norm_label": "buildaudittrailcsv()"
     },
     {
@@ -1422,7 +1431,7 @@
       "source_file": "src/pages/auditTrailHelpers.ts",
       "source_location": "L97",
       "id": "pages_audittrailhelpers_escapecsvcell",
-      "community": 9,
+      "community": 10,
       "norm_label": "escapecsvcell()"
     },
     {
@@ -1440,106 +1449,151 @@
       "source_file": "src/pages/organizerSettingsHelpers.ts",
       "source_location": "L1",
       "id": "src_pages_organizersettingshelpers_ts",
-      "community": 11,
+      "community": 5,
       "norm_label": "organizersettingshelpers.ts"
     },
     {
       "label": "normalizeOrganizerSettingsPayload()",
       "file_type": "code",
       "source_file": "src/pages/organizerSettingsHelpers.ts",
-      "source_location": "L245",
+      "source_location": "L280",
       "id": "pages_organizersettingshelpers_normalizeorganizersettingspayload",
-      "community": 11,
+      "community": 5,
       "norm_label": "normalizeorganizersettingspayload()"
+    },
+    {
+      "label": "createOrganizerSetupBoard()",
+      "file_type": "code",
+      "source_file": "src/pages/organizerSettingsHelpers.ts",
+      "source_location": "L302",
+      "id": "pages_organizersettingshelpers_createorganizersetupboard",
+      "community": 5,
+      "norm_label": "createorganizersetupboard()"
     },
     {
       "label": "groupSeasonSeriesBySeason()",
       "file_type": "code",
       "source_file": "src/pages/organizerSettingsHelpers.ts",
-      "source_location": "L267",
+      "source_location": "L418",
       "id": "pages_organizersettingshelpers_groupseasonseriesbyseason",
-      "community": 11,
+      "community": 5,
       "norm_label": "groupseasonseriesbyseason()"
+    },
+    {
+      "label": "createSetupStep()",
+      "file_type": "code",
+      "source_file": "src/pages/organizerSettingsHelpers.ts",
+      "source_location": "L426",
+      "id": "pages_organizersettingshelpers_createsetupstep",
+      "community": 5,
+      "norm_label": "createsetupstep()"
+    },
+    {
+      "label": "getClassActionLabel()",
+      "file_type": "code",
+      "source_file": "src/pages/organizerSettingsHelpers.ts",
+      "source_location": "L434",
+      "id": "pages_organizersettingshelpers_getclassactionlabel",
+      "community": 5,
+      "norm_label": "getclassactionlabel()"
+    },
+    {
+      "label": "getClassEditorKey()",
+      "file_type": "code",
+      "source_file": "src/pages/organizerSettingsHelpers.ts",
+      "source_location": "L441",
+      "id": "pages_organizersettingshelpers_getclasseditorkey",
+      "community": 5,
+      "norm_label": "getclasseditorkey()"
+    },
+    {
+      "label": "getRuleEditorKey()",
+      "file_type": "code",
+      "source_file": "src/pages/organizerSettingsHelpers.ts",
+      "source_location": "L448",
+      "id": "pages_organizersettingshelpers_getruleeditorkey",
+      "community": 5,
+      "norm_label": "getruleeditorkey()"
     },
     {
       "label": "groupSeasonSeriesGradesBySeries()",
       "file_type": "code",
       "source_file": "src/pages/organizerSettingsHelpers.ts",
-      "source_location": "L275",
+      "source_location": "L455",
       "id": "pages_organizersettingshelpers_groupseasonseriesgradesbyseries",
-      "community": 11,
+      "community": 5,
       "norm_label": "groupseasonseriesgradesbyseries()"
     },
     {
       "label": "groupEventSeriesRulesByEvent()",
       "file_type": "code",
       "source_file": "src/pages/organizerSettingsHelpers.ts",
-      "source_location": "L283",
+      "source_location": "L463",
       "id": "pages_organizersettingshelpers_groupeventseriesrulesbyevent",
-      "community": 11,
+      "community": 5,
       "norm_label": "groupeventseriesrulesbyevent()"
     },
     {
       "label": "groupInspectionTemplatesByEventRule()",
       "file_type": "code",
       "source_file": "src/pages/organizerSettingsHelpers.ts",
-      "source_location": "L291",
+      "source_location": "L471",
       "id": "pages_organizersettingshelpers_groupinspectiontemplatesbyeventrule",
-      "community": 11,
+      "community": 5,
       "norm_label": "groupinspectiontemplatesbyeventrule()"
     },
     {
       "label": "groupBallastRulesByEventRule()",
       "file_type": "code",
       "source_file": "src/pages/organizerSettingsHelpers.ts",
-      "source_location": "L299",
+      "source_location": "L479",
       "id": "pages_organizersettingshelpers_groupballastrulesbyeventrule",
-      "community": 11,
+      "community": 5,
       "norm_label": "groupballastrulesbyeventrule()"
     },
     {
       "label": "groupTireRulesByEventRule()",
       "file_type": "code",
       "source_file": "src/pages/organizerSettingsHelpers.ts",
-      "source_location": "L307",
+      "source_location": "L487",
       "id": "pages_organizersettingshelpers_grouptirerulesbyeventrule",
-      "community": 11,
+      "community": 5,
       "norm_label": "grouptirerulesbyeventrule()"
     },
     {
       "label": "groupSponsorStickerAssetsByEventRule()",
       "file_type": "code",
       "source_file": "src/pages/organizerSettingsHelpers.ts",
-      "source_location": "L315",
+      "source_location": "L495",
       "id": "pages_organizersettingshelpers_groupsponsorstickerassetsbyeventrule",
-      "community": 11,
+      "community": 5,
       "norm_label": "groupsponsorstickerassetsbyeventrule()"
     },
     {
       "label": "groupPrintBackgroundAssetsByEvent()",
       "file_type": "code",
       "source_file": "src/pages/organizerSettingsHelpers.ts",
-      "source_location": "L323",
+      "source_location": "L503",
       "id": "pages_organizersettingshelpers_groupprintbackgroundassetsbyevent",
-      "community": 11,
+      "community": 5,
       "norm_label": "groupprintbackgroundassetsbyevent()"
     },
     {
       "label": "groupWeightRulesByEventRule()",
       "file_type": "code",
       "source_file": "src/pages/organizerSettingsHelpers.ts",
-      "source_location": "L331",
+      "source_location": "L511",
       "id": "pages_organizersettingshelpers_groupweightrulesbyeventrule",
-      "community": 11,
+      "community": 5,
       "norm_label": "groupweightrulesbyeventrule()"
     },
     {
       "label": "getEligibleGradesForEventSeries()",
       "file_type": "code",
       "source_file": "src/pages/organizerSettingsHelpers.ts",
-      "source_location": "L339",
+      "source_location": "L519",
       "id": "pages_organizersettingshelpers_geteligiblegradesforeventseries",
-      "community": 11,
+      "community": 5,
       "norm_label": "geteligiblegradesforeventseries()"
     },
     {
@@ -1962,7 +2016,7 @@
       "source_file": "src/pages/PrivacySettingsPage.tsx",
       "source_location": "L1",
       "id": "src_pages_privacysettingspage_tsx",
-      "community": 5,
+      "community": 6,
       "norm_label": "privacysettingspage.tsx"
     },
     {
@@ -1971,7 +2025,7 @@
       "source_file": "src/pages/PrivacySettingsPage.tsx",
       "source_location": "L19",
       "id": "pages_privacysettingspage_updatepassword",
-      "community": 5,
+      "community": 6,
       "norm_label": "updatepassword()"
     },
     {
@@ -2131,7 +2185,7 @@
       "label": "run()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L372",
+      "source_location": "L363",
       "id": "pages_organizersettingspage_run",
       "community": 0,
       "norm_label": "run()"
@@ -2140,7 +2194,7 @@
       "label": "openEditor()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L405",
+      "source_location": "L395",
       "id": "pages_organizersettingspage_openeditor",
       "community": 0,
       "norm_label": "openeditor()"
@@ -2149,7 +2203,7 @@
       "label": "startDuplicateSeason()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L410",
+      "source_location": "L400",
       "id": "pages_organizersettingspage_startduplicateseason",
       "community": 0,
       "norm_label": "startduplicateseason()"
@@ -2158,7 +2212,7 @@
       "label": "startDuplicateEvent()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L424",
+      "source_location": "L414",
       "id": "pages_organizersettingspage_startduplicateevent",
       "community": 0,
       "norm_label": "startduplicateevent()"
@@ -2167,7 +2221,7 @@
       "label": "submitDuplicate()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L440",
+      "source_location": "L430",
       "id": "pages_organizersettingspage_submitduplicate",
       "community": 0,
       "norm_label": "submitduplicate()"
@@ -2176,7 +2230,7 @@
       "label": "saveCircuit()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L475",
+      "source_location": "L465",
       "id": "pages_organizersettingspage_savecircuit",
       "community": 0,
       "norm_label": "savecircuit()"
@@ -2185,7 +2239,7 @@
       "label": "saveSeason()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L492",
+      "source_location": "L482",
       "id": "pages_organizersettingspage_saveseason",
       "community": 0,
       "norm_label": "saveseason()"
@@ -2194,7 +2248,7 @@
       "label": "saveSeriesRace()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L511",
+      "source_location": "L501",
       "id": "pages_organizersettingspage_saveseriesrace",
       "community": 0,
       "norm_label": "saveseriesrace()"
@@ -2203,7 +2257,7 @@
       "label": "saveGrade()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L530",
+      "source_location": "L520",
       "id": "pages_organizersettingspage_savegrade",
       "community": 0,
       "norm_label": "savegrade()"
@@ -2212,7 +2266,7 @@
       "label": "setSeasonSeries()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L547",
+      "source_location": "L537",
       "id": "pages_organizersettingspage_setseasonseries",
       "community": 0,
       "norm_label": "setseasonseries()"
@@ -2221,7 +2275,7 @@
       "label": "setSeasonSeriesGrade()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L563",
+      "source_location": "L553",
       "id": "pages_organizersettingspage_setseasonseriesgrade",
       "community": 0,
       "norm_label": "setseasonseriesgrade()"
@@ -2230,7 +2284,7 @@
       "label": "saveEventSeriesRule()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L580",
+      "source_location": "L570",
       "id": "pages_organizersettingspage_saveeventseriesrule",
       "community": 0,
       "norm_label": "saveeventseriesrule()"
@@ -2239,7 +2293,7 @@
       "label": "saveInspectionTemplate()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L601",
+      "source_location": "L591",
       "id": "pages_organizersettingspage_saveinspectiontemplate",
       "community": 0,
       "norm_label": "saveinspectiontemplate()"
@@ -2248,7 +2302,7 @@
       "label": "saveInspectionSection()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L620",
+      "source_location": "L610",
       "id": "pages_organizersettingspage_saveinspectionsection",
       "community": 0,
       "norm_label": "saveinspectionsection()"
@@ -2257,7 +2311,7 @@
       "label": "saveInspectionItem()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L639",
+      "source_location": "L629",
       "id": "pages_organizersettingspage_saveinspectionitem",
       "community": 0,
       "norm_label": "saveinspectionitem()"
@@ -2266,7 +2320,7 @@
       "label": "saveWeightRule()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L673",
+      "source_location": "L663",
       "id": "pages_organizersettingspage_saveweightrule",
       "community": 0,
       "norm_label": "saveweightrule()"
@@ -2275,7 +2329,7 @@
       "label": "saveBallastRule()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L707",
+      "source_location": "L697",
       "id": "pages_organizersettingspage_saveballastrule",
       "community": 0,
       "norm_label": "saveballastrule()"
@@ -2284,7 +2338,7 @@
       "label": "saveTireRule()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L739",
+      "source_location": "L729",
       "id": "pages_organizersettingspage_savetirerule",
       "community": 0,
       "norm_label": "savetirerule()"
@@ -2293,7 +2347,7 @@
       "label": "saveSponsorStickerAsset()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L757",
+      "source_location": "L747",
       "id": "pages_organizersettingspage_savesponsorstickerasset",
       "community": 0,
       "norm_label": "savesponsorstickerasset()"
@@ -2302,7 +2356,7 @@
       "label": "savePrintBackgroundAsset()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L789",
+      "source_location": "L779",
       "id": "pages_organizersettingspage_saveprintbackgroundasset",
       "community": 0,
       "norm_label": "saveprintbackgroundasset()"
@@ -2311,7 +2365,7 @@
       "label": "saveEvent()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L823",
+      "source_location": "L813",
       "id": "pages_organizersettingspage_saveevent",
       "community": 0,
       "norm_label": "saveevent()"
@@ -2320,7 +2374,7 @@
       "label": "saveRace()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L844",
+      "source_location": "L834",
       "id": "pages_organizersettingspage_saverace",
       "community": 0,
       "norm_label": "saverace()"
@@ -2329,7 +2383,7 @@
       "label": "finishSave()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L864",
+      "source_location": "L854",
       "id": "pages_organizersettingspage_finishsave",
       "community": 0,
       "norm_label": "finishsave()"
@@ -2338,7 +2392,7 @@
       "label": "uploadSponsorStickerAsset()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L875",
+      "source_location": "L865",
       "id": "pages_organizersettingspage_uploadsponsorstickerasset",
       "community": 0,
       "norm_label": "uploadsponsorstickerasset()"
@@ -2347,7 +2401,7 @@
       "label": "uploadOrganizerAsset()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L883",
+      "source_location": "L873",
       "id": "pages_organizersettingspage_uploadorganizerasset",
       "community": 0,
       "norm_label": "uploadorganizerasset()"
@@ -2356,7 +2410,7 @@
       "label": "Alert()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2211",
+      "source_location": "L2290",
       "id": "pages_organizersettingspage_alert",
       "community": 0,
       "norm_label": "alert()"
@@ -2365,7 +2419,7 @@
       "label": "OrganizerSkeleton()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2219",
+      "source_location": "L2298",
       "id": "pages_organizersettingspage_organizerskeleton",
       "community": 0,
       "norm_label": "organizerskeleton()"
@@ -2374,43 +2428,16 @@
       "label": "EmptyState()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2228",
+      "source_location": "L2307",
       "id": "pages_organizersettingspage_emptystate",
       "community": 0,
       "norm_label": "emptystate()"
     },
     {
-      "label": "createSettingsReadiness()",
-      "file_type": "code",
-      "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2232",
-      "id": "pages_organizersettingspage_createsettingsreadiness",
-      "community": 0,
-      "norm_label": "createsettingsreadiness()"
-    },
-    {
-      "label": "createSettingsPhaseSummaries()",
-      "file_type": "code",
-      "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2243",
-      "id": "pages_organizersettingspage_createsettingsphasesummaries",
-      "community": 0,
-      "norm_label": "createsettingsphasesummaries()"
-    },
-    {
-      "label": "countReady()",
-      "file_type": "code",
-      "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2254",
-      "id": "pages_organizersettingspage_countready",
-      "community": 0,
-      "norm_label": "countready()"
-    },
-    {
       "label": "createEmptyCircuitForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2258",
+      "source_location": "L2311",
       "id": "pages_organizersettingspage_createemptycircuitform",
       "community": 0,
       "norm_label": "createemptycircuitform()"
@@ -2419,7 +2446,7 @@
       "label": "createCircuitForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2262",
+      "source_location": "L2315",
       "id": "pages_organizersettingspage_createcircuitform",
       "community": 0,
       "norm_label": "createcircuitform()"
@@ -2428,7 +2455,7 @@
       "label": "createEmptySeasonForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2272",
+      "source_location": "L2325",
       "id": "pages_organizersettingspage_createemptyseasonform",
       "community": 0,
       "norm_label": "createemptyseasonform()"
@@ -2437,7 +2464,7 @@
       "label": "createSeasonForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2277",
+      "source_location": "L2330",
       "id": "pages_organizersettingspage_createseasonform",
       "community": 0,
       "norm_label": "createseasonform()"
@@ -2446,7 +2473,7 @@
       "label": "createEmptySeriesRaceForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2289",
+      "source_location": "L2342",
       "id": "pages_organizersettingspage_createemptyseriesraceform",
       "community": 0,
       "norm_label": "createemptyseriesraceform()"
@@ -2455,7 +2482,7 @@
       "label": "createSeriesRaceForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2293",
+      "source_location": "L2346",
       "id": "pages_organizersettingspage_createseriesraceform",
       "community": 0,
       "norm_label": "createseriesraceform()"
@@ -2464,7 +2491,7 @@
       "label": "createEmptyGradeForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2305",
+      "source_location": "L2358",
       "id": "pages_organizersettingspage_createemptygradeform",
       "community": 0,
       "norm_label": "createemptygradeform()"
@@ -2473,7 +2500,7 @@
       "label": "createGradeForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2309",
+      "source_location": "L2362",
       "id": "pages_organizersettingspage_creategradeform",
       "community": 0,
       "norm_label": "creategradeform()"
@@ -2482,7 +2509,7 @@
       "label": "createEmptySeasonSeriesForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2319",
+      "source_location": "L2372",
       "id": "pages_organizersettingspage_createemptyseasonseriesform",
       "community": 0,
       "norm_label": "createemptyseasonseriesform()"
@@ -2491,7 +2518,7 @@
       "label": "createEmptySeasonSeriesGradeForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2323",
+      "source_location": "L2376",
       "id": "pages_organizersettingspage_createemptyseasonseriesgradeform",
       "community": 0,
       "norm_label": "createemptyseasonseriesgradeform()"
@@ -2500,7 +2527,7 @@
       "label": "createEmptyEventSeriesRuleForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2327",
+      "source_location": "L2380",
       "id": "pages_organizersettingspage_createemptyeventseriesruleform",
       "community": 0,
       "norm_label": "createemptyeventseriesruleform()"
@@ -2509,7 +2536,7 @@
       "label": "createEventSeriesRuleForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2331",
+      "source_location": "L2384",
       "id": "pages_organizersettingspage_createeventseriesruleform",
       "community": 0,
       "norm_label": "createeventseriesruleform()"
@@ -2518,7 +2545,7 @@
       "label": "createEmptyInspectionTemplateForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2345",
+      "source_location": "L2398",
       "id": "pages_organizersettingspage_createemptyinspectiontemplateform",
       "community": 0,
       "norm_label": "createemptyinspectiontemplateform()"
@@ -2527,7 +2554,7 @@
       "label": "createInspectionTemplateForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2349",
+      "source_location": "L2402",
       "id": "pages_organizersettingspage_createinspectiontemplateform",
       "community": 0,
       "norm_label": "createinspectiontemplateform()"
@@ -2536,7 +2563,7 @@
       "label": "createEmptyInspectionSectionForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2361",
+      "source_location": "L2414",
       "id": "pages_organizersettingspage_createemptyinspectionsectionform",
       "community": 0,
       "norm_label": "createemptyinspectionsectionform()"
@@ -2545,7 +2572,7 @@
       "label": "createInspectionSectionForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2365",
+      "source_location": "L2418",
       "id": "pages_organizersettingspage_createinspectionsectionform",
       "community": 0,
       "norm_label": "createinspectionsectionform()"
@@ -2554,7 +2581,7 @@
       "label": "createEmptyInspectionItemForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2377",
+      "source_location": "L2430",
       "id": "pages_organizersettingspage_createemptyinspectionitemform",
       "community": 0,
       "norm_label": "createemptyinspectionitemform()"
@@ -2563,7 +2590,7 @@
       "label": "createInspectionItemForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2381",
+      "source_location": "L2434",
       "id": "pages_organizersettingspage_createinspectionitemform",
       "community": 0,
       "norm_label": "createinspectionitemform()"
@@ -2572,7 +2599,7 @@
       "label": "createEmptyWeightRuleForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2397",
+      "source_location": "L2450",
       "id": "pages_organizersettingspage_createemptyweightruleform",
       "community": 0,
       "norm_label": "createemptyweightruleform()"
@@ -2581,7 +2608,7 @@
       "label": "createWeightRuleForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2411",
+      "source_location": "L2464",
       "id": "pages_organizersettingspage_createweightruleform",
       "community": 0,
       "norm_label": "createweightruleform()"
@@ -2590,7 +2617,7 @@
       "label": "createEmptyBallastRuleForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2426",
+      "source_location": "L2479",
       "id": "pages_organizersettingspage_createemptyballastruleform",
       "community": 0,
       "norm_label": "createemptyballastruleform()"
@@ -2599,7 +2626,7 @@
       "label": "createBallastRuleForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2438",
+      "source_location": "L2491",
       "id": "pages_organizersettingspage_createballastruleform",
       "community": 0,
       "norm_label": "createballastruleform()"
@@ -2608,7 +2635,7 @@
       "label": "createEmptyTireRuleForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2451",
+      "source_location": "L2504",
       "id": "pages_organizersettingspage_createemptytireruleform",
       "community": 0,
       "norm_label": "createemptytireruleform()"
@@ -2617,7 +2644,7 @@
       "label": "createTireRuleForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2461",
+      "source_location": "L2514",
       "id": "pages_organizersettingspage_createtireruleform",
       "community": 0,
       "norm_label": "createtireruleform()"
@@ -2626,7 +2653,7 @@
       "label": "createEmptySponsorStickerAssetForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2472",
+      "source_location": "L2525",
       "id": "pages_organizersettingspage_createemptysponsorstickerassetform",
       "community": 0,
       "norm_label": "createemptysponsorstickerassetform()"
@@ -2635,7 +2662,7 @@
       "label": "createSponsorStickerAssetForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2483",
+      "source_location": "L2536",
       "id": "pages_organizersettingspage_createsponsorstickerassetform",
       "community": 0,
       "norm_label": "createsponsorstickerassetform()"
@@ -2644,7 +2671,7 @@
       "label": "createEmptyPrintBackgroundAssetForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2495",
+      "source_location": "L2548",
       "id": "pages_organizersettingspage_createemptyprintbackgroundassetform",
       "community": 0,
       "norm_label": "createemptyprintbackgroundassetform()"
@@ -2653,7 +2680,7 @@
       "label": "createPrintBackgroundAssetForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2508",
+      "source_location": "L2561",
       "id": "pages_organizersettingspage_createprintbackgroundassetform",
       "community": 0,
       "norm_label": "createprintbackgroundassetform()"
@@ -2662,7 +2689,7 @@
       "label": "formatOrientation()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2522",
+      "source_location": "L2575",
       "id": "pages_organizersettingspage_formatorientation",
       "community": 0,
       "norm_label": "formatorientation()"
@@ -2671,7 +2698,7 @@
       "label": "createEmptyEventForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2526",
+      "source_location": "L2579",
       "id": "pages_organizersettingspage_createemptyeventform",
       "community": 0,
       "norm_label": "createemptyeventform()"
@@ -2680,7 +2707,7 @@
       "label": "createEventForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2530",
+      "source_location": "L2583",
       "id": "pages_organizersettingspage_createeventform",
       "community": 0,
       "norm_label": "createeventform()"
@@ -2689,7 +2716,7 @@
       "label": "createEmptyRaceForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2544",
+      "source_location": "L2597",
       "id": "pages_organizersettingspage_createemptyraceform",
       "community": 0,
       "norm_label": "createemptyraceform()"
@@ -2698,7 +2725,7 @@
       "label": "createRaceForm()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2548",
+      "source_location": "L2601",
       "id": "pages_organizersettingspage_createraceform",
       "community": 0,
       "norm_label": "createraceform()"
@@ -2707,7 +2734,7 @@
       "label": "groupEventsBySeason()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2561",
+      "source_location": "L2614",
       "id": "pages_organizersettingspage_groupeventsbyseason",
       "community": 0,
       "norm_label": "groupeventsbyseason()"
@@ -2716,7 +2743,7 @@
       "label": "groupRacesByEvent()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2569",
+      "source_location": "L2622",
       "id": "pages_organizersettingspage_groupracesbyevent",
       "community": 0,
       "norm_label": "groupracesbyevent()"
@@ -2725,7 +2752,7 @@
       "label": "parseJsonObject()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2577",
+      "source_location": "L2630",
       "id": "pages_organizersettingspage_parsejsonobject",
       "community": 0,
       "norm_label": "parsejsonobject()"
@@ -2734,7 +2761,7 @@
       "label": "sanitizeFileName()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2585",
+      "source_location": "L2638",
       "id": "pages_organizersettingspage_sanitizefilename",
       "community": 0,
       "norm_label": "sanitizefilename()"
@@ -2743,7 +2770,7 @@
       "label": "formatDateRange()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2590",
+      "source_location": "L2643",
       "id": "pages_organizersettingspage_formatdaterange",
       "community": 0,
       "norm_label": "formatdaterange()"
@@ -2752,7 +2779,7 @@
       "label": "toDateTimeLocal()",
       "file_type": "code",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2596",
+      "source_location": "L2649",
       "id": "pages_organizersettingspage_todatetimelocal",
       "community": 0,
       "norm_label": "todatetimelocal()"
@@ -2943,7 +2970,7 @@
       "source_file": "src/pages/SignUpPage.tsx",
       "source_location": "L1",
       "id": "src_pages_signuppage_tsx",
-      "community": 5,
+      "community": 6,
       "norm_label": "signuppage.tsx"
     },
     {
@@ -2952,7 +2979,7 @@
       "source_file": "src/pages/SignUpPage.tsx",
       "source_location": "L22",
       "id": "pages_signuppage_handlesignup",
-      "community": 5,
+      "community": 6,
       "norm_label": "handlesignup()"
     },
     {
@@ -2961,7 +2988,7 @@
       "source_file": "src/pages/OnboardingPage.tsx",
       "source_location": "L1",
       "id": "src_pages_onboardingpage_tsx",
-      "community": 5,
+      "community": 6,
       "norm_label": "onboardingpage.tsx"
     },
     {
@@ -2970,7 +2997,7 @@
       "source_file": "src/pages/OnboardingPage.tsx",
       "source_location": "L105",
       "id": "pages_onboardingpage_loadpendinginvitation",
-      "community": 5,
+      "community": 6,
       "norm_label": "loadpendinginvitation()"
     },
     {
@@ -2979,7 +3006,7 @@
       "source_file": "src/pages/OnboardingPage.tsx",
       "source_location": "L125",
       "id": "pages_onboardingpage_updatefield",
-      "community": 5,
+      "community": 6,
       "norm_label": "updatefield()"
     },
     {
@@ -2988,7 +3015,7 @@
       "source_file": "src/pages/OnboardingPage.tsx",
       "source_location": "L129",
       "id": "pages_onboardingpage_validateidentity",
-      "community": 5,
+      "community": 6,
       "norm_label": "validateidentity()"
     },
     {
@@ -2997,7 +3024,7 @@
       "source_file": "src/pages/OnboardingPage.tsx",
       "source_location": "L133",
       "id": "pages_onboardingpage_handlesubmit",
-      "community": 5,
+      "community": 6,
       "norm_label": "handlesubmit()"
     },
     {
@@ -3006,7 +3033,7 @@
       "source_file": "src/pages/AuditTrailPage.tsx",
       "source_location": "L1",
       "id": "src_pages_audittrailpage_tsx",
-      "community": 9,
+      "community": 10,
       "norm_label": "audittrailpage.tsx"
     },
     {
@@ -3015,7 +3042,7 @@
       "source_file": "src/pages/AuditTrailPage.tsx",
       "source_location": "L50",
       "id": "pages_audittrailpage_fetchaudittrail",
-      "community": 9,
+      "community": 10,
       "norm_label": "fetchaudittrail()"
     },
     {
@@ -3024,7 +3051,7 @@
       "source_file": "src/pages/AuditTrailPage.tsx",
       "source_location": "L80",
       "id": "pages_audittrailpage_loadaudittrail",
-      "community": 9,
+      "community": 10,
       "norm_label": "loadaudittrail()"
     },
     {
@@ -3033,7 +3060,7 @@
       "source_file": "src/pages/AuditTrailPage.tsx",
       "source_location": "L87",
       "id": "pages_audittrailpage_run",
-      "community": 9,
+      "community": 10,
       "norm_label": "run()"
     },
     {
@@ -3042,7 +3069,7 @@
       "source_file": "src/pages/AuditTrailPage.tsx",
       "source_location": "L103",
       "id": "pages_audittrailpage_applyfilters",
-      "community": 9,
+      "community": 10,
       "norm_label": "applyfilters()"
     },
     {
@@ -3051,7 +3078,7 @@
       "source_file": "src/pages/AuditTrailPage.tsx",
       "source_location": "L108",
       "id": "pages_audittrailpage_movepage",
-      "community": 9,
+      "community": 10,
       "norm_label": "movepage()"
     },
     {
@@ -3060,7 +3087,7 @@
       "source_file": "src/pages/AuditTrailPage.tsx",
       "source_location": "L114",
       "id": "pages_audittrailpage_exportvisiblerows",
-      "community": 9,
+      "community": 10,
       "norm_label": "exportvisiblerows()"
     },
     {
@@ -3105,7 +3132,7 @@
       "source_file": "src/pages/raceResultPrintHelpers.ts",
       "source_location": "L1",
       "id": "src_pages_raceresultprinthelpers_ts",
-      "community": 6,
+      "community": 7,
       "norm_label": "raceresultprinthelpers.ts"
     },
     {
@@ -3114,7 +3141,7 @@
       "source_file": "src/pages/raceResultPrintHelpers.ts",
       "source_location": "L15",
       "id": "pages_raceresultprinthelpers_getraceresultprintsummary",
-      "community": 6,
+      "community": 7,
       "norm_label": "getraceresultprintsummary()"
     },
     {
@@ -3123,7 +3150,7 @@
       "source_file": "src/pages/raceResultPrintHelpers.ts",
       "source_location": "L32",
       "id": "pages_raceresultprinthelpers_canprintraceresult",
-      "community": 6,
+      "community": 7,
       "norm_label": "canprintraceresult()"
     },
     {
@@ -3132,7 +3159,7 @@
       "source_file": "src/pages/RaceResultPage.tsx",
       "source_location": "L1",
       "id": "src_pages_raceresultpage_tsx",
-      "community": 6,
+      "community": 7,
       "norm_label": "raceresultpage.tsx"
     },
     {
@@ -3141,7 +3168,7 @@
       "source_file": "src/pages/RaceResultPage.tsx",
       "source_location": "L162",
       "id": "pages_raceresultpage_run",
-      "community": 6,
+      "community": 7,
       "norm_label": "run()"
     },
     {
@@ -3150,7 +3177,7 @@
       "source_file": "src/pages/RaceResultPage.tsx",
       "source_location": "L200",
       "id": "pages_raceresultpage_createraceresult",
-      "community": 6,
+      "community": 7,
       "norm_label": "createraceresult()"
     },
     {
@@ -3159,7 +3186,7 @@
       "source_file": "src/pages/RaceResultPage.tsx",
       "source_location": "L222",
       "id": "pages_raceresultpage_saveentry",
-      "community": 6,
+      "community": 7,
       "norm_label": "saveentry()"
     },
     {
@@ -3168,7 +3195,7 @@
       "source_file": "src/pages/RaceResultPage.tsx",
       "source_location": "L250",
       "id": "pages_raceresultpage_publishresult",
-      "community": 6,
+      "community": 7,
       "norm_label": "publishresult()"
     },
     {
@@ -3177,7 +3204,7 @@
       "source_file": "src/pages/RaceResultPage.tsx",
       "source_location": "L273",
       "id": "pages_raceresultpage_printselectedresult",
-      "community": 6,
+      "community": 7,
       "norm_label": "printselectedresult()"
     },
     {
@@ -3186,7 +3213,7 @@
       "source_file": "src/pages/RaceResultPage.tsx",
       "source_location": "L278",
       "id": "pages_raceresultpage_updatedraft",
-      "community": 6,
+      "community": 7,
       "norm_label": "updatedraft()"
     },
     {
@@ -3195,7 +3222,7 @@
       "source_file": "src/pages/RaceResultPage.tsx",
       "source_location": "L435",
       "id": "pages_raceresultpage_if",
-      "community": 6,
+      "community": 7,
       "norm_label": "if()"
     },
     {
@@ -3204,7 +3231,7 @@
       "source_file": "src/pages/RaceResultPage.tsx",
       "source_location": "L717",
       "id": "pages_raceresultpage_getclasskey",
-      "community": 6,
+      "community": 7,
       "norm_label": "getclasskey()"
     },
     {
@@ -3213,7 +3240,7 @@
       "source_file": "src/pages/RaceResultPage.tsx",
       "source_location": "L722",
       "id": "pages_raceresultpage_parsenullableinteger",
-      "community": 6,
+      "community": 7,
       "norm_label": "parsenullableinteger()"
     },
     {
@@ -3222,7 +3249,7 @@
       "source_file": "src/pages/RaceResultPage.tsx",
       "source_location": "L729",
       "id": "pages_raceresultpage_formatdatetime",
-      "community": 6,
+      "community": 7,
       "norm_label": "formatdatetime()"
     },
     {
@@ -3231,7 +3258,7 @@
       "source_file": "src/pages/RaceResultPage.tsx",
       "source_location": "L737",
       "id": "pages_raceresultpage_formatkg",
-      "community": 6,
+      "community": 7,
       "norm_label": "formatkg()"
     },
     {
@@ -3240,7 +3267,7 @@
       "source_file": "src/pages/RaceResultPage.tsx",
       "source_location": "L741",
       "id": "pages_raceresultpage_compareresultentries",
-      "community": 6,
+      "community": 7,
       "norm_label": "compareresultentries()"
     },
     {
@@ -3249,7 +3276,7 @@
       "source_file": "src/pages/UserRolePage.tsx",
       "source_location": "L1",
       "id": "src_pages_userrolepage_tsx",
-      "community": 8,
+      "community": 9,
       "norm_label": "userrolepage.tsx"
     },
     {
@@ -3258,7 +3285,7 @@
       "source_file": "src/pages/UserRolePage.tsx",
       "source_location": "L121",
       "id": "pages_userrolepage_run",
-      "community": 8,
+      "community": 9,
       "norm_label": "run()"
     },
     {
@@ -3267,7 +3294,7 @@
       "source_file": "src/pages/UserRolePage.tsx",
       "source_location": "L151",
       "id": "pages_userrolepage_assignrole",
-      "community": 8,
+      "community": 9,
       "norm_label": "assignrole()"
     },
     {
@@ -3276,7 +3303,7 @@
       "source_file": "src/pages/UserRolePage.tsx",
       "source_location": "L175",
       "id": "pages_userrolepage_inviterolebyemail",
-      "community": 8,
+      "community": 9,
       "norm_label": "inviterolebyemail()"
     },
     {
@@ -3285,7 +3312,7 @@
       "source_file": "src/pages/UserRolePage.tsx",
       "source_location": "L195",
       "id": "pages_userrolepage_resendinvitation",
-      "community": 8,
+      "community": 9,
       "norm_label": "resendinvitation()"
     },
     {
@@ -3294,7 +3321,7 @@
       "source_file": "src/pages/UserRolePage.tsx",
       "source_location": "L212",
       "id": "pages_userrolepage_cancelinvitation",
-      "community": 8,
+      "community": 9,
       "norm_label": "cancelinvitation()"
     },
     {
@@ -3303,7 +3330,7 @@
       "source_file": "src/pages/UserRolePage.tsx",
       "source_location": "L234",
       "id": "pages_userrolepage_deactivaterole",
-      "community": 8,
+      "community": 9,
       "norm_label": "deactivaterole()"
     },
     {
@@ -3321,7 +3348,7 @@
       "source_file": "src/pages/UserRolePage.tsx",
       "source_location": "L627",
       "id": "pages_userrolepage_getfirstelevatedrolecode",
-      "community": 8,
+      "community": 9,
       "norm_label": "getfirstelevatedrolecode()"
     },
     {
@@ -3330,7 +3357,7 @@
       "source_file": "src/pages/UserRolePage.tsx",
       "source_location": "L631",
       "id": "pages_userrolepage_keepelevatedrolecode",
-      "community": 8,
+      "community": 9,
       "norm_label": "keepelevatedrolecode()"
     },
     {
@@ -3339,7 +3366,7 @@
       "source_file": "src/pages/UserRolePage.tsx",
       "source_location": "L637",
       "id": "pages_userrolepage_filterassignableusers",
-      "community": 8,
+      "community": 9,
       "norm_label": "filterassignableusers()"
     },
     {
@@ -3348,7 +3375,7 @@
       "source_file": "src/pages/UserRolePage.tsx",
       "source_location": "L649",
       "id": "pages_userrolepage_usermatchesrolefilter",
-      "community": 8,
+      "community": 9,
       "norm_label": "usermatchesrolefilter()"
     },
     {
@@ -3357,7 +3384,7 @@
       "source_file": "src/pages/UserRolePage.tsx",
       "source_location": "L656",
       "id": "pages_userrolepage_getinvitationnotice",
-      "community": 8,
+      "community": 9,
       "norm_label": "getinvitationnotice()"
     },
     {
@@ -3366,7 +3393,7 @@
       "source_file": "src/pages/UserRolePage.tsx",
       "source_location": "L663",
       "id": "pages_userrolepage_sendroleinvitation",
-      "community": 8,
+      "community": 9,
       "norm_label": "sendroleinvitation()"
     },
     {
@@ -3375,7 +3402,7 @@
       "source_file": "src/pages/UserRolePage.tsx",
       "source_location": "L676",
       "id": "pages_userrolepage_getemaildeliverytone",
-      "community": 8,
+      "community": 9,
       "norm_label": "getemaildeliverytone()"
     },
     {
@@ -3384,7 +3411,7 @@
       "source_file": "src/pages/UserRolePage.tsx",
       "source_location": "L683",
       "id": "pages_userrolepage_formatdatetime",
-      "community": 8,
+      "community": 9,
       "norm_label": "formatdatetime()"
     },
     {
@@ -5196,7 +5223,19 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.test.ts",
-      "source_location": "L158",
+      "source_location": "L188",
+      "weight": 1.0,
+      "_src": "src_pages_organizersettingspage_test_ts",
+      "_tgt": "pages_organizersettingspage_test_createorganizerpayload",
+      "source": "src_pages_organizersettingspage_test_ts",
+      "target": "pages_organizersettingspage_test_createorganizerpayload",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/OrganizerSettingsPage.test.ts",
+      "source_location": "L211",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_test_ts",
       "_tgt": "pages_organizersettingspage_test_createeventrule",
@@ -5208,7 +5247,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.test.ts",
-      "source_location": "L176",
+      "source_location": "L229",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_test_ts",
       "_tgt": "pages_organizersettingspage_test_createinspectiontemplate",
@@ -5220,7 +5259,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.test.ts",
-      "source_location": "L193",
+      "source_location": "L246",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_test_ts",
       "_tgt": "pages_organizersettingspage_test_createballastrule",
@@ -5232,7 +5271,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.test.ts",
-      "source_location": "L211",
+      "source_location": "L264",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_test_ts",
       "_tgt": "pages_organizersettingspage_test_createtirerule",
@@ -5244,7 +5283,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.test.ts",
-      "source_location": "L227",
+      "source_location": "L280",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_test_ts",
       "_tgt": "pages_organizersettingspage_test_createsponsorstickerasset",
@@ -5256,7 +5295,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.test.ts",
-      "source_location": "L247",
+      "source_location": "L300",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_test_ts",
       "_tgt": "pages_organizersettingspage_test_createprintbackgroundasset",
@@ -5268,7 +5307,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.test.ts",
-      "source_location": "L266",
+      "source_location": "L319",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_test_ts",
       "_tgt": "pages_organizersettingspage_test_createweightrule",
@@ -5508,7 +5547,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/organizerSettingsHelpers.ts",
-      "source_location": "L245",
+      "source_location": "L280",
       "weight": 1.0,
       "_src": "src_pages_organizersettingshelpers_ts",
       "_tgt": "pages_organizersettingshelpers_normalizeorganizersettingspayload",
@@ -5520,7 +5559,19 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/organizerSettingsHelpers.ts",
-      "source_location": "L267",
+      "source_location": "L302",
+      "weight": 1.0,
+      "_src": "src_pages_organizersettingshelpers_ts",
+      "_tgt": "pages_organizersettingshelpers_createorganizersetupboard",
+      "source": "src_pages_organizersettingshelpers_ts",
+      "target": "pages_organizersettingshelpers_createorganizersetupboard",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/organizerSettingsHelpers.ts",
+      "source_location": "L418",
       "weight": 1.0,
       "_src": "src_pages_organizersettingshelpers_ts",
       "_tgt": "pages_organizersettingshelpers_groupseasonseriesbyseason",
@@ -5532,7 +5583,55 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/organizerSettingsHelpers.ts",
-      "source_location": "L275",
+      "source_location": "L426",
+      "weight": 1.0,
+      "_src": "src_pages_organizersettingshelpers_ts",
+      "_tgt": "pages_organizersettingshelpers_createsetupstep",
+      "source": "src_pages_organizersettingshelpers_ts",
+      "target": "pages_organizersettingshelpers_createsetupstep",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/organizerSettingsHelpers.ts",
+      "source_location": "L434",
+      "weight": 1.0,
+      "_src": "src_pages_organizersettingshelpers_ts",
+      "_tgt": "pages_organizersettingshelpers_getclassactionlabel",
+      "source": "src_pages_organizersettingshelpers_ts",
+      "target": "pages_organizersettingshelpers_getclassactionlabel",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/organizerSettingsHelpers.ts",
+      "source_location": "L441",
+      "weight": 1.0,
+      "_src": "src_pages_organizersettingshelpers_ts",
+      "_tgt": "pages_organizersettingshelpers_getclasseditorkey",
+      "source": "src_pages_organizersettingshelpers_ts",
+      "target": "pages_organizersettingshelpers_getclasseditorkey",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/organizerSettingsHelpers.ts",
+      "source_location": "L448",
+      "weight": 1.0,
+      "_src": "src_pages_organizersettingshelpers_ts",
+      "_tgt": "pages_organizersettingshelpers_getruleeditorkey",
+      "source": "src_pages_organizersettingshelpers_ts",
+      "target": "pages_organizersettingshelpers_getruleeditorkey",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/organizerSettingsHelpers.ts",
+      "source_location": "L455",
       "weight": 1.0,
       "_src": "src_pages_organizersettingshelpers_ts",
       "_tgt": "pages_organizersettingshelpers_groupseasonseriesgradesbyseries",
@@ -5544,7 +5643,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/organizerSettingsHelpers.ts",
-      "source_location": "L283",
+      "source_location": "L463",
       "weight": 1.0,
       "_src": "src_pages_organizersettingshelpers_ts",
       "_tgt": "pages_organizersettingshelpers_groupeventseriesrulesbyevent",
@@ -5556,7 +5655,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/organizerSettingsHelpers.ts",
-      "source_location": "L291",
+      "source_location": "L471",
       "weight": 1.0,
       "_src": "src_pages_organizersettingshelpers_ts",
       "_tgt": "pages_organizersettingshelpers_groupinspectiontemplatesbyeventrule",
@@ -5568,7 +5667,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/organizerSettingsHelpers.ts",
-      "source_location": "L299",
+      "source_location": "L479",
       "weight": 1.0,
       "_src": "src_pages_organizersettingshelpers_ts",
       "_tgt": "pages_organizersettingshelpers_groupballastrulesbyeventrule",
@@ -5580,7 +5679,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/organizerSettingsHelpers.ts",
-      "source_location": "L307",
+      "source_location": "L487",
       "weight": 1.0,
       "_src": "src_pages_organizersettingshelpers_ts",
       "_tgt": "pages_organizersettingshelpers_grouptirerulesbyeventrule",
@@ -5592,7 +5691,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/organizerSettingsHelpers.ts",
-      "source_location": "L315",
+      "source_location": "L495",
       "weight": 1.0,
       "_src": "src_pages_organizersettingshelpers_ts",
       "_tgt": "pages_organizersettingshelpers_groupsponsorstickerassetsbyeventrule",
@@ -5604,7 +5703,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/organizerSettingsHelpers.ts",
-      "source_location": "L323",
+      "source_location": "L503",
       "weight": 1.0,
       "_src": "src_pages_organizersettingshelpers_ts",
       "_tgt": "pages_organizersettingshelpers_groupprintbackgroundassetsbyevent",
@@ -5616,7 +5715,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/organizerSettingsHelpers.ts",
-      "source_location": "L331",
+      "source_location": "L511",
       "weight": 1.0,
       "_src": "src_pages_organizersettingshelpers_ts",
       "_tgt": "pages_organizersettingshelpers_groupweightrulesbyeventrule",
@@ -5628,12 +5727,60 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/organizerSettingsHelpers.ts",
-      "source_location": "L339",
+      "source_location": "L519",
       "weight": 1.0,
       "_src": "src_pages_organizersettingshelpers_ts",
       "_tgt": "pages_organizersettingshelpers_geteligiblegradesforeventseries",
       "source": "src_pages_organizersettingshelpers_ts",
       "target": "pages_organizersettingshelpers_geteligiblegradesforeventseries",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/organizerSettingsHelpers.ts",
+      "source_location": "L314",
+      "weight": 1.0,
+      "_src": "pages_organizersettingshelpers_createorganizersetupboard",
+      "_tgt": "pages_organizersettingshelpers_createsetupstep",
+      "source": "pages_organizersettingshelpers_createorganizersetupboard",
+      "target": "pages_organizersettingshelpers_createsetupstep",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/organizerSettingsHelpers.ts",
+      "source_location": "L343",
+      "weight": 1.0,
+      "_src": "pages_organizersettingshelpers_createorganizersetupboard",
+      "_tgt": "pages_organizersettingshelpers_getclassactionlabel",
+      "source": "pages_organizersettingshelpers_createorganizersetupboard",
+      "target": "pages_organizersettingshelpers_getclassactionlabel",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/organizerSettingsHelpers.ts",
+      "source_location": "L344",
+      "weight": 1.0,
+      "_src": "pages_organizersettingshelpers_createorganizersetupboard",
+      "_tgt": "pages_organizersettingshelpers_getclasseditorkey",
+      "source": "pages_organizersettingshelpers_createorganizersetupboard",
+      "target": "pages_organizersettingshelpers_getclasseditorkey",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/organizerSettingsHelpers.ts",
+      "source_location": "L358",
+      "weight": 1.0,
+      "_src": "pages_organizersettingshelpers_createorganizersetupboard",
+      "_tgt": "pages_organizersettingshelpers_getruleeditorkey",
+      "source": "pages_organizersettingshelpers_createorganizersetupboard",
+      "target": "pages_organizersettingshelpers_getruleeditorkey",
       "confidence_score": 1.0
     },
     {
@@ -6528,7 +6675,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L372",
+      "source_location": "L363",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_run",
@@ -6540,7 +6687,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L405",
+      "source_location": "L395",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_openeditor",
@@ -6552,7 +6699,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L410",
+      "source_location": "L400",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_startduplicateseason",
@@ -6564,7 +6711,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L424",
+      "source_location": "L414",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_startduplicateevent",
@@ -6576,7 +6723,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L440",
+      "source_location": "L430",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_submitduplicate",
@@ -6588,7 +6735,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L475",
+      "source_location": "L465",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_savecircuit",
@@ -6600,7 +6747,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L492",
+      "source_location": "L482",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_saveseason",
@@ -6612,7 +6759,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L511",
+      "source_location": "L501",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_saveseriesrace",
@@ -6624,7 +6771,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L530",
+      "source_location": "L520",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_savegrade",
@@ -6636,7 +6783,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L547",
+      "source_location": "L537",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_setseasonseries",
@@ -6648,7 +6795,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L563",
+      "source_location": "L553",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_setseasonseriesgrade",
@@ -6660,7 +6807,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L580",
+      "source_location": "L570",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_saveeventseriesrule",
@@ -6672,7 +6819,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L601",
+      "source_location": "L591",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_saveinspectiontemplate",
@@ -6684,7 +6831,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L620",
+      "source_location": "L610",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_saveinspectionsection",
@@ -6696,7 +6843,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L639",
+      "source_location": "L629",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_saveinspectionitem",
@@ -6708,7 +6855,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L673",
+      "source_location": "L663",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_saveweightrule",
@@ -6720,7 +6867,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L707",
+      "source_location": "L697",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_saveballastrule",
@@ -6732,7 +6879,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L739",
+      "source_location": "L729",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_savetirerule",
@@ -6744,7 +6891,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L757",
+      "source_location": "L747",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_savesponsorstickerasset",
@@ -6756,7 +6903,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L789",
+      "source_location": "L779",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_saveprintbackgroundasset",
@@ -6768,7 +6915,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L823",
+      "source_location": "L813",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_saveevent",
@@ -6780,7 +6927,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L844",
+      "source_location": "L834",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_saverace",
@@ -6792,7 +6939,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L864",
+      "source_location": "L854",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_finishsave",
@@ -6804,7 +6951,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L875",
+      "source_location": "L865",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_uploadsponsorstickerasset",
@@ -6816,7 +6963,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L883",
+      "source_location": "L873",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_uploadorganizerasset",
@@ -6828,7 +6975,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2211",
+      "source_location": "L2290",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_alert",
@@ -6840,7 +6987,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2219",
+      "source_location": "L2298",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_organizerskeleton",
@@ -6852,7 +6999,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2228",
+      "source_location": "L2307",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_emptystate",
@@ -6864,43 +7011,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2232",
-      "weight": 1.0,
-      "_src": "src_pages_organizersettingspage_tsx",
-      "_tgt": "pages_organizersettingspage_createsettingsreadiness",
-      "source": "src_pages_organizersettingspage_tsx",
-      "target": "pages_organizersettingspage_createsettingsreadiness",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2243",
-      "weight": 1.0,
-      "_src": "src_pages_organizersettingspage_tsx",
-      "_tgt": "pages_organizersettingspage_createsettingsphasesummaries",
-      "source": "src_pages_organizersettingspage_tsx",
-      "target": "pages_organizersettingspage_createsettingsphasesummaries",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2254",
-      "weight": 1.0,
-      "_src": "src_pages_organizersettingspage_tsx",
-      "_tgt": "pages_organizersettingspage_countready",
-      "source": "src_pages_organizersettingspage_tsx",
-      "target": "pages_organizersettingspage_countready",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2258",
+      "source_location": "L2311",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createemptycircuitform",
@@ -6912,7 +7023,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2262",
+      "source_location": "L2315",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createcircuitform",
@@ -6924,7 +7035,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2272",
+      "source_location": "L2325",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createemptyseasonform",
@@ -6936,7 +7047,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2277",
+      "source_location": "L2330",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createseasonform",
@@ -6948,7 +7059,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2289",
+      "source_location": "L2342",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createemptyseriesraceform",
@@ -6960,7 +7071,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2293",
+      "source_location": "L2346",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createseriesraceform",
@@ -6972,7 +7083,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2305",
+      "source_location": "L2358",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createemptygradeform",
@@ -6984,7 +7095,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2309",
+      "source_location": "L2362",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_creategradeform",
@@ -6996,7 +7107,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2319",
+      "source_location": "L2372",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createemptyseasonseriesform",
@@ -7008,7 +7119,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2323",
+      "source_location": "L2376",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createemptyseasonseriesgradeform",
@@ -7020,7 +7131,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2327",
+      "source_location": "L2380",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createemptyeventseriesruleform",
@@ -7032,7 +7143,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2331",
+      "source_location": "L2384",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createeventseriesruleform",
@@ -7044,7 +7155,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2345",
+      "source_location": "L2398",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createemptyinspectiontemplateform",
@@ -7056,7 +7167,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2349",
+      "source_location": "L2402",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createinspectiontemplateform",
@@ -7068,7 +7179,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2361",
+      "source_location": "L2414",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createemptyinspectionsectionform",
@@ -7080,7 +7191,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2365",
+      "source_location": "L2418",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createinspectionsectionform",
@@ -7092,7 +7203,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2377",
+      "source_location": "L2430",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createemptyinspectionitemform",
@@ -7104,7 +7215,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2381",
+      "source_location": "L2434",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createinspectionitemform",
@@ -7116,7 +7227,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2397",
+      "source_location": "L2450",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createemptyweightruleform",
@@ -7128,7 +7239,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2411",
+      "source_location": "L2464",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createweightruleform",
@@ -7140,7 +7251,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2426",
+      "source_location": "L2479",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createemptyballastruleform",
@@ -7152,7 +7263,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2438",
+      "source_location": "L2491",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createballastruleform",
@@ -7164,7 +7275,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2451",
+      "source_location": "L2504",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createemptytireruleform",
@@ -7176,7 +7287,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2461",
+      "source_location": "L2514",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createtireruleform",
@@ -7188,7 +7299,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2472",
+      "source_location": "L2525",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createemptysponsorstickerassetform",
@@ -7200,7 +7311,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2483",
+      "source_location": "L2536",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createsponsorstickerassetform",
@@ -7212,7 +7323,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2495",
+      "source_location": "L2548",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createemptyprintbackgroundassetform",
@@ -7224,7 +7335,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2508",
+      "source_location": "L2561",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createprintbackgroundassetform",
@@ -7236,7 +7347,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2522",
+      "source_location": "L2575",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_formatorientation",
@@ -7248,7 +7359,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2526",
+      "source_location": "L2579",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createemptyeventform",
@@ -7260,7 +7371,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2530",
+      "source_location": "L2583",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createeventform",
@@ -7272,7 +7383,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2544",
+      "source_location": "L2597",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createemptyraceform",
@@ -7284,7 +7395,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2548",
+      "source_location": "L2601",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_createraceform",
@@ -7296,7 +7407,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2561",
+      "source_location": "L2614",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_groupeventsbyseason",
@@ -7308,7 +7419,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2569",
+      "source_location": "L2622",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_groupracesbyevent",
@@ -7320,7 +7431,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2577",
+      "source_location": "L2630",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_parsejsonobject",
@@ -7332,7 +7443,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2585",
+      "source_location": "L2638",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_sanitizefilename",
@@ -7344,7 +7455,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2590",
+      "source_location": "L2643",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_formatdaterange",
@@ -7356,7 +7467,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2596",
+      "source_location": "L2649",
       "weight": 1.0,
       "_src": "src_pages_organizersettingspage_tsx",
       "_tgt": "pages_organizersettingspage_todatetimelocal",
@@ -7368,7 +7479,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L488",
+      "source_location": "L478",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_savecircuit",
       "_tgt": "pages_organizersettingspage_finishsave",
@@ -7380,7 +7491,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L507",
+      "source_location": "L497",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_saveseason",
       "_tgt": "pages_organizersettingspage_finishsave",
@@ -7392,7 +7503,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L526",
+      "source_location": "L516",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_saveseriesrace",
       "_tgt": "pages_organizersettingspage_finishsave",
@@ -7404,7 +7515,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L543",
+      "source_location": "L533",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_savegrade",
       "_tgt": "pages_organizersettingspage_finishsave",
@@ -7416,7 +7527,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L559",
+      "source_location": "L549",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_setseasonseries",
       "_tgt": "pages_organizersettingspage_finishsave",
@@ -7428,7 +7539,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L576",
+      "source_location": "L566",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_setseasonseriesgrade",
       "_tgt": "pages_organizersettingspage_finishsave",
@@ -7440,7 +7551,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L597",
+      "source_location": "L587",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_saveeventseriesrule",
       "_tgt": "pages_organizersettingspage_finishsave",
@@ -7452,7 +7563,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L616",
+      "source_location": "L606",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_saveinspectiontemplate",
       "_tgt": "pages_organizersettingspage_finishsave",
@@ -7464,7 +7575,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L635",
+      "source_location": "L625",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_saveinspectionsection",
       "_tgt": "pages_organizersettingspage_finishsave",
@@ -7476,7 +7587,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L669",
+      "source_location": "L659",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_saveinspectionitem",
       "_tgt": "pages_organizersettingspage_finishsave",
@@ -7488,7 +7599,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L703",
+      "source_location": "L693",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_saveweightrule",
       "_tgt": "pages_organizersettingspage_finishsave",
@@ -7500,7 +7611,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L717",
+      "source_location": "L707",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_saveballastrule",
       "_tgt": "pages_organizersettingspage_parsejsonobject",
@@ -7512,7 +7623,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L735",
+      "source_location": "L725",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_saveballastrule",
       "_tgt": "pages_organizersettingspage_finishsave",
@@ -7524,7 +7635,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L753",
+      "source_location": "L743",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_savetirerule",
       "_tgt": "pages_organizersettingspage_finishsave",
@@ -7536,7 +7647,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L768",
+      "source_location": "L758",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_savesponsorstickerasset",
       "_tgt": "pages_organizersettingspage_uploadsponsorstickerasset",
@@ -7548,7 +7659,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L781",
+      "source_location": "L771",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_savesponsorstickerasset",
       "_tgt": "pages_organizersettingspage_finishsave",
@@ -7560,7 +7671,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L800",
+      "source_location": "L790",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_saveprintbackgroundasset",
       "_tgt": "pages_organizersettingspage_uploadorganizerasset",
@@ -7572,7 +7683,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L815",
+      "source_location": "L805",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_saveprintbackgroundasset",
       "_tgt": "pages_organizersettingspage_finishsave",
@@ -7584,7 +7695,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L840",
+      "source_location": "L830",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_saveevent",
       "_tgt": "pages_organizersettingspage_finishsave",
@@ -7596,7 +7707,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L860",
+      "source_location": "L850",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_saverace",
       "_tgt": "pages_organizersettingspage_finishsave",
@@ -7608,7 +7719,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L880",
+      "source_location": "L870",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_uploadsponsorstickerasset",
       "_tgt": "pages_organizersettingspage_uploadorganizerasset",
@@ -7620,7 +7731,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L892",
+      "source_location": "L882",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_uploadorganizerasset",
       "_tgt": "pages_organizersettingspage_sanitizefilename",
@@ -7632,19 +7743,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2247",
-      "weight": 1.0,
-      "_src": "pages_organizersettingspage_createsettingsphasesummaries",
-      "_tgt": "pages_organizersettingspage_countready",
-      "source": "pages_organizersettingspage_createsettingsphasesummaries",
-      "target": "pages_organizersettingspage_countready",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2263",
+      "source_location": "L2316",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_createcircuitform",
       "_tgt": "pages_organizersettingspage_createemptycircuitform",
@@ -7656,7 +7755,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2278",
+      "source_location": "L2331",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_createseasonform",
       "_tgt": "pages_organizersettingspage_createemptyseasonform",
@@ -7668,7 +7767,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2294",
+      "source_location": "L2347",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_createseriesraceform",
       "_tgt": "pages_organizersettingspage_createemptyseriesraceform",
@@ -7680,7 +7779,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2310",
+      "source_location": "L2363",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_creategradeform",
       "_tgt": "pages_organizersettingspage_createemptygradeform",
@@ -7692,7 +7791,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2332",
+      "source_location": "L2385",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_createeventseriesruleform",
       "_tgt": "pages_organizersettingspage_createemptyeventseriesruleform",
@@ -7704,7 +7803,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2350",
+      "source_location": "L2403",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_createinspectiontemplateform",
       "_tgt": "pages_organizersettingspage_createemptyinspectiontemplateform",
@@ -7716,7 +7815,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2366",
+      "source_location": "L2419",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_createinspectionsectionform",
       "_tgt": "pages_organizersettingspage_createemptyinspectionsectionform",
@@ -7728,7 +7827,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2382",
+      "source_location": "L2435",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_createinspectionitemform",
       "_tgt": "pages_organizersettingspage_createemptyinspectionitemform",
@@ -7740,7 +7839,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2412",
+      "source_location": "L2465",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_createweightruleform",
       "_tgt": "pages_organizersettingspage_createemptyweightruleform",
@@ -7752,7 +7851,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2439",
+      "source_location": "L2492",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_createballastruleform",
       "_tgt": "pages_organizersettingspage_createemptyballastruleform",
@@ -7764,7 +7863,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2462",
+      "source_location": "L2515",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_createtireruleform",
       "_tgt": "pages_organizersettingspage_createemptytireruleform",
@@ -7776,7 +7875,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2484",
+      "source_location": "L2537",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_createsponsorstickerassetform",
       "_tgt": "pages_organizersettingspage_createemptysponsorstickerassetform",
@@ -7788,7 +7887,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2509",
+      "source_location": "L2562",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_createprintbackgroundassetform",
       "_tgt": "pages_organizersettingspage_createemptyprintbackgroundassetform",
@@ -7800,7 +7899,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2531",
+      "source_location": "L2584",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_createeventform",
       "_tgt": "pages_organizersettingspage_createemptyeventform",
@@ -7812,7 +7911,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2549",
+      "source_location": "L2602",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_createraceform",
       "_tgt": "pages_organizersettingspage_createemptyraceform",
@@ -7824,7 +7923,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/OrganizerSettingsPage.tsx",
-      "source_location": "L2556",
+      "source_location": "L2609",
       "weight": 1.0,
       "_src": "pages_organizersettingspage_createraceform",
       "_tgt": "pages_organizersettingspage_todatetimelocal",

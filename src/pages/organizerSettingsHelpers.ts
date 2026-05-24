@@ -242,6 +242,41 @@ export type OrganizerPayload = {
   races: RaceRow[]
 }
 
+export type OrganizerSetupStepKey = 'foundation' | 'calendar' | 'classes' | 'rules' | 'assets'
+
+export type OrganizerSetupRequirement = {
+  label: string
+  ready: boolean
+}
+
+export type OrganizerSetupStep = {
+  key: OrganizerSetupStepKey
+  label: string
+  shortLabel: string
+  description: string
+  primaryActionLabel: string
+  editorKey: string
+  complete: number
+  total: number
+  requirements: OrganizerSetupRequirement[]
+}
+
+export type OrganizerSetupStat = {
+  label: string
+  value: string
+  helper: string
+  tone: 'success' | 'warning' | 'neutral'
+}
+
+export type OrganizerSetupBoard = {
+  completionPercent: number
+  missingCount: number
+  activeSeasonLabel: string
+  nextStep: OrganizerSetupStep
+  steps: OrganizerSetupStep[]
+  stats: OrganizerSetupStat[]
+}
+
 export function normalizeOrganizerSettingsPayload(payload: OrganizerPayload | null): OrganizerPayload {
   return {
     canManage: Boolean(payload?.canManage),
@@ -264,12 +299,157 @@ export function normalizeOrganizerSettingsPayload(payload: OrganizerPayload | nu
   }
 }
 
+export function createOrganizerSetupBoard(payload: OrganizerPayload): OrganizerSetupBoard {
+  const activeSeason = payload.seasons.find((season) => season.isActive) ?? payload.seasons.find((season) => season.status === 'Active') ?? payload.seasons[0]
+  const activeSeasonEvents = activeSeason ? payload.events.filter((event) => event.seasonId === activeSeason.seasonId) : []
+  const activeEventIds = new Set(activeSeasonEvents.map((event) => event.eventId))
+  const activeRuleIds = new Set(payload.eventSeriesRules.filter((rule) => activeEventIds.has(rule.eventId)).map((rule) => rule.eventSeriesRuleId))
+  const activeRaces = payload.races.filter((race) => activeEventIds.has(race.eventId))
+  const activePrintBackgrounds = payload.printBackgroundAssets.filter((asset) => activeEventIds.has(asset.eventId))
+  const activeSponsorStickers = payload.sponsorStickerAssets.filter((asset) => activeRuleIds.has(asset.eventSeriesRuleId))
+  const activeWeightRules = payload.weightRules.filter((rule) => activeRuleIds.has(rule.eventSeriesRuleId))
+  const activeTemplates = payload.inspectionTemplates.filter((template) => activeRuleIds.has(template.eventSeriesRuleId))
+
+  const steps = [
+    createSetupStep({
+      key: 'foundation',
+      label: 'Season Foundation',
+      shortLabel: 'Foundation',
+      description: 'Create the racing year and reusable track list before building the calendar.',
+      primaryActionLabel: payload.seasons.length === 0 ? 'Create Season' : 'Add Circuit',
+      editorKey: payload.seasons.length === 0 ? 'season' : 'circuit',
+      requirements: [
+        { label: 'Season exists', ready: payload.seasons.length > 0 },
+        { label: 'Circuit exists', ready: payload.circuits.length > 0 },
+      ],
+    }),
+    createSetupStep({
+      key: 'calendar',
+      label: 'Race Calendar',
+      shortLabel: 'Calendar',
+      description: 'Add race weekends and sessions so Entry Forms, results, and reports have a place to attach.',
+      primaryActionLabel: activeSeasonEvents.length === 0 ? 'Create Event' : 'Add Race Session',
+      editorKey: activeSeasonEvents.length === 0 ? 'event' : 'race',
+      requirements: [
+        { label: 'Event exists', ready: activeSeasonEvents.length > 0 },
+        { label: 'Race session exists', ready: activeRaces.length > 0 },
+      ],
+    }),
+    createSetupStep({
+      key: 'classes',
+      label: 'Competition Classes',
+      shortLabel: 'Classes',
+      description: 'Define who can race: series, grades, and which class combinations are active this season.',
+      primaryActionLabel: getClassActionLabel(payload),
+      editorKey: getClassEditorKey(payload),
+      requirements: [
+        { label: 'Series exists', ready: payload.seriesRaces.length > 0 },
+        { label: 'Grade exists', ready: payload.grades.length > 0 },
+        { label: 'Series linked to season', ready: payload.seasonSeries.some((series) => series.isActive) },
+        { label: 'Grades linked to season series', ready: payload.seasonSeriesGrades.some((grade) => grade.isActive) },
+      ],
+    }),
+    createSetupStep({
+      key: 'rules',
+      label: 'Rule Packages',
+      shortLabel: 'Rules',
+      description: 'Package event, class, weight, tires, ballast, and inspection form rules together.',
+      primaryActionLabel: activeRuleIds.size === 0 ? 'Create Rule Package' : 'Complete Technical Rules',
+      editorKey: getRuleEditorKey(activeRuleIds.size, activeWeightRules.length, activeTemplates.length),
+      requirements: [
+        { label: 'Rule package exists', ready: activeRuleIds.size > 0 },
+        { label: 'Weight rule exists', ready: activeWeightRules.length > 0 },
+        { label: 'Inspection template exists', ready: activeTemplates.length > 0 },
+      ],
+    }),
+    createSetupStep({
+      key: 'assets',
+      label: 'Official Assets',
+      shortLabel: 'Assets',
+      description: 'Upload A4 print backgrounds and sponsor stickers used in official documents.',
+      primaryActionLabel: activePrintBackgrounds.length === 0 ? 'Add A4 Background' : 'Add Sponsor Sticker',
+      editorKey: activePrintBackgrounds.length === 0 ? 'printBackgroundAsset' : 'sponsorStickerAsset',
+      requirements: [
+        { label: 'A4 background exists', ready: activePrintBackgrounds.length > 0 },
+        { label: 'Sponsor sticker exists', ready: activeSponsorStickers.length > 0 },
+      ],
+    }),
+  ]
+  const complete = steps.reduce((sum, step) => sum + step.complete, 0)
+  const total = steps.reduce((sum, step) => sum + step.total, 0)
+  const missingCount = total - complete
+  const nextStep = steps.find((step) => step.complete < step.total) ?? steps[steps.length - 1]
+
+  return {
+    completionPercent: total === 0 ? 0 : Math.round((complete / total) * 100),
+    missingCount,
+    activeSeasonLabel: activeSeason ? `${activeSeason.year} / ${activeSeason.name}` : 'No active season',
+    nextStep,
+    steps,
+    stats: [
+      {
+        label: 'Active season',
+        value: activeSeason ? String(activeSeason.year) : 'None',
+        helper: activeSeason ? activeSeason.name : 'Create a season first',
+        tone: activeSeason ? 'success' : 'warning',
+      },
+      {
+        label: 'Race weekends',
+        value: String(activeSeasonEvents.length),
+        helper: activeSeason ? `Inside ${activeSeason.name}` : 'Waiting for season',
+        tone: activeSeasonEvents.length > 0 ? 'success' : 'warning',
+      },
+      {
+        label: 'Rule packages',
+        value: String(activeRuleIds.size),
+        helper: 'Event + series + grade combinations',
+        tone: activeRuleIds.size > 0 ? 'success' : 'warning',
+      },
+      {
+        label: 'Missing setup',
+        value: String(missingCount),
+        helper: missingCount === 0 ? 'Ready for race operations' : 'Items still need attention',
+        tone: missingCount === 0 ? 'success' : 'warning',
+      },
+    ],
+  }
+}
+
 export function groupSeasonSeriesBySeason(seasonSeries: SeasonSeriesRow[]) {
   const map = new Map<string, SeasonSeriesRow[]>()
   seasonSeries.forEach((series) => {
     map.set(series.seasonId, [...(map.get(series.seasonId) ?? []), series])
   })
   return map
+}
+
+function createSetupStep(step: Omit<OrganizerSetupStep, 'complete' | 'total'>): OrganizerSetupStep {
+  return {
+    ...step,
+    complete: step.requirements.filter((requirement) => requirement.ready).length,
+    total: step.requirements.length,
+  }
+}
+
+function getClassActionLabel(payload: OrganizerPayload) {
+  if (payload.seriesRaces.length === 0) return 'Create Series'
+  if (payload.grades.length === 0) return 'Create Grade'
+  if (!payload.seasonSeries.some((series) => series.isActive)) return 'Link Series To Season'
+  return 'Link Grades To Series'
+}
+
+function getClassEditorKey(payload: OrganizerPayload) {
+  if (payload.seriesRaces.length === 0) return 'seriesRace'
+  if (payload.grades.length === 0) return 'grade'
+  if (!payload.seasonSeries.some((series) => series.isActive)) return 'seasonSeries'
+  return 'seasonSeriesGrade'
+}
+
+function getRuleEditorKey(ruleCount: number, weightRuleCount: number, templateCount: number) {
+  if (ruleCount === 0) return 'eventSeriesRule'
+  if (weightRuleCount === 0) return 'weightRule'
+  if (templateCount === 0) return 'inspectionTemplate'
+  return 'eventSeriesRule'
 }
 
 export function groupSeasonSeriesGradesBySeries(seasonSeriesGrades: SeasonSeriesGradeRow[]) {

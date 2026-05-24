@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  createOrganizerSetupBoard,
   getEligibleGradesForEventSeries,
   groupBallastRulesByEventRule,
   groupEventSeriesRulesByEvent,
@@ -12,6 +13,7 @@ import {
   groupWeightRulesByEventRule,
   normalizeOrganizerSettingsPayload,
 } from './organizerSettingsHelpers'
+import type { OrganizerPayload } from './organizerSettingsHelpers'
 
 describe('OrganizerSettingsPage helpers', () => {
   it('normalizes missing organizer arrays for safe rendering', () => {
@@ -153,7 +155,58 @@ describe('OrganizerSettingsPage helpers', () => {
 
     expect(eligibleGrades.map((grade) => grade.gradeId)).toEqual(['grade-pro'])
   })
+
+  it('creates setup board guidance for a new empty organizer setup', () => {
+    const board = createOrganizerSetupBoard(createOrganizerPayload())
+
+    expect(board.completionPercent).toBe(0)
+    expect(board.nextStep.key).toBe('foundation')
+    expect(board.nextStep.primaryActionLabel).toBe('Create Season')
+    expect(board.stats.find((stat) => stat.label === 'Missing setup')?.value).toBe('13')
+  })
+
+  it('prioritizes missing rule package setup for an active season', () => {
+    const payload = createOrganizerPayload({
+      seasons: [{ seasonId: 'season-1', organizationId: 'org-1', name: '2026 Season', year: 2026, status: 'Active', isActive: true, activatedAt: '2026-01-01' }],
+      circuits: [{ circuitId: 'circuit-1', name: 'Chang International Circuit', location: 'Buriram', country: 'Thailand' }],
+      events: [{ eventId: 'event-1', seasonId: 'season-1', circuitId: 'circuit-1', circuitName: 'Chang International Circuit', name: 'Event 1', eventOrder: 1, startsOn: null, endsOn: null, status: 'Draft' }],
+      races: [{ raceId: 'race-1', eventId: 'event-1', name: 'Race 1', raceOrder: 1, sessionType: 'Race', scheduledAt: null, resultsImportUnlocked: false }],
+      seriesRaces: [{ seriesRaceId: 'series-1', organizationId: 'org-1', code: 'SIAM', name: 'Siam Series', ballastType: 'SuccessBallast', isActive: true }],
+      grades: [{ gradeId: 'grade-pro', code: 'PRO', name: 'Professional', sortOrder: 1 }],
+      seasonSeries: [{ seasonSeriesId: 'ss-1', seasonId: 'season-1', seriesRaceId: 'series-1', seriesName: 'Siam Series', isActive: true }],
+      seasonSeriesGrades: [{ seasonSeriesGradeId: 'ssg-1', seasonSeriesId: 'ss-1', seasonId: 'season-1', seriesRaceId: 'series-1', gradeId: 'grade-pro', gradeName: 'PRO', isActive: true }],
+    })
+
+    const board = createOrganizerSetupBoard(payload)
+
+    expect(board.nextStep.key).toBe('rules')
+    expect(board.nextStep.primaryActionLabel).toBe('Create Rule Package')
+    expect(board.steps.find((step) => step.key === 'classes')).toMatchObject({ complete: 4, total: 4 })
+  })
 })
+
+function createOrganizerPayload(overrides: Partial<OrganizerPayload> = {}): OrganizerPayload {
+  return {
+    canManage: true,
+    organizations: [{ organizationId: 'org-1', name: 'RaceDoc Organizer', slug: 'racedoc', isActive: true }],
+    circuits: [],
+    seriesRaces: [],
+    grades: [],
+    seasonSeries: [],
+    seasonSeriesGrades: [],
+    eventSeriesRules: [],
+    ballastRules: [],
+    tireRules: [],
+    sponsorStickerAssets: [],
+    printBackgroundAssets: [],
+    weightRules: [],
+    inspectionTemplates: [],
+    seasons: [],
+    events: [],
+    races: [],
+    ...overrides,
+  }
+}
 
 function createEventRule(eventSeriesRuleId: string, eventId: string, seriesRaceId: string, gradeId: string) {
   return {

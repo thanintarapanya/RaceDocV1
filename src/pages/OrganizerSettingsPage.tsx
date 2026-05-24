@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { CalendarDays, ClipboardList, Flag, Image, Layers3, Loader2, MapPinned, RefreshCcw, Save, Scale, Trophy, Wrench, X } from 'lucide-react'
+import { ArrowRight, CalendarDays, CheckCircle2, Circle, ClipboardList, Flag, Image, Layers3, Loader2, MapPinned, RefreshCcw, Save, Scale, Trophy, Wrench, X } from 'lucide-react'
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import {
@@ -12,6 +12,7 @@ import {
   groupEventSeriesRulesByEvent,
   groupInspectionTemplatesByEventRule,
   groupWeightRulesByEventRule,
+  createOrganizerSetupBoard,
   getEligibleGradesForEventSeries,
   normalizeOrganizerSettingsPayload,
   type BallastRuleRow,
@@ -26,6 +27,8 @@ import {
   type InspectionTemplateRow,
   type InspectionTemplateSectionRow,
   type OrganizerPayload,
+  type OrganizerSetupBoard,
+  type OrganizerSetupStep,
   type PrintBackgroundAssetRow,
   type RaceRow,
   type SeasonRow,
@@ -267,18 +270,6 @@ type SettingsEditor = {
   icon: typeof Wrench
 }
 
-type SettingsReadinessItem = {
-  label: string
-  value: number
-  ready: boolean
-}
-
-type SettingsPhaseSummary = {
-  phase: string
-  complete: number
-  total: number
-}
-
 const settingsEditors: SettingsEditor[] = [
   { key: 'season', label: 'Season', phase: '1. Foundation', hint: 'Start the racing year and active season.', icon: CalendarDays },
   { key: 'circuit', label: 'Circuit', phase: '1. Foundation', hint: 'Create tracks before assigning events.', icon: MapPinned },
@@ -399,8 +390,7 @@ export function OrganizerSettingsPage() {
   const inspectionSections = useMemo(() => payload.inspectionTemplates.flatMap((template) => template.sections), [payload.inspectionTemplates])
   const inspectionItems = useMemo(() => inspectionSections.flatMap((section) => section.items), [inspectionSections])
   const activeEditorMeta = settingsEditors.find((editor) => editor.key === activeEditor) ?? settingsEditors[0]
-  const readiness = useMemo(() => createSettingsReadiness(payload), [payload])
-  const phaseSummaries = useMemo(() => createSettingsPhaseSummaries(readiness), [readiness])
+  const setupBoard = useMemo(() => createOrganizerSetupBoard(payload), [payload])
 
   function openEditor(editor: SettingsEditorKey) {
     setActiveEditor(editor)
@@ -950,8 +940,7 @@ export function OrganizerSettingsPage() {
               editors={settingsEditors}
               activeEditor={activeEditor}
               activeEditorMeta={activeEditorMeta}
-              readiness={readiness}
-              phaseSummaries={phaseSummaries}
+              setupBoard={setupBoard}
               onSelect={openEditor}
             />
 
@@ -1114,7 +1103,7 @@ export function OrganizerSettingsPage() {
                 <EntitySelect label="Weight effect" value={inspectionItemForm.weightEffectType} options={weightEffectTypes.map((effectType) => ({ value: effectType, label: effectType }))} onChange={(weightEffectType) => setInspectionItemForm((current) => ({ ...current, weightEffectType: weightEffectType as WeightEffectType }))} />
               </div>
               <TextField label="Fixed weight kg" type="number" value={inspectionItemForm.fixedWeightKg} onChange={(fixedWeightKg) => setInspectionItemForm((current) => ({ ...current, fixedWeightKg }))} placeholder="0.00" />
-              <TextAreaField label="Options JSON array" value={inspectionItemForm.optionsText} onChange={(optionsText) => setInspectionItemForm((current) => ({ ...current, optionsText }))} placeholder='["Yes", "No"]' />
+              <TextAreaField label="Dropdown choices" helperText={'Advanced format for now: write choices as a list, for example ["Yes", "No"].'} value={inspectionItemForm.optionsText} onChange={(optionsText) => setInspectionItemForm((current) => ({ ...current, optionsText }))} placeholder='["Yes", "No"]' />
               <TextField label="Sort order" type="number" value={inspectionItemForm.sortOrder} onChange={(sortOrder) => setInspectionItemForm((current) => ({ ...current, sortOrder }))} placeholder="10" />
               <CheckboxField label="Required item" checked={inspectionItemForm.isRequired} onChange={(isRequired) => setInspectionItemForm((current) => ({ ...current, isRequired }))} />
               <EntitySelect
@@ -1142,7 +1131,7 @@ export function OrganizerSettingsPage() {
                 <TextField label="Base weight kg" type="number" value={weightRuleForm.baseWeightKg} onChange={(baseWeightKg) => setWeightRuleForm((current) => ({ ...current, baseWeightKg }))} placeholder="950" />
                 <TextField label="Sort order" type="number" value={weightRuleForm.sortOrder} onChange={(sortOrder) => setWeightRuleForm((current) => ({ ...current, sortOrder }))} placeholder="10" />
               </div>
-              <TextAreaField label="Additional weight rules JSON array" value={weightRuleForm.additionalWeightRulesText} onChange={(additionalWeightRulesText) => setWeightRuleForm((current) => ({ ...current, additionalWeightRulesText }))} placeholder='[{"code":"turbo","label":"Turbo","weightKg":30}]' />
+              <TextAreaField label="Additional weight options" helperText="Advanced format for now: each option needs a code, label, and weight kg." value={weightRuleForm.additionalWeightRulesText} onChange={(additionalWeightRulesText) => setWeightRuleForm((current) => ({ ...current, additionalWeightRulesText }))} placeholder='[{"code":"turbo","label":"Turbo","weightKg":30}]' />
               <CheckboxField label="Weight rule is active" checked={weightRuleForm.isActive} onChange={(isActive) => setWeightRuleForm((current) => ({ ...current, isActive }))} />
               <EntitySelect
                 label="Edit existing weight rule"
@@ -1165,8 +1154,8 @@ export function OrganizerSettingsPage() {
                 <TextField label="Maximum ballast kg" type="number" value={ballastRuleForm.maxBallastKg} onChange={(maxBallastKg) => setBallastRuleForm((current) => ({ ...current, maxBallastKg }))} placeholder="80" />
               </div>
               <CheckboxField label="Allow join weight ledger for this rule" checked={ballastRuleForm.joinWeightEnabled} onChange={(joinWeightEnabled) => setBallastRuleForm((current) => ({ ...current, joinWeightEnabled }))} />
-              <TextAreaField label="Position matrix JSON" value={ballastRuleForm.positionMatrixText} onChange={(positionMatrixText) => setBallastRuleForm((current) => ({ ...current, positionMatrixText }))} placeholder='{"1": 30, "2": 20, "3": 10}' />
-              <TextAreaField label="Removal rule JSON" value={ballastRuleForm.removalRuleText} onChange={(removalRuleText) => setBallastRuleForm((current) => ({ ...current, removalRuleText }))} placeholder='{"note": "Future rule for ballast removal"}' />
+              <TextAreaField label="Ballast by finishing position" helperText="Advanced format for now: position number on the left, ballast kg on the right." value={ballastRuleForm.positionMatrixText} onChange={(positionMatrixText) => setBallastRuleForm((current) => ({ ...current, positionMatrixText }))} placeholder='{"1": 30, "2": 20, "3": 10}' />
+              <TextAreaField label="Ballast removal notes" helperText="Optional advanced rule for how carried ballast is reduced in later races." value={ballastRuleForm.removalRuleText} onChange={(removalRuleText) => setBallastRuleForm((current) => ({ ...current, removalRuleText }))} placeholder='{"note": "Future rule for ballast removal"}' />
               <EntitySelect
                 label="Edit existing ballast rule"
                 value={ballastRuleForm.ballastRuleId}
@@ -1304,10 +1293,10 @@ export function OrganizerSettingsPage() {
 
           <section className="border border-zinc-200 dark:border-zinc-800">
             <div className="border-b border-zinc-200 p-4 dark:border-zinc-800">
-              <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Live structure</p>
-              <h2 className="mt-2 text-xl font-semibold">Season Structure</h2>
+              <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Configuration map</p>
+              <h2 className="mt-2 text-xl font-semibold">Season Setup Map</h2>
               <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">
-                This is the configuration map. Choose a workflow step on the left, or click any existing item here to edit it in the drawer.
+                Read this from top to bottom: Season, Events, Rule Packages, then Assets and Inspection Forms. Click any existing item to edit it.
               </p>
             </div>
             <div className="grid gap-3 border-b border-zinc-200 p-4 sm:grid-cols-4 dark:border-zinc-800">
@@ -1737,107 +1726,196 @@ function SettingsFocusPanel({
   editors,
   activeEditor,
   activeEditorMeta,
-  readiness,
-  phaseSummaries,
+  setupBoard,
   onSelect,
 }: {
   editors: SettingsEditor[]
   activeEditor: SettingsEditorKey
   activeEditorMeta: SettingsEditor
-  readiness: SettingsReadinessItem[]
-  phaseSummaries: SettingsPhaseSummary[]
+  setupBoard: OrganizerSetupBoard
   onSelect: (editor: SettingsEditorKey) => void
 }) {
+  const quickEditors = editors.filter((editor) => ['season', 'event', 'eventSeriesRule', 'weightRule', 'printBackgroundAsset'].includes(editor.key))
   const phases = [...new Set(editors.map((editor) => editor.phase))]
 
   return (
     <section className="border border-zinc-200 dark:border-zinc-800">
       <div className="border-b border-zinc-200 p-4 dark:border-zinc-800">
-        <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Setup cockpit</p>
-        <h2 className="mt-2 text-xl font-semibold">Open one editor, keep the map clean</h2>
+        <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Season setup board</p>
+        <h2 className="mt-2 text-xl font-semibold">Build the season in order</h2>
         <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">
-          Select a workflow step to open the off-canvas editor. The season structure stays on this page, so you never lose context.
+          Follow the checklist from top to bottom. Each step opens one focused editor, while the season map stays visible on the right.
         </p>
       </div>
 
       <div className="border-b border-zinc-200 p-4 dark:border-zinc-800">
         <div className="rounded-md border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-950">
-          <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Selected editor</p>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Overall setup</p>
+              <p className="mt-2 text-3xl font-semibold tabular-nums">{setupBoard.completionPercent}%</p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm font-semibold">{setupBoard.activeSeasonLabel}</p>
+              <p className="mt-1 text-sm text-zinc-500">{setupBoard.missingCount} item(s) missing</p>
+            </div>
+          </div>
+          <div className="mt-3 h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-800">
+            <div className="h-1.5 rounded-full bg-primary" style={{ width: `${setupBoard.completionPercent}%` }} />
+          </div>
+        </div>
+
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          {setupBoard.stats.map((stat) => (
+            <div key={stat.label} className="rounded-md border border-zinc-200 px-3 py-2 dark:border-zinc-800">
+              <p className="font-mono text-[0.68rem] uppercase tracking-[0.12em] text-zinc-500">{stat.label}</p>
+              <p className={`mt-1 text-lg font-semibold ${stat.tone === 'warning' ? 'text-amber-700 dark:text-amber-400' : 'text-zinc-950 dark:text-zinc-50'}`}>{stat.value}</p>
+              <p className="mt-1 text-xs leading-5 text-zinc-500">{stat.helper}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-3 p-4">
+        <NextSetupAction step={setupBoard.nextStep} onSelect={onSelect} />
+        {setupBoard.steps.map((step) => (
+          <SetupStepCard key={step.key} step={step} activeEditor={activeEditor} onSelect={onSelect} />
+        ))}
+      </div>
+
+      <div className="border-t border-zinc-200 p-4 dark:border-zinc-800">
+        <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Quick editors</p>
+        <div className="mt-3 grid gap-2">
+          {quickEditors.map((editor) => {
+            const Icon = editor.icon
+            const isActive = editor.key === activeEditor
+
+            return (
+              <motion.button
+                key={editor.key}
+                whileTap={{ scale: 0.98 }}
+                type="button"
+                onClick={() => onSelect(editor.key)}
+                className={`flex min-h-11 items-center gap-3 rounded-md border px-3 py-2 text-left text-sm transition ${
+                  isActive
+                    ? 'border-zinc-300 border-l-2 border-l-primary bg-orange-500/5 dark:border-zinc-700 dark:border-l-primary'
+                    : 'border-zinc-200 hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600'
+                }`}
+              >
+                <Icon size={17} className={isActive ? 'text-primary' : 'text-zinc-500'} />
+                <span className="font-semibold">{editor.label}</span>
+              </motion.button>
+            )
+          })}
+        </div>
+
+        <div className="mt-4 rounded-md border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-950">
+          <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Current focus</p>
           <div className="mt-3 flex items-start gap-3">
             <activeEditorMeta.icon className="mt-1 text-primary" size={19} />
             <div>
               <p className="font-semibold">{activeEditorMeta.label}</p>
-              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{activeEditorMeta.phase} / {activeEditorMeta.hint}</p>
+              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{activeEditorMeta.hint}</p>
             </div>
           </div>
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            type="button"
-            onClick={() => onSelect(activeEditor)}
-            className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-white"
-          >
-            Open {activeEditorMeta.label}
-          </motion.button>
         </div>
 
-        <div className="mt-3 grid gap-2">
-          {phaseSummaries.map((summary) => (
-            <div key={summary.phase} className="rounded-md border border-zinc-200 px-3 py-2 dark:border-zinc-800">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-semibold">{summary.phase}</p>
-                <p className="font-mono text-xs text-zinc-500">{summary.complete}/{summary.total}</p>
+        <details className="mt-4 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
+          <summary className="cursor-pointer list-none text-sm font-semibold">
+            All setup tools
+            <span className="ml-2 font-mono text-xs uppercase tracking-[0.12em] text-zinc-500">advanced</span>
+          </summary>
+          <p className="mt-2 text-xs leading-5 text-zinc-500">
+            Use this when you need a specific editor that is not the recommended next action.
+          </p>
+          <div className="mt-3 space-y-4">
+            {phases.map((phase) => (
+              <div key={phase}>
+                <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">{phase}</p>
+                <div className="mt-2 grid gap-2">
+                  {editors.filter((editor) => editor.phase === phase).map((editor) => {
+                    const Icon = editor.icon
+                    const isActive = editor.key === activeEditor
+
+                    return (
+                      <motion.button
+                        key={editor.key}
+                        whileTap={{ scale: 0.98 }}
+                        type="button"
+                        onClick={() => onSelect(editor.key)}
+                        className={`flex min-h-11 items-center gap-3 rounded-md border px-3 py-2 text-left text-sm transition ${
+                          isActive
+                            ? 'border-zinc-300 border-l-2 border-l-primary bg-orange-500/5 dark:border-zinc-700 dark:border-l-primary'
+                            : 'border-zinc-200 hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600'
+                        }`}
+                      >
+                        <Icon size={17} className={isActive ? 'text-primary' : 'text-zinc-500'} />
+                        <span className="font-semibold">{editor.label}</span>
+                      </motion.button>
+                    )
+                  })}
+                </div>
               </div>
-              <div className="mt-2 h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-800">
-                <div
-                  className="h-1.5 rounded-full bg-primary"
-                  style={{ width: `${Math.round((summary.complete / summary.total) * 100)}%` }}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {readiness.map((item) => (
-            <div key={item.label} className="rounded-md border border-zinc-200 px-3 py-2 dark:border-zinc-800">
-              <p className="font-mono text-[0.68rem] uppercase tracking-[0.12em] text-zinc-500">{item.label}</p>
-              <p className={`mt-1 text-lg font-semibold ${item.ready ? 'text-zinc-950 dark:text-zinc-50' : 'text-amber-700 dark:text-amber-400'}`}>{item.value}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="space-y-4 p-4">
-        {phases.map((phase) => (
-          <div key={phase}>
-            <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">{phase}</p>
-            <div className="mt-2 grid gap-2">
-              {editors.filter((editor) => editor.phase === phase).map((editor) => {
-                const Icon = editor.icon
-                const isActive = editor.key === activeEditor
-
-                return (
-                  <motion.button
-                    key={editor.key}
-                    whileTap={{ scale: 0.98 }}
-                    type="button"
-                    onClick={() => onSelect(editor.key)}
-                    className={`flex min-h-11 items-center gap-3 rounded-md border px-3 py-2 text-left text-sm transition ${
-                      isActive
-                        ? 'border-zinc-300 border-l-2 border-l-primary bg-orange-500/5 dark:border-zinc-700 dark:border-l-primary'
-                        : 'border-zinc-200 hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600'
-                    }`}
-                  >
-                    <Icon size={17} className={isActive ? 'text-primary' : 'text-zinc-500'} />
-                    <span className="font-semibold">{editor.label}</span>
-                  </motion.button>
-                )
-              })}
-            </div>
+            ))}
           </div>
-        ))}
+        </details>
       </div>
     </section>
+  )
+}
+
+function NextSetupAction({ step, onSelect }: { step: OrganizerSetupStep; onSelect: (editor: SettingsEditorKey) => void }) {
+  return (
+    <div className="rounded-md border border-primary/50 bg-orange-500/5 p-3">
+      <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Recommended next</p>
+      <h3 className="mt-2 font-semibold">{step.label}</h3>
+      <p className="mt-1 text-sm leading-6 text-zinc-600 dark:text-zinc-400">{step.description}</p>
+      <motion.button
+        whileTap={{ scale: 0.98 }}
+        type="button"
+        onClick={() => onSelect(step.editorKey as SettingsEditorKey)}
+        className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-white"
+      >
+        {step.primaryActionLabel}
+        <ArrowRight size={16} />
+      </motion.button>
+    </div>
+  )
+}
+
+function SetupStepCard({ step, activeEditor, onSelect }: { step: OrganizerSetupStep; activeEditor: SettingsEditorKey; onSelect: (editor: SettingsEditorKey) => void }) {
+  const isFocused = step.editorKey === activeEditor
+  const isComplete = step.complete === step.total
+
+  return (
+    <motion.button
+      whileTap={{ scale: 0.98 }}
+      type="button"
+      onClick={() => onSelect(step.editorKey as SettingsEditorKey)}
+      className={`w-full rounded-md border p-3 text-left transition ${
+        isFocused
+          ? 'border-zinc-300 border-l-2 border-l-primary bg-orange-500/5 dark:border-zinc-700 dark:border-l-primary'
+          : 'border-zinc-200 hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600'
+      }`}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold">{step.shortLabel}</p>
+          <p className="mt-1 text-xs leading-5 text-zinc-500">{step.description}</p>
+        </div>
+        <span className={`font-mono text-xs ${isComplete ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-700 dark:text-amber-400'}`}>
+          {step.complete}/{step.total}
+        </span>
+      </div>
+      <div className="mt-3 grid gap-2">
+        {step.requirements.map((requirement) => (
+          <span key={requirement.label} className="flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400">
+            {requirement.ready ? <CheckCircle2 size={14} className="text-emerald-600 dark:text-emerald-400" /> : <Circle size={14} className="text-amber-600 dark:text-amber-400" />}
+            {requirement.label}
+          </span>
+        ))}
+      </div>
+    </motion.button>
   )
 }
 
@@ -1999,7 +2077,7 @@ function SeasonPanel({
                           onClick={() => onEditWeightRule(weightRule)}
                           className="rounded-md border border-zinc-200 px-2 py-1 text-left text-xs transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600"
                         >
-                          Weight / {weightRule.name} / base {weightRule.baseWeightKg} kg
+                          Weight rule / {weightRule.name} / base {weightRule.baseWeightKg} kg
                         </button>
                       ))}
                     </div>
@@ -2012,7 +2090,7 @@ function SeasonPanel({
                           onClick={() => onEditBallastRule(ballastRule)}
                           className="rounded-md border border-zinc-200 px-2 py-1 text-left text-xs transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600"
                         >
-                          Ballast / {ballastRule.ballastType} / max {ballastRule.maxBallastKg ?? 'none'} kg
+                          Success ballast / {ballastRule.ballastType} / max {ballastRule.maxBallastKg ?? 'none'} kg
                         </button>
                       ))}
                     </div>
@@ -2025,7 +2103,7 @@ function SeasonPanel({
                           onClick={() => onEditTireRule(tireRule)}
                           className="rounded-md border border-zinc-200 px-2 py-1 text-left text-xs transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600"
                         >
-                          Tire / {tireRule.tireBrand}{tireRule.tireModel ? ` ${tireRule.tireModel}` : ''} / {tireRule.isAllowed ? 'Allowed' : 'Disallowed'}
+                          Tire rule / {tireRule.tireBrand}{tireRule.tireModel ? ` ${tireRule.tireModel}` : ''} / {tireRule.isAllowed ? 'Allowed' : 'Disallowed'}
                         </button>
                       ))}
                     </div>
@@ -2038,7 +2116,7 @@ function SeasonPanel({
                           onClick={() => onEditSponsorStickerAsset(asset)}
                           className="rounded-md border border-zinc-200 px-2 py-1 text-left text-xs transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600"
                         >
-                          Sticker / {asset.title} / {asset.filename}
+                          Sponsor sticker / {asset.title} / {asset.filename}
                         </button>
                       ))}
                     </div>
@@ -2051,7 +2129,7 @@ function SeasonPanel({
                           onClick={() => onEditInspectionTemplate(template)}
                           className="rounded-md border border-zinc-200 px-2 py-1 text-left text-xs transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600"
                         >
-                          Template / {template.name} / v{template.version} / {template.isActive ? 'Active' : 'Inactive'}
+                          Inspection template / {template.name} / v{template.version} / {template.isActive ? 'Active' : 'Inactive'}
                         </button>
                       ))}
                     </div>
@@ -2064,7 +2142,7 @@ function SeasonPanel({
                             onClick={() => onEditInspectionSection(section)}
                             className="rounded-md border border-zinc-200 px-2 py-1 text-left text-xs transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600"
                           >
-                            Section / {section.title} / {section.items.length} item(s)
+                            Inspection section / {section.title} / {section.items.length} item(s)
                           </button>
                         ))}
                         {template.sections.flatMap((section) => section.items).map((item) => (
@@ -2074,7 +2152,7 @@ function SeasonPanel({
                             onClick={() => onEditInspectionItem(item)}
                             className="rounded-md border border-zinc-200 px-2 py-1 text-left text-xs transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600"
                           >
-                            Item / {item.labelTh} / {item.inputType}
+                            Inspection item / {item.labelTh} / {item.inputType}
                           </button>
                         ))}
                       </div>
@@ -2117,7 +2195,7 @@ function TextField({ label, value, onChange, type = 'text', placeholder }: { lab
   )
 }
 
-function TextAreaField({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (value: string) => void; placeholder?: string }) {
+function TextAreaField({ label, value, onChange, placeholder, helperText }: { label: string; value: string; onChange: (value: string) => void; placeholder?: string; helperText?: string }) {
   return (
     <label className="block">
       <span className="text-sm font-medium">{label}</span>
@@ -2128,6 +2206,7 @@ function TextAreaField({ label, value, onChange, placeholder }: { label: string;
         rows={3}
         className="mt-2 w-full rounded-md border border-zinc-300 bg-zinc-50 px-3 py-2 text-base outline-none transition focus:border-primary dark:border-zinc-800 dark:bg-zinc-950"
       />
+      {helperText ? <span className="mt-2 block text-xs leading-5 text-zinc-500">{helperText}</span> : null}
     </label>
   )
 }
@@ -2227,32 +2306,6 @@ function OrganizerSkeleton() {
 
 function EmptyState() {
   return <div className="p-5 text-sm text-zinc-500">No seasons configured. Create the first season to start building events and races.</div>
-}
-
-function createSettingsReadiness(payload: OrganizerPayload): SettingsReadinessItem[] {
-  return [
-    { label: 'Seasons', value: payload.seasons.length, ready: payload.seasons.length > 0 },
-    { label: 'Events', value: payload.events.length, ready: payload.events.length > 0 },
-    { label: 'Races', value: payload.races.length, ready: payload.races.length > 0 },
-    { label: 'Series', value: payload.seriesRaces.length, ready: payload.seriesRaces.length > 0 },
-    { label: 'Rules', value: payload.eventSeriesRules.length, ready: payload.eventSeriesRules.length > 0 },
-    { label: 'Templates', value: payload.inspectionTemplates.length, ready: payload.inspectionTemplates.length > 0 },
-  ]
-}
-
-function createSettingsPhaseSummaries(readiness: SettingsReadinessItem[]): SettingsPhaseSummary[] {
-  const ready = new Map(readiness.map((item) => [item.label, item.ready]))
-
-  return [
-    { phase: 'Foundation', complete: countReady(ready, ['Seasons']), total: 1 },
-    { phase: 'Classes', complete: countReady(ready, ['Series']), total: 1 },
-    { phase: 'Calendar', complete: countReady(ready, ['Events', 'Races']), total: 2 },
-    { phase: 'Rules', complete: countReady(ready, ['Rules', 'Templates']), total: 2 },
-  ]
-}
-
-function countReady(ready: Map<string, boolean>, labels: string[]) {
-  return labels.filter((label) => ready.get(label)).length
 }
 
 function createEmptyCircuitForm(): CircuitForm {

@@ -1,11 +1,11 @@
 # Graph Report - RaceDocV1Github  (2026-05-24)
 
 ## Corpus Check
-- 59 files · ~70,618 words
+- 59 files · ~71,904 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 395 nodes · 444 edges · 19 communities detected
+- 398 nodes · 450 edges · 20 communities detected
 - Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 25 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -20,6 +20,7 @@
 - [[_COMMUNITY_Community 7|Community 7]]
 - [[_COMMUNITY_Community 8|Community 8]]
 - [[_COMMUNITY_Community 9|Community 9]]
+- [[_COMMUNITY_Community 10|Community 10]]
 - [[_COMMUNITY_Community 12|Community 12]]
 - [[_COMMUNITY_Community 13|Community 13]]
 - [[_COMMUNITY_Community 15|Community 15]]
@@ -34,13 +35,13 @@
 1. `finishSave()` - 18 edges
 2. `useAuth()` - 7 edges
 3. `getAuthErrorMessage()` - 7 edges
-4. `RacedocV1` - 5 edges
-5. `refreshDetail()` - 4 edges
-6. `prefillInspectionAnswers()` - 4 edges
-7. `uploadEntryAsset()` - 4 edges
-8. `uniqueValues()` - 4 edges
-9. `uploadOrganizerAsset()` - 4 edges
-10. `fetchAuditTrail()` - 4 edges
+4. `createOrganizerSetupBoard()` - 5 edges
+5. `RacedocV1` - 5 edges
+6. `refreshDetail()` - 4 edges
+7. `prefillInspectionAnswers()` - 4 edges
+8. `uploadEntryAsset()` - 4 edges
+9. `uniqueValues()` - 4 edges
+10. `uploadOrganizerAsset()` - 4 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `RacedocV1` --indexes--> `Graphify`  [INFERRED]
@@ -57,8 +58,8 @@
 ## Communities
 
 ### Community 0 - "Community 0"
-Cohesion: 0.04
-Nodes (55): countReady(), createBallastRuleForm(), createCircuitForm(), createEmptyBallastRuleForm(), createEmptyCircuitForm(), createEmptyEventForm(), createEmptyEventSeriesRuleForm(), createEmptyGradeForm() (+47 more)
+Cohesion: 0.05
+Nodes (53): createBallastRuleForm(), createCircuitForm(), createEmptyBallastRuleForm(), createEmptyCircuitForm(), createEmptyEventForm(), createEmptyEventSeriesRuleForm(), createEmptyGradeForm(), createEmptyInspectionItemForm() (+45 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.06
@@ -77,22 +78,26 @@ Cohesion: 0.13
 Nodes (11): AuthRedirect(), OnboardingRoute(), ProtectedRoute(), AdminOnlyRoute(), AdminOrSecretaryRoute(), ScrutineerReportRoute(), useAuth(), canSeeAdminNavigation() (+3 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.13
-Nodes (8): getAuthErrorMessage(), handleEmailLogin(), handleGoogleLogin(), handleSubmit(), validateIdentity(), updatePassword(), handleSignUp(), handleSubmit()
+Cohesion: 0.15
+Nodes (5): createOrganizerSetupBoard(), createSetupStep(), getClassActionLabel(), getClassEditorKey(), getRuleEditorKey()
 
 ### Community 6 - "Community 6"
 Cohesion: 0.13
-Nodes (4): parseNullableInteger(), printSelectedResult(), saveEntry(), canPrintRaceResult()
+Nodes (8): getAuthErrorMessage(), handleEmailLogin(), handleGoogleLogin(), handleSubmit(), validateIdentity(), updatePassword(), handleSignUp(), handleSubmit()
 
 ### Community 7 - "Community 7"
-Cohesion: 0.17
-Nodes (6): calculateItemWeight(), createInspectionVersionDiff(), getSelectedValues(), getSingleSelectedValue(), isAnswerFilled(), mapReviews()
+Cohesion: 0.13
+Nodes (4): parseNullableInteger(), printSelectedResult(), saveEntry(), canPrintRaceResult()
 
 ### Community 8 - "Community 8"
 Cohesion: 0.17
-Nodes (4): getInvitationNotice(), inviteRoleByEmail(), resendInvitation(), sendRoleInvitation()
+Nodes (6): calculateItemWeight(), createInspectionVersionDiff(), getSelectedValues(), getSingleSelectedValue(), isAnswerFilled(), mapReviews()
 
 ### Community 9 - "Community 9"
+Cohesion: 0.17
+Nodes (4): getInvitationNotice(), inviteRoleByEmail(), resendInvitation(), sendRoleInvitation()
+
+### Community 10 - "Community 10"
 Cohesion: 0.2
 Nodes (8): buildAuditTrailCsv(), normalizeAuditTrailPayload(), applyFilters(), exportVisibleRows(), fetchAuditTrail(), loadAuditTrail(), movePage(), run()
 
@@ -147,11 +152,11 @@ Nodes (1): Branding
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `prefillInspectionAnswers()` connect `Community 2` to `Community 7`?**
+- **Why does `prefillInspectionAnswers()` connect `Community 2` to `Community 8`?**
   _High betweenness centrality (0.006) - this node is a cross-community bridge._
-- **Why does `isAnswerFilled()` connect `Community 7` to `Community 2`?**
+- **Why does `isAnswerFilled()` connect `Community 8` to `Community 2`?**
   _High betweenness centrality (0.006) - this node is a cross-community bridge._
-- **Why does `normalizePayload()` connect `Community 13` to `Community 8`?**
+- **Why does `normalizePayload()` connect `Community 13` to `Community 9`?**
   _High betweenness centrality (0.002) - this node is a cross-community bridge._
 - **Are the 6 inferred relationships involving `useAuth()` (e.g. with `ProtectedRoute()` and `AdminOrSecretaryRoute()`) actually correct?**
   _`useAuth()` has 6 INFERRED edges - model-reasoned connections that need verification._
@@ -160,4 +165,4 @@ _Questions this graph is uniquely positioned to answer:_
 - **What connects `Entry Form`, `Success Ballast`, `Audit Trail` to the rest of the system?**
   _8 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.04 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05 - nodes in this community are weakly interconnected._
