@@ -1,11 +1,11 @@
 # Graph Report - RaceDocV1Github  (2026-05-24)
 
 ## Corpus Check
-- 59 files · ~72,891 words
+- 59 files · ~72,825 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 400 nodes · 452 edges · 20 communities detected
+- 402 nodes · 454 edges · 20 communities detected
 - Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 25 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -58,7 +58,7 @@
 ## Communities
 
 ### Community 0 - "Community 0"
-Cohesion: 0.05
+Cohesion: 0.04
 Nodes (53): createBallastRuleForm(), createCircuitForm(), createEmptyBallastRuleForm(), createEmptyCircuitForm(), createEmptyEventForm(), createEmptyEventSeriesRuleForm(), createEmptyGradeForm(), createEmptyInspectionItemForm() (+45 more)
 
 ### Community 1 - "Community 1"
@@ -165,4 +165,4 @@ _Questions this graph is uniquely positioned to answer:_
 - **What connects `Entry Form`, `Success Ballast`, `Audit Trail` to the rest of the system?**
   _8 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.05 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.04 - nodes in this community are weakly interconnected._
