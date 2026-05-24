@@ -25,17 +25,12 @@ import {
 } from '@/components/SeriesRaceFilter'
 import { filterBySeriesRace, getSeriesRaceOptions } from '@/lib/series-race-filter'
 import { supabase } from '@/lib/supabase'
+import { createEmptyEntryListFilters, filterEntryList, getEntryListFilterOptions, getEntryStatusDisplay, hasActiveEntryListFilters, type EntryListFilters, type EntryListRow } from './entryFormListHelpers'
 
 type EntryStatus = 'draft' | 'pending' | 'active' | 'inactive' | 'rejected'
 
-type EntryFormRow = {
+type EntryFormRow = EntryListRow & {
   id: string
-  event_name: string
-  season_year: number
-  series_class: string
-  car_number: string | null
-  status: EntryStatus
-  created_at: string
 }
 
 type ApprovalDocument = {
@@ -312,13 +307,13 @@ export function EntryFormPage() {
   const [entriesLoading, setEntriesLoading] = useState(true)
   const [entriesError, setEntriesError] = useState<string | null>(null)
   const [creatorOpen, setCreatorOpen] = useState(false)
-  const [selectedSeries, setSelectedSeries] = useState('all')
+  const [filters, setFilters] = useState<EntryListFilters>(() => createEmptyEntryListFilters())
   const isApprovalRole = roles.includes('ADMIN') || roles.includes('SECRETARY')
   const canSoftDelete = roles.includes('ADMIN')
   const [deletingEntryId, setDeletingEntryId] = useState<string | null>(null)
   const linkedEntryFormId = searchParams.get('entryFormId')
-  const seriesOptions = useMemo(() => getSeriesRaceOptions(entries), [entries])
-  const visibleEntries = useMemo(() => filterBySeriesRace(entries, selectedSeries), [entries, selectedSeries])
+  const filterOptions = useMemo(() => getEntryListFilterOptions(entries), [entries])
+  const visibleEntries = useMemo(() => filterEntryList(entries, filters), [entries, filters])
   const linkedEntry = useMemo(
     () => entries.find((entry) => entry.id === linkedEntryFormId) ?? null,
     [entries, linkedEntryFormId],
@@ -407,14 +402,7 @@ export function EntryFormPage() {
 
       <section className="mt-6">
         {!entriesLoading && !entriesError && entries.length > 0 ? (
-          <div className="mb-4 grid gap-3 border border-zinc-200 p-4 sm:grid-cols-[minmax(0,22rem)_1fr] sm:items-end dark:border-zinc-800">
-            <SeriesRaceFilter value={selectedSeries} options={seriesOptions} onChange={setSelectedSeries} />
-            <FilterResultSummary
-              visible={visibleEntries.length}
-              total={entries.length}
-              onClear={() => setSelectedSeries('all')}
-            />
-          </div>
+          <EntryListFilterBoard filters={filters} options={filterOptions} visible={visibleEntries.length} total={entries.length} onChange={setFilters} onClear={() => setFilters(createEmptyEntryListFilters())} />
         ) : null}
         {entriesLoading ? <EntryTableSkeleton /> : null}
         {!entriesLoading && entriesError ? <ErrorPanel message={entriesError} /> : null}
@@ -427,7 +415,7 @@ export function EntryFormPage() {
           <EmptyState onCreate={() => setCreatorOpen(true)} />
         ) : null}
         {!entriesLoading && !entriesError && entries.length > 0 && visibleEntries.length === 0 ? (
-          <FilteredEmptyState onClear={() => setSelectedSeries('all')} />
+          <FilteredEmptyState onClear={() => setFilters(createEmptyEntryListFilters())} />
         ) : null}
         {!entriesLoading && !entriesError && visibleEntries.length > 0 ? (
           <EntryTable
@@ -966,11 +954,83 @@ function EntryTable({
   )
 }
 
+function EntryListFilterBoard({ filters, options, visible, total, onChange, onClear }: { filters: EntryListFilters; options: ReturnType<typeof getEntryListFilterOptions>; visible: number; total: number; onChange: (filters: EntryListFilters) => void; onClear: () => void }) {
+  const active = hasActiveEntryListFilters(filters)
+
+  function updateFilter(field: keyof EntryListFilters, value: string) {
+    onChange({ ...filters, [field]: value })
+  }
+
+  return (
+    <div className="mb-4 border border-zinc-200 p-4 dark:border-zinc-800">
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+        <FilterTextField label="Search" value={filters.query} placeholder="Event, class, car no..." onChange={(value) => updateFilter('query', value)} />
+        <FilterSelect label="Year" value={filters.year} allLabel="All Years" options={options.years} onChange={(value) => updateFilter('year', value)} />
+        <FilterSelect label="Event" value={filters.event} allLabel="All Events" options={options.events} onChange={(value) => updateFilter('event', value)} />
+        <FilterSelect label="Series / Grade" value={filters.series} allLabel="All Series / Grades" options={options.series} onChange={(value) => updateFilter('series', value)} />
+        <FilterSelect label="Status" value={filters.status} allLabel="All Statuses" options={options.statuses} getLabel={(status) => getEntryStatusDisplay(status as EntryStatus).label} onChange={(value) => updateFilter('status', value)} />
+      </div>
+      <div className="mt-4 flex flex-col gap-3 border-t border-zinc-200 pt-4 sm:flex-row sm:items-center sm:justify-between dark:border-zinc-800">
+        <div>
+          <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Showing {visible} / {total}</p>
+          {active ? <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">Filtered view. Clear filters to return to every visible Entry Form.</p> : <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">All Entry Forms visible to your role.</p>}
+        </div>
+        {active ? (
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+            type="button"
+            onClick={onClear}
+            className="inline-flex min-h-10 items-center justify-center rounded-md border border-zinc-300 px-3 text-sm font-semibold dark:border-zinc-800"
+          >
+            Clear filters
+          </motion.button>
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
+function FilterTextField({ label, value, placeholder, onChange }: { label: string; value: string; placeholder: string; onChange: (value: string) => void }) {
+  return (
+    <label className="block min-w-0">
+      <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">{label}</span>
+      <input
+        type="search"
+        value={value}
+        placeholder={placeholder}
+        onChange={(event) => onChange(event.target.value)}
+        className="mt-2 min-h-11 w-full rounded-md border border-zinc-300 bg-zinc-50 px-3 text-base outline-none transition focus:border-primary dark:border-zinc-800 dark:bg-zinc-950"
+      />
+    </label>
+  )
+}
+
+function FilterSelect({ label, value, allLabel, options, getLabel = (option) => option, onChange }: { label: string; value: string; allLabel: string; options: string[]; getLabel?: (option: string) => string; onChange: (value: string) => void }) {
+  return (
+    <label className="block min-w-0">
+      <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">{label}</span>
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="mt-2 min-h-11 w-full rounded-md border border-zinc-300 bg-zinc-50 px-3 text-base outline-none transition focus:border-primary dark:border-zinc-800 dark:bg-zinc-950"
+      >
+        <option value="all">{allLabel}</option>
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {getLabel(option)}
+          </option>
+        ))}
+      </select>
+    </label>
+  )
+}
+
 function EntryStatusBadge({ status }: { status: EntryStatus }) {
   const style = statusStyles[status]
+  const display = getEntryStatusDisplay(status)
   return (
-    <span className={`inline-flex rounded-sm px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${style}`}>
-      {status}
+    <span title={display.description} className={`inline-flex rounded-sm px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${style}`}>
+      {display.label}
     </span>
   )
 }
@@ -1011,9 +1071,9 @@ function FilteredEmptyState({ onClear }: { onClear: () => void }) {
       className="border border-zinc-200 p-6 dark:border-zinc-800"
     >
       <FileText size={26} className="text-primary" />
-      <h2 className="mt-4 text-2xl font-semibold tracking-tight">No entries match this Series Race.</h2>
+      <h2 className="mt-4 text-2xl font-semibold tracking-tight">No entries match these filters.</h2>
       <p className="mt-2 max-w-xl text-zinc-600 dark:text-zinc-400">
-        Clear the filter to return to the full Entry Form list.
+        Clear the filters to return to the full Entry Form list.
       </p>
       <motion.button
         whileTap={{ scale: 0.98 }}
@@ -1021,7 +1081,7 @@ function FilteredEmptyState({ onClear }: { onClear: () => void }) {
         onClick={onClear}
         className="mt-5 inline-flex min-h-11 items-center justify-center rounded-md border border-zinc-300 px-4 text-sm font-semibold dark:border-zinc-800"
       >
-        Clear filter
+        Clear filters
       </motion.button>
     </motion.div>
   )
