@@ -533,6 +533,7 @@ create table public.print_background_assets (
   event_id uuid not null references public.events(id) on delete cascade,
   file_asset_id uuid not null references public.file_assets(id) on delete restrict,
   title text not null,
+  orientation text not null default 'portrait' check (orientation in ('portrait', 'landscape')),
   is_default boolean not null default false
 );
 
@@ -939,8 +940,8 @@ create unique index team_invitations_pending_competitor_season_uk
   on public.team_invitations (team_id, season_id, competitor_profile_id, invite_direction)
   where status = 'Pending';
 
-create unique index print_background_assets_one_default_per_event_uk
-  on public.print_background_assets (event_id)
+create unique index print_background_assets_one_default_per_event_orientation_uk
+  on public.print_background_assets (event_id, orientation)
   where is_default = true;
 
 create unique index inspection_templates_one_active_per_rule_uk

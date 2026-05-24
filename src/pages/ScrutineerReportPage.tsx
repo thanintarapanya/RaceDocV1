@@ -13,7 +13,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useAuth } from '@/auth/useAuth'
 import { supabase } from '@/lib/supabase'
-import { getPrintBackgroundAsset, normalizePrintOptions, type PrintOptions } from './scrutineerReportHelpers'
+import { getPrintBackgroundAsset, getPrintBackgroundOptionsForOrientation, normalizePrintOptions, type PrintOptions } from './scrutineerReportHelpers'
 
 type ReportCar = {
   entryId: string
@@ -109,6 +109,7 @@ export function ScrutineerReportPage() {
   const [deletingReportId, setDeletingReportId] = useState<string | null>(null)
   const [printOptions, setPrintOptions] = useState<PrintOptions | null>(null)
   const [selectedPrintBackgroundId, setSelectedPrintBackgroundId] = useState('')
+  const [printOrientation, setPrintOrientation] = useState<'portrait' | 'landscape'>('portrait')
   const canSoftDelete = roles.includes('ADMIN')
 
   const loadData = useCallback(async (isActive: () => boolean = () => true) => {
@@ -248,7 +249,7 @@ export function ScrutineerReportPage() {
 
     const nextPrintOptions = normalizePrintOptions(data as PrintOptions | null)
     setPrintOptions(nextPrintOptions)
-    setSelectedPrintBackgroundId(nextPrintOptions?.selectedBackgroundId ?? nextPrintOptions?.printBackgroundAssets[0]?.printBackgroundAssetId ?? '')
+    setSelectedPrintBackgroundId(getDefaultPrintBackgroundId(nextPrintOptions, printOrientation))
     setSubmitting(false)
   }
 
@@ -355,10 +356,15 @@ export function ScrutineerReportPage() {
           submitting={submitting}
           printOptions={printOptions?.reportId === selectedReport?.report_id ? printOptions : null}
           selectedPrintBackgroundId={selectedPrintBackgroundId}
+          printOrientation={printOrientation}
           onPublish={publishReport}
           onDelete={deleteReport}
           onLoadPrintOptions={loadPrintOptions}
           onSelectedPrintBackgroundIdChange={setSelectedPrintBackgroundId}
+          onPrintOrientationChange={(orientation) => {
+            setPrintOrientation(orientation)
+            setSelectedPrintBackgroundId(getDefaultPrintBackgroundId(printOptions, orientation))
+          }}
           onConfirmPrintBackground={confirmPrintBackground}
           canSoftDelete={canSoftDelete}
           deletingReportId={deletingReportId}
@@ -423,10 +429,12 @@ function ReportPreview({
   submitting,
   printOptions,
   selectedPrintBackgroundId,
+  printOrientation,
   onPublish,
   onDelete,
   onLoadPrintOptions,
   onSelectedPrintBackgroundIdChange,
+  onPrintOrientationChange,
   onConfirmPrintBackground,
   canSoftDelete,
   deletingReportId,
@@ -435,10 +443,12 @@ function ReportPreview({
   submitting: boolean
   printOptions: PrintOptions | null
   selectedPrintBackgroundId: string
+  printOrientation: 'portrait' | 'landscape'
   onPublish: (report: ScrutineerReport) => Promise<void>
   onDelete: (report: ScrutineerReport) => Promise<void>
   onLoadPrintOptions: (report: ScrutineerReport) => Promise<void>
   onSelectedPrintBackgroundIdChange: (printBackgroundId: string) => void
+  onPrintOrientationChange: (orientation: 'portrait' | 'landscape') => void
   onConfirmPrintBackground: (report: ScrutineerReport, printBackgroundId: string) => Promise<void>
   canSoftDelete: boolean
   deletingReportId: string | null
@@ -453,8 +463,9 @@ function ReportPreview({
   }
 
   const snapshot = normalizeSnapshot(report.report_snapshot)
-  const printBackground = getPrintBackgroundAsset(printOptions, selectedPrintBackgroundId)
+  const printBackground = getPrintBackgroundAsset(printOptions, selectedPrintBackgroundId, printOrientation)
   const printBackgroundUrl = printBackground ? supabase.storage.from(printBackground.bucket).getPublicUrl(printBackground.path).data.publicUrl : null
+  const orientedPrintBackgroundOptions = getPrintBackgroundOptionsForOrientation(printOptions, printOrientation)
 
   return (
     <motion.article
@@ -465,10 +476,10 @@ function ReportPreview({
     >
       <div
         id="scrutineer-report-print-sheet"
-        className="hidden"
+        className={`hidden a4-${printOrientation}`}
         style={printBackgroundUrl ? { backgroundImage: `url(${printBackgroundUrl})` } : undefined}
       >
-        <PrintableReport report={report} snapshot={snapshot} />
+        <PrintableReport report={report} snapshot={snapshot} orientation={printOrientation} />
       </div>
       <header className="flex flex-col gap-4 border-b border-zinc-200 pb-5 sm:flex-row sm:items-start sm:justify-between dark:border-zinc-800">
         <div>
@@ -526,12 +537,21 @@ function ReportPreview({
           </div>
 
           {printOptions ? (
-            <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+            <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,14rem)_minmax(0,1fr)_auto] lg:items-end">
+              <SelectField
+                label="A4 layout"
+                value={printOrientation}
+                onChange={(orientation) => onPrintOrientationChange(orientation as 'portrait' | 'landscape')}
+                options={[
+                  { value: 'portrait', label: 'Portrait A4' },
+                  { value: 'landscape', label: 'Landscape A4' },
+                ]}
+              />
               <SelectField
                 label="A4 background"
                 value={selectedPrintBackgroundId}
                 onChange={onSelectedPrintBackgroundIdChange}
-                options={printOptions.printBackgroundAssets.map((asset) => ({ value: asset.printBackgroundAssetId, label: `${asset.title}${asset.isDefault ? ' / Default' : ''}` }))}
+                options={orientedPrintBackgroundOptions.map((asset) => ({ value: asset.printBackgroundAssetId, label: `${asset.title}${asset.isDefault ? ' / Default' : ''}` }))}
               />
               <motion.button
                 whileTap={{ scale: 0.98 }}
@@ -553,9 +573,9 @@ function ReportPreview({
             </div>
           ) : null}
 
-          {printOptions?.printBackgroundAssets.length === 0 ? (
+          {printOptions && orientedPrintBackgroundOptions.length === 0 ? (
             <p className="mt-4 border border-amber-200 bg-amber-500/10 p-3 text-sm text-amber-700 dark:border-amber-900/60 dark:text-amber-500">
-              No image A4 background is configured for this Event. Add a PNG, JPEG, or WebP background in Organizer Settings.
+              No image A4 {printOrientation} background is configured for this Event. Add a PNG, JPEG, or WebP background in Organizer Settings.
             </p>
           ) : null}
         </section>
@@ -627,9 +647,11 @@ function CarList({ cars, empty, passed = false }: { cars: ReportCar[]; empty: st
 function PrintableReport({
   report,
   snapshot,
+  orientation,
 }: {
   report: ScrutineerReport
   snapshot: Required<Pick<ReportSnapshot, 'summary' | 'passedCars' | 'failedCars'>>
+  orientation: 'portrait' | 'landscape'
 }) {
   return (
     <div className="print-sheet-content">
@@ -665,6 +687,7 @@ function PrintableReport({
         <div>
           <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-zinc-500">Race Result Interlock</p>
           <p className="mt-1">Official technical report published before Race Result import.</p>
+          <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-zinc-500">A4 {orientation}</p>
         </div>
         <div>
           <p className="border-t border-zinc-400 pt-2">{report.signed_by_name ?? 'Official'}</p>
@@ -805,4 +828,9 @@ function formatDateTime(value: string | null) {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(new Date(value))
+}
+
+function getDefaultPrintBackgroundId(options: PrintOptions | null, orientation: 'portrait' | 'landscape') {
+  const orientedOptions = getPrintBackgroundOptionsForOrientation(options, orientation)
+  return orientedOptions.find((asset) => asset.isDefault)?.printBackgroundAssetId ?? orientedOptions[0]?.printBackgroundAssetId ?? ''
 }

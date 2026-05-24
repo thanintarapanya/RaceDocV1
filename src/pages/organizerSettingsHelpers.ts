@@ -194,6 +194,7 @@ export type PrintBackgroundAssetRow = {
   seasonId: string
   eventOrder: number
   title: string
+  orientation: 'portrait' | 'landscape'
   isDefault: boolean
   fileAssetId: string
   bucket: string

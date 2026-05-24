@@ -100,6 +100,11 @@ body {
   margin: 0;
 }
 
+@page racedoc-a4-landscape {
+  size: A4 landscape;
+  margin: 0;
+}
+
 @media print {
   body * {
     visibility: hidden;
@@ -129,11 +134,23 @@ body {
     -webkit-print-color-adjust: exact;
   }
 
+  #scrutineer-report-print-sheet.a4-landscape,
+  #race-result-print-sheet.a4-landscape {
+    page: racedoc-a4-landscape;
+    width: 297mm;
+    min-height: 210mm;
+  }
+
   .print-sheet-content {
     box-sizing: border-box;
     min-height: 297mm;
     padding: 24mm 18mm 18mm;
-    background: rgb(250 250 250 / 0.9);
+    background: transparent;
+  }
+
+  .a4-landscape .print-sheet-content {
+    min-height: 210mm;
+    padding: 18mm 20mm 16mm;
   }
 
   .race-result-print-content {

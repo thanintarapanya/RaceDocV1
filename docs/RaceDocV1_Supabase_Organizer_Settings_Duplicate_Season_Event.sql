@@ -99,11 +99,11 @@ begin
   where event_id = v_source_event.id
   order by race_order, name;
 
-  insert into public.print_background_assets (event_id, file_asset_id, title, is_default)
-  select v_new_event_id, file_asset_id, title, is_default
+  insert into public.print_background_assets (event_id, file_asset_id, title, orientation, is_default)
+  select v_new_event_id, file_asset_id, title, orientation, is_default
   from public.print_background_assets
   where event_id = v_source_event.id
-  order by is_default desc, title;
+  order by orientation, is_default desc, title;
 
   -- Ensure the target Season has the Series/Grade links needed by copied Event Rules.
   for v_source_rule in

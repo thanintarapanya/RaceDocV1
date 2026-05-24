@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getPrintBackgroundAsset, normalizePrintOptions, type PrintOptions } from './scrutineerReportHelpers'
+import { getPrintBackgroundAsset, getPrintBackgroundOptionsForOrientation, normalizePrintOptions, type PrintOptions } from './scrutineerReportHelpers'
 
 describe('scrutineer report helpers', () => {
   it('normalizes empty print options safely', () => {
@@ -39,14 +39,49 @@ describe('scrutineer report helpers', () => {
 
     expect(getPrintBackgroundAsset(options, 'background-2')?.printBackgroundAssetId).toBe('background-2')
   })
+
+  it('filters print background options by orientation', () => {
+    const options: PrintOptions = {
+      canManage: true,
+      reportId: 'report-1',
+      status: 'Official',
+      eventId: 'event-1',
+      eventName: 'Event 1',
+      raceName: 'Race 1',
+      seriesClass: 'Siam Eco - Pro',
+      selectedBackgroundId: 'background-1',
+      selectedBackground: createBackground('background-1'),
+      printBackgroundAssets: [createBackground('background-1'), createBackground('background-2', 'landscape')],
+    }
+
+    expect(getPrintBackgroundOptionsForOrientation(options, 'landscape').map((asset) => asset.printBackgroundAssetId)).toEqual(['background-2'])
+  })
+
+  it('does not fall back to a background from another orientation', () => {
+    const options: PrintOptions = {
+      canManage: true,
+      reportId: 'report-1',
+      status: 'Official',
+      eventId: 'event-1',
+      eventName: 'Event 1',
+      raceName: 'Race 1',
+      seriesClass: 'Siam Eco - Pro',
+      selectedBackgroundId: 'background-1',
+      selectedBackground: createBackground('background-1'),
+      printBackgroundAssets: [createBackground('background-1')],
+    }
+
+    expect(getPrintBackgroundAsset(options, '', 'landscape')).toBeNull()
+  })
 })
 
-function createBackground(printBackgroundAssetId: string) {
+function createBackground(printBackgroundAssetId: string, orientation: 'portrait' | 'landscape' = 'portrait') {
   return {
     printBackgroundAssetId,
     eventId: 'event-1',
     eventName: 'Event 1',
     title: printBackgroundAssetId,
+    orientation,
     isDefault: printBackgroundAssetId === 'background-1',
     fileAssetId: `file-${printBackgroundAssetId}`,
     bucket: 'organizer_assets',

@@ -3,6 +3,7 @@ export type PrintBackgroundAsset = {
   eventId: string
   eventName: string
   title: string
+  orientation: 'portrait' | 'landscape'
   isDefault: boolean
   fileAssetId: string
   bucket: string
@@ -42,13 +43,22 @@ export function normalizePrintOptions(options: PrintOptions | null | undefined):
   }
 }
 
-export function getPrintBackgroundAsset(options: PrintOptions | null, selectedBackgroundId: string) {
+export function getPrintBackgroundOptionsForOrientation(options: PrintOptions | null, orientation: 'portrait' | 'landscape') {
+  return options?.printBackgroundAssets.filter((asset) => asset.orientation === orientation) ?? []
+}
+
+export function getPrintBackgroundAsset(options: PrintOptions | null, selectedBackgroundId: string, orientation?: 'portrait' | 'landscape') {
   if (!options) return null
 
+  const eligibleAssets = orientation
+    ? getPrintBackgroundOptionsForOrientation(options, orientation)
+    : options.printBackgroundAssets
+
   return (
-    options.printBackgroundAssets.find((asset) => asset.printBackgroundAssetId === selectedBackgroundId)
-    ?? options.selectedBackground
-    ?? options.printBackgroundAssets[0]
+    eligibleAssets.find((asset) => asset.printBackgroundAssetId === selectedBackgroundId)
+    ?? eligibleAssets.find((asset) => asset.printBackgroundAssetId === options.selectedBackground?.printBackgroundAssetId)
+    ?? eligibleAssets.find((asset) => asset.isDefault)
+    ?? eligibleAssets[0]
     ?? null
   )
 }

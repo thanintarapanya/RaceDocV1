@@ -1,11 +1,11 @@
 # Graph Report - RaceDocV1Github  (2026-05-24)
 
 ## Corpus Check
-- 57 files · ~69,168 words
+- 57 files · ~69,487 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 382 nodes · 430 edges · 18 communities detected
+- 384 nodes · 433 edges · 18 communities detected
 - Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 25 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -97,11 +97,11 @@ Nodes (8): buildAuditTrailCsv(), normalizeAuditTrailPayload(), applyFilters(), e
 
 ### Community 11 - "Community 11"
 Cohesion: 0.22
-Nodes (5): clean(), loadInitialProfile(), saveProfile(), loadInitialData(), normalizePayload()
+Nodes (5): getPrintBackgroundAsset(), getPrintBackgroundOptionsForOrientation(), normalizePrintOptions(), confirmPrintBackground(), loadPrintOptions()
 
 ### Community 12 - "Community 12"
 Cohesion: 0.22
-Nodes (3): normalizePrintOptions(), confirmPrintBackground(), loadPrintOptions()
+Nodes (5): clean(), loadInitialProfile(), saveProfile(), loadInitialData(), normalizePayload()
 
 ### Community 15 - "Community 15"
 Cohesion: 0.29
@@ -146,7 +146,7 @@ _Questions this graph is uniquely positioned to answer:_
   _High betweenness centrality (0.006) - this node is a cross-community bridge._
 - **Why does `isAnswerFilled()` connect `Community 7` to `Community 2`?**
   _High betweenness centrality (0.006) - this node is a cross-community bridge._
-- **Why does `normalizePayload()` connect `Community 11` to `Community 8`?**
+- **Why does `normalizePayload()` connect `Community 12` to `Community 8`?**
   _High betweenness centrality (0.002) - this node is a cross-community bridge._
 - **Are the 6 inferred relationships involving `useAuth()` (e.g. with `ProtectedRoute()` and `AdminOrSecretaryRoute()`) actually correct?**
   _`useAuth()` has 6 INFERRED edges - model-reasoned connections that need verification._

@@ -252,6 +252,7 @@ function createPrintBackgroundAsset(printBackgroundAssetId: string, eventId: str
     seasonId: 'season-1',
     eventOrder: 1,
     title: 'A4 official background',
+    orientation: 'portrait' as const,
     isDefault: printBackgroundAssetId === 'background-1',
     fileAssetId: `file-${printBackgroundAssetId}`,
     bucket: 'organizer_assets',

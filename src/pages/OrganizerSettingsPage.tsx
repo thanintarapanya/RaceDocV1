@@ -191,6 +191,7 @@ type PrintBackgroundAssetForm = {
   printBackgroundAssetId: string
   eventId: string
   title: string
+  orientation: 'portrait' | 'landscape'
   isDefault: boolean
   file: File | null
   existingFilename: string
@@ -803,6 +804,7 @@ export function OrganizerSettingsPage() {
         p_print_background_asset_id: printBackgroundAssetForm.printBackgroundAssetId || null,
         p_event_id: printBackgroundAssetForm.eventId || null,
         p_title: printBackgroundAssetForm.title,
+        p_orientation: printBackgroundAssetForm.orientation,
         p_is_default: printBackgroundAssetForm.isDefault,
         p_path: uploadedAsset?.path ?? null,
         p_filename: uploadedAsset?.filename ?? null,
@@ -1231,7 +1233,16 @@ export function OrganizerSettingsPage() {
                 onChange={(eventId) => setPrintBackgroundAssetForm((current) => ({ ...current, eventId }))}
               />
               <TextField label="Background title" value={printBackgroundAssetForm.title} onChange={(title) => setPrintBackgroundAssetForm((current) => ({ ...current, title }))} placeholder="Official A4 entry background" />
-              <CheckboxField label="Use as default A4 background for this Event" checked={printBackgroundAssetForm.isDefault} onChange={(isDefault) => setPrintBackgroundAssetForm((current) => ({ ...current, isDefault }))} />
+              <EntitySelect
+                label="A4 layout"
+                value={printBackgroundAssetForm.orientation}
+                options={[
+                  { value: 'portrait', label: 'Portrait A4' },
+                  { value: 'landscape', label: 'Landscape A4' },
+                ]}
+                onChange={(orientation) => setPrintBackgroundAssetForm((current) => ({ ...current, orientation: orientation as PrintBackgroundAssetForm['orientation'] }))}
+              />
+              <CheckboxField label="Use as default for this Event and A4 layout" checked={printBackgroundAssetForm.isDefault} onChange={(isDefault) => setPrintBackgroundAssetForm((current) => ({ ...current, isDefault }))} />
               <FileField
                 label="Background file"
                 accept="image/png,image/jpeg,image/webp,application/pdf"
@@ -1249,7 +1260,7 @@ export function OrganizerSettingsPage() {
                 label="Edit existing A4 background"
                 value={printBackgroundAssetForm.printBackgroundAssetId}
                 emptyLabel="Create new A4 background"
-                options={payload.printBackgroundAssets.map((asset) => ({ value: asset.printBackgroundAssetId, label: `${asset.eventName} / ${asset.title}${asset.isDefault ? ' / Default' : ''}` }))}
+                options={payload.printBackgroundAssets.map((asset) => ({ value: asset.printBackgroundAssetId, label: `${asset.eventName} / ${formatOrientation(asset.orientation)} / ${asset.title}${asset.isDefault ? ' / Default' : ''}` }))}
                 onChange={(printBackgroundAssetId) => setPrintBackgroundAssetForm(printBackgroundAssetId ? createPrintBackgroundAssetForm(payload.printBackgroundAssets.find((asset) => asset.printBackgroundAssetId === printBackgroundAssetId) ?? null) : createEmptyPrintBackgroundAssetForm(payload.events[0]?.eventId ?? ''))}
               />
             </SettingsForm>
@@ -1951,7 +1962,7 @@ function SeasonPanel({
                   onClick={() => onEditPrintBackgroundAsset(asset)}
                   className="rounded-md border border-zinc-200 px-2 py-1 text-left text-xs transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600"
                 >
-                  A4 / {asset.title} / {asset.isDefault ? 'Default' : 'Optional'}
+                  A4 {formatOrientation(asset.orientation)} / {asset.title} / {asset.isDefault ? 'Default' : 'Optional'}
                 </button>
               ))}
             </div>
@@ -2486,6 +2497,7 @@ function createEmptyPrintBackgroundAssetForm(eventId = ''): PrintBackgroundAsset
     printBackgroundAssetId: '',
     eventId,
     title: '',
+    orientation: 'portrait',
     isDefault: false,
     file: null,
     existingFilename: '',
@@ -2499,11 +2511,16 @@ function createPrintBackgroundAssetForm(asset: PrintBackgroundAssetRow | null): 
     printBackgroundAssetId: asset.printBackgroundAssetId,
     eventId: asset.eventId,
     title: asset.title,
+    orientation: asset.orientation,
     isDefault: asset.isDefault,
     file: null,
     existingFilename: asset.filename,
     existingPath: asset.path,
   }
+}
+
+function formatOrientation(orientation: 'portrait' | 'landscape') {
+  return orientation === 'landscape' ? 'Landscape' : 'Portrait'
 }
 
 function createEmptyEventForm(seasonId = '', circuitId = ''): EventForm {
