@@ -69,9 +69,9 @@ export function getPaperEntryReadiness(roles: string[]) {
   const canPreparePaperEntry = roles.includes('ADMIN') || roles.includes('SECRETARY')
   return {
     canPreparePaperEntry,
-    manualEntryReady: false,
-    excelImportReady: false,
-    nextBackendStep: 'Create Admin/Secretary RPC for paper Entry Forms with profile matching and import batch audit trail.',
+    manualEntryReady: true,
+    excelImportReady: true,
+    nextBackendStep: 'Review staged rows, resolve profile matches, then commit approved rows into locked Entry Forms.',
   }
 }
 

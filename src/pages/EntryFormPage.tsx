@@ -11,6 +11,7 @@ import {
   FolderCheck,
   Import,
   Loader2,
+  MoreHorizontal,
   PenLine,
   Plus,
   Trash2,
@@ -27,6 +28,7 @@ import {
 import { filterBySeriesRace, getSeriesRaceOptions } from '@/lib/series-race-filter'
 import { supabase } from '@/lib/supabase'
 import { createEmptyEntryListFilters, filterEntryList, getEntryListFilterOptions, getEntryStatusDisplay, getPaperEntryReadiness, hasActiveEntryListFilters, type EntryListFilters, type EntryListRow } from './entryFormListHelpers'
+import { createEmptyPaperEntryDraft, createPaperEntryImportPayload, isPaperEntryDraftStageable, parsePaperEntryCsvImportRows, type PaperEntryDraft } from './paperEntryImportHelpers'
 
 type EntryStatus = 'draft' | 'pending' | 'active' | 'inactive' | 'rejected'
 
@@ -308,6 +310,7 @@ export function EntryFormPage() {
   const [entriesLoading, setEntriesLoading] = useState(true)
   const [entriesError, setEntriesError] = useState<string | null>(null)
   const [creatorOpen, setCreatorOpen] = useState(false)
+  const [paperEntryOpen, setPaperEntryOpen] = useState(false)
   const [filters, setFilters] = useState<EntryListFilters>(() => createEmptyEntryListFilters())
   const isApprovalRole = roles.includes('ADMIN') || roles.includes('SECRETARY')
   const canSoftDelete = roles.includes('ADMIN')
@@ -390,19 +393,25 @@ export function EntryFormPage() {
               locked source data for inspection and weight-in workflows.
             </p>
           </div>
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            type="button"
-            onClick={() => setCreatorOpen(true)}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground"
-          >
-            <Plus size={18} />
-            Create Entry Form
-          </motion.button>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+            {paperEntryReadiness.canPreparePaperEntry ? (
+              <PaperEntryOperationsMenu
+                readiness={paperEntryReadiness}
+                onOpen={() => setPaperEntryOpen(true)}
+              />
+            ) : null}
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              type="button"
+              onClick={() => setCreatorOpen(true)}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground"
+            >
+              <Plus size={18} />
+              Create Entry Form
+            </motion.button>
+          </div>
         </div>
       </motion.header>
-
-      {paperEntryReadiness.canPreparePaperEntry ? <PaperEntryOperationsPanel readiness={paperEntryReadiness} /> : null}
 
       <section className="mt-6">
         {!entriesLoading && !entriesError && entries.length > 0 ? (
@@ -438,6 +447,7 @@ export function EntryFormPage() {
 
       <AnimatePresence>
         {creatorOpen ? <EntryFormCreator onClose={() => setCreatorOpen(false)} /> : null}
+        {paperEntryOpen ? <PaperEntryImportModal onClose={() => setPaperEntryOpen(false)} /> : null}
       </AnimatePresence>
     </div>
   )
@@ -958,68 +968,278 @@ function EntryTable({
   )
 }
 
-function PaperEntryOperationsPanel({ readiness }: { readiness: ReturnType<typeof getPaperEntryReadiness> }) {
+function PaperEntryOperationsMenu({ readiness, onOpen }: { readiness: ReturnType<typeof getPaperEntryReadiness>; onOpen: () => void }) {
+  const [open, setOpen] = useState(false)
+
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.16, delay: 0.03 }}
-      className="mt-6 border border-zinc-200 p-5 dark:border-zinc-800"
-    >
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="flex items-start gap-3">
-          <Import className="mt-1 text-primary" size={22} />
-          <div>
+    <div className="relative">
+      <motion.button
+        whileTap={{ scale: 0.98 }}
+        type="button"
+        onClick={() => setOpen((current) => !current)}
+        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-zinc-300 px-3 text-sm font-semibold dark:border-zinc-800"
+        aria-expanded={open}
+        aria-haspopup="menu"
+      >
+        <Import size={17} className="text-primary" />
+        Paper Entry
+        <MoreHorizontal size={16} />
+      </motion.button>
+
+      <AnimatePresence>
+        {open ? (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 6 }}
+            transition={{ duration: 0.12 }}
+            className="absolute right-0 z-20 mt-2 w-80 border border-zinc-200 bg-zinc-50 p-3 text-left dark:border-zinc-800 dark:bg-zinc-950"
+            role="menu"
+          >
             <p className="font-mono text-xs uppercase tracking-[0.16em] text-zinc-500">Race office intake</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight">Paper Entry Operations</h2>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-600 dark:text-zinc-400">
-              Prepare paper registrations here. Manual admin fill-in and Excel import require profile matching plus import-batch audit trail before they can safely create Entry Forms for another racer.
+            <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+              Stage paper forms or CSV rows for profile matching. No Entry Form is created yet.
             </p>
-          </div>
-        </div>
-        <span className="inline-flex min-h-8 items-center rounded-md border border-amber-300 bg-amber-500/10 px-3 font-mono text-xs uppercase tracking-[0.12em] text-amber-700 dark:border-amber-900/70 dark:text-amber-400">
-          Backend required
-        </span>
-      </div>
-
-      <div className="mt-5 grid gap-3 md:grid-cols-2">
-        <PaperEntryActionCard
-          title="Manual Paper Fill-In"
-          description="Admin or Secretary selects the racer profile, enters the paper form data, then submits as official intake with actor audit trail."
-          ready={readiness.manualEntryReady}
-        />
-        <PaperEntryActionCard
-          title="Excel Bulk Import"
-          description="Upload the race-office spreadsheet, preview row validation, match profiles, resolve conflicts, then confirm a batch import."
-          ready={readiness.excelImportReady}
-        />
-      </div>
-
-      <p className="mt-4 border-t border-zinc-200 pt-4 text-sm text-zinc-600 dark:border-zinc-800 dark:text-zinc-400">
-        Next backend step: {readiness.nextBackendStep}
-      </p>
-    </motion.section>
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              type="button"
+              onClick={() => {
+                setOpen(false)
+                onOpen()
+              }}
+              className="mt-3 flex min-h-11 w-full items-center justify-between rounded-md border border-zinc-300 px-3 text-sm font-semibold dark:border-zinc-800"
+              role="menuitem"
+            >
+              <span>Open staging workspace</span>
+              <span className="font-mono text-xs uppercase tracking-[0.12em] text-emerald-700 dark:text-emerald-400">
+                {readiness.manualEntryReady && readiness.excelImportReady ? 'Ready' : 'Staged'}
+              </span>
+            </motion.button>
+            <p className="mt-3 border-t border-zinc-200 pt-3 text-xs leading-5 text-zinc-500 dark:border-zinc-800">
+              Next: {readiness.nextBackendStep}
+            </p>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </div>
   )
 }
 
-function PaperEntryActionCard({ title, description, ready }: { title: string; description: string; ready: boolean }) {
+function PaperEntryImportModal({ onClose }: { onClose: () => void }) {
+  const [mode, setMode] = useState<'manual' | 'csv'>('manual')
+  const [draft, setDraft] = useState<PaperEntryDraft>(() => createEmptyPaperEntryDraft())
+  const [csvFileName, setCsvFileName] = useState('')
+  const [statusMessage, setStatusMessage] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [staging, setStaging] = useState(false)
+  const canStageManual = isPaperEntryDraftStageable(draft)
+
+  function updateDraft<Key extends keyof PaperEntryDraft>(key: Key, value: PaperEntryDraft[Key]) {
+    setDraft((current) => ({ ...current, [key]: value }))
+  }
+
+  async function createBatch(source: 'ManualPaper' | 'ExcelUpload', originalFilename: string | null, notes: string | null) {
+    const { data, error: batchError } = await supabase.rpc('create_entry_import_batch', {
+      p_source: source,
+      p_original_filename: originalFilename,
+      p_notes: notes,
+    })
+
+    if (batchError) throw batchError
+    return data as string
+  }
+
+  async function stageRow(batchId: string, rowNumber: number, payload: ReturnType<typeof createPaperEntryImportPayload>) {
+    const { error: rowError } = await supabase.rpc('stage_entry_import_row', {
+      p_batch_id: batchId,
+      p_row_number: rowNumber,
+      p_raw_payload: payload.rawPayload,
+      p_normalized_payload: payload.normalizedPayload,
+    })
+
+    if (rowError) throw rowError
+  }
+
+  async function stageManualRow() {
+    if (!canStageManual || staging) return
+
+    setStaging(true)
+    setError(null)
+    setStatusMessage(null)
+
+    try {
+      const batchId = await createBatch('ManualPaper', null, draft.notes || 'Manual paper entry staged from RaceDoc UI')
+      await stageRow(batchId, 1, createPaperEntryImportPayload(draft))
+      setStatusMessage(`Manual paper row staged in batch ${batchId}. Match the profile before committing Entry Forms.`)
+      setDraft(createEmptyPaperEntryDraft())
+    } catch (stageError) {
+      setError(stageError instanceof Error ? stageError.message : 'Paper entry staging failed')
+    } finally {
+      setStaging(false)
+    }
+  }
+
+  async function stageCsvFile(file: File) {
+    setStaging(true)
+    setError(null)
+    setStatusMessage(null)
+    setCsvFileName(file.name)
+
+    try {
+      const text = await file.text()
+      const parsed = parsePaperEntryCsvImportRows(text)
+      if (parsed.errors.length > 0) {
+        throw new Error(parsed.errors.slice(0, 4).join(' '))
+      }
+
+      const batchId = await createBatch('ExcelUpload', file.name, 'CSV import staged from RaceDoc UI')
+      for (const row of parsed.rows) {
+        await stageRow(batchId, row.rowNumber, row)
+      }
+
+      setStatusMessage(`${parsed.rows.length} row(s) staged in batch ${batchId}. Resolve profile matches before commit.`)
+    } catch (stageError) {
+      setError(stageError instanceof Error ? stageError.message : 'CSV staging failed')
+    } finally {
+      setStaging(false)
+    }
+  }
+
   return (
-    <article className="border border-zinc-200 p-4 dark:border-zinc-800">
-      <div className="flex items-start justify-between gap-3">
-        <h3 className="font-semibold">{title}</h3>
-        <span className={`rounded-sm px-2 py-1 font-mono text-xs uppercase tracking-[0.12em] ${ready ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : 'bg-zinc-500/10 text-zinc-600 dark:text-zinc-400'}`}>
-          {ready ? 'Ready' : 'Staged'}
-        </span>
-      </div>
-      <p className="mt-3 text-sm leading-6 text-zinc-600 dark:text-zinc-400">{description}</p>
-      <button
-        type="button"
-        disabled
-        className="mt-4 inline-flex min-h-10 w-full cursor-not-allowed items-center justify-center rounded-md border border-zinc-300 px-3 text-sm font-semibold text-zinc-400 dark:border-zinc-800"
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.12 }}
+      className="fixed inset-0 z-50 bg-zinc-950/45 px-3 py-4 sm:px-5"
+      onClick={onClose}
+    >
+      <motion.section
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 14 }}
+        transition={{ duration: 0.16 }}
+        className="mx-auto flex max-h-[calc(100svh-2rem)] max-w-5xl flex-col overflow-hidden border border-zinc-200 bg-zinc-50 text-zinc-950 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50"
+        onClick={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="paper-entry-import-title"
       >
-        {ready ? 'Open' : 'Waiting for backend'}
-      </button>
-    </article>
+        <header className="flex items-start justify-between gap-4 border-b border-zinc-200 p-4 sm:p-5 dark:border-zinc-800">
+          <div>
+            <p className="font-mono text-xs uppercase tracking-[0.18em] text-zinc-500">Paper intake staging</p>
+            <h2 id="paper-entry-import-title" className="mt-2 text-2xl font-semibold tracking-tight">
+              Paper Entry Operations
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+              Create an audited import batch and stage rows for profile matching. This does not create locked Entry Forms yet.
+            </p>
+          </div>
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+            type="button"
+            onClick={onClose}
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-zinc-300 dark:border-zinc-800"
+            aria-label="Close paper entry operations"
+          >
+            <X size={20} />
+          </motion.button>
+        </header>
+
+        <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
+          <div className="grid gap-2 sm:grid-cols-2">
+            <PaperEntryModeButton active={mode === 'manual'} title="Manual Paper Fill-In" description="Stage one paper registration row." onClick={() => setMode('manual')} />
+            <PaperEntryModeButton active={mode === 'csv'} title="CSV Bulk Import" description="Stage multiple race-office rows." onClick={() => setMode('csv')} />
+          </div>
+
+          {mode === 'manual' ? (
+            <div className="mt-6 grid gap-5 xl:grid-cols-2">
+              <TextField label="ชื่อ (ภาษาไทย) / Name (Thai)" value={draft.firstNameTh} onChange={(value) => updateDraft('firstNameTh', value)} />
+              <TextField label="นามสกุล (ภาษาไทย) / Surname (Thai)" value={draft.lastNameTh} onChange={(value) => updateDraft('lastNameTh', value)} />
+              <TextField label="ชื่อ (ภาษาอังกฤษ) / Name (English)" value={draft.firstNameEn} onChange={(value) => updateDraft('firstNameEn', value)} />
+              <TextField label="นามสกุล (ภาษาอังกฤษ) / Surname (English)" value={draft.lastNameEn} onChange={(value) => updateDraft('lastNameEn', value)} />
+              <TextField label="อีเมล / Email" type="email" value={draft.email} onChange={(value) => updateDraft('email', value)} />
+              <TextField label="เบอร์โทรศัพท์ / Mobile No." type="tel" value={draft.phone} onChange={(value) => updateDraft('phone', value)} />
+              <TextField label="เลขบัตรประชาชน / ID Card No." value={draft.identityNo} onChange={(value) => updateDraft('identityNo', value)} />
+              <TextField label="Passport No." value={draft.passportNo} onChange={(value) => updateDraft('passportNo', value)} />
+              <TextField label="หมายเลขรถ / Car Number" value={draft.carNumber} inputMode="numeric" onChange={(value) => updateDraft('carNumber', value)} />
+              <TextField label="เลขที่ใบอนุญาตขับแข่ง / Competition License No." value={draft.licenseNo} onChange={(value) => updateDraft('licenseNo', value)} />
+              <TextField label="งานแข่งขัน / Event" value={draft.eventName} onChange={(value) => updateDraft('eventName', value)} />
+              <TextField label="รุ่นการแข่งขัน / Series Race" value={draft.seriesName} onChange={(value) => updateDraft('seriesName', value)} />
+              <TextField label="ระดับที่ลงแข่ง / Grade Race" value={draft.gradeName} onChange={(value) => updateDraft('gradeName', value)} />
+              <TextField label="ชื่อทีมแข่ง / Team Name" value={draft.teamName} onChange={(value) => updateDraft('teamName', value)} />
+              <TextField label="ยี่ห้อรถ / Car Manufacturer" value={draft.vehicleManufacturer} onChange={(value) => updateDraft('vehicleManufacturer', value)} />
+              <TextField label="รุ่น / Model" value={draft.vehicleModel} onChange={(value) => updateDraft('vehicleModel', value)} />
+              <TextField label="สี / Color" value={draft.vehicleColor} onChange={(value) => updateDraft('vehicleColor', value)} />
+              <TextField label="ปี / Year" value={draft.vehicleYear} inputMode="numeric" onChange={(value) => updateDraft('vehicleYear', value)} />
+              <TextField label="ขนาดเครื่องยนต์ / Engine Size CC" value={draft.engineSizeCc} inputMode="numeric" onChange={(value) => updateDraft('engineSizeCc', value)} />
+              <TextAreaField label="Race office notes" value={draft.notes} onChange={(value) => updateDraft('notes', value)} />
+            </div>
+          ) : (
+            <div className="mt-6 border border-zinc-200 p-5 dark:border-zinc-800">
+              <UploadCloud size={24} className="text-primary" />
+              <h3 className="mt-4 text-xl font-semibold">CSV Bulk Import</h3>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+                Upload a CSV exported from Excel. Supported headers include Name EN, Surname EN, Email, Mobile No, ID Card No, Passport No, Car No, Series Race, Grade Race, and Team Name.
+              </p>
+              <label className="mt-5 flex min-h-32 cursor-pointer flex-col items-center justify-center rounded-md border border-dashed border-zinc-300 px-4 text-center dark:border-zinc-800">
+                {staging ? <Loader2 size={24} className="animate-spin text-primary" /> : <UploadCloud size={24} className="text-primary" />}
+                <span className="mt-2 text-sm font-semibold">{staging ? 'Staging rows...' : 'Select CSV file'}</span>
+                <span className="mt-1 text-xs text-zinc-500">{csvFileName || 'Comma-separated values only'}</span>
+                <input
+                  type="file"
+                  accept=".csv,text/csv"
+                  disabled={staging}
+                  className="sr-only"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0]
+                    if (file) stageCsvFile(file)
+                    event.currentTarget.value = ''
+                  }}
+                />
+              </label>
+            </div>
+          )}
+
+          {error ? <div className="mt-5"><ErrorPanel message={error} /></div> : null}
+          {statusMessage ? (
+            <div className="mt-5 border border-emerald-200 bg-emerald-500/10 p-4 text-sm text-emerald-700 dark:border-emerald-900/60 dark:text-emerald-400">
+              {statusMessage}
+            </div>
+          ) : null}
+        </div>
+
+        <footer className="flex flex-col gap-3 border-t border-zinc-200 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-zinc-800">
+          <p className="text-sm text-zinc-500">
+            Manual staging requires car number plus email, phone, ID, passport, or full name.
+          </p>
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+            type="button"
+            onClick={stageManualRow}
+            disabled={mode !== 'manual' || !canStageManual || staging}
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-45"
+          >
+            {staging ? <Loader2 size={17} className="animate-spin" /> : <Import size={17} />}
+            Stage Manual Row
+          </motion.button>
+        </footer>
+      </motion.section>
+    </motion.div>
+  )
+}
+
+function PaperEntryModeButton({ active, title, description, onClick }: { active: boolean; title: string; description: string; onClick: () => void }) {
+  return (
+    <motion.button
+      whileTap={{ scale: 0.98 }}
+      type="button"
+      onClick={onClick}
+      className={`min-h-24 rounded-md border p-4 text-left ${active ? 'border-primary bg-zinc-100 dark:bg-zinc-900' : 'border-zinc-200 dark:border-zinc-800'}`}
+    >
+      <p className="font-semibold">{title}</p>
+      <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{description}</p>
+    </motion.button>
   )
 }
 
