@@ -104,6 +104,7 @@ export function ChecklistPage() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [bulkTopicId, setBulkTopicId] = useState('')
   const [bulkUpdating, setBulkUpdating] = useState(false)
+  const [selectedEntryIds, setSelectedEntryIds] = useState<string[]>([])
   const [notesDraft, setNotesDraft] = useState<Record<string, string>>({})
   const [auditTarget, setAuditTarget] = useState<AuditTarget | null>(null)
   const [auditRows, setAuditRows] = useState<AuditRow[]>([])
@@ -169,11 +170,40 @@ export function ChecklistPage() {
   const selectedBulkTopicId = eventTopics.some((topic) => topic.topicId === bulkTopicId)
     ? bulkTopicId
     : eventTopics[0]?.topicId || ''
+  const eventEntryIdSet = useMemo(() => new Set(eventEntries.map((entry) => entry.entryId)), [eventEntries])
+  const selectedEntryIdSet = useMemo(
+    () => new Set(selectedEntryIds.filter((entryId) => eventEntryIdSet.has(entryId))),
+    [eventEntryIdSet, selectedEntryIds],
+  )
+  const selectedBulkEntries = useMemo(
+    () => visibleEntries.filter((entry) => selectedEntryIdSet.has(entry.entryId)),
+    [selectedEntryIdSet, visibleEntries],
+  )
+  const allVisibleEntriesSelected = visibleEntries.length > 0 && visibleEntries.every((entry) => selectedEntryIdSet.has(entry.entryId))
 
   function handleEventChange(eventId: string) {
     setSelectedEventId(eventId)
     setSelectedSeries('all')
     setSettingsOpen(false)
+    setSelectedEntryIds([])
+  }
+
+  function toggleEntrySelection(entryId: string, selected: boolean) {
+    setSelectedEntryIds((current) => {
+      if (selected) return current.includes(entryId) ? current : [...current, entryId]
+      return current.filter((currentEntryId) => currentEntryId !== entryId)
+    })
+  }
+
+  function toggleVisibleEntrySelection(selected: boolean) {
+    const visibleEntryIds = visibleEntries.map((entry) => entry.entryId)
+    setSelectedEntryIds((current) => {
+      if (!selected) return current.filter((entryId) => !visibleEntryIds.includes(entryId))
+
+      const next = new Set(current)
+      visibleEntryIds.forEach((entryId) => next.add(entryId))
+      return Array.from(next)
+    })
   }
 
   async function createTopic() {
@@ -263,17 +293,17 @@ export function ChecklistPage() {
   }
 
   async function bulkUpdateChecklistItems(checked: boolean) {
-    if (!selectedBulkTopicId || visibleEntries.length === 0) return
+    if (!selectedBulkTopicId || selectedBulkEntries.length === 0) return
 
     const topic = eventTopics.find((currentTopic) => currentTopic.topicId === selectedBulkTopicId)
-    const confirmed = window.confirm(`${checked ? 'Check' : 'Uncheck'} "${topic?.title ?? 'selected topic'}" for ${visibleEntries.length} visible row(s)?`)
+    const confirmed = window.confirm(`${checked ? 'Check' : 'Uncheck'} "${topic?.title ?? 'selected topic'}" for ${selectedBulkEntries.length} selected row(s)?`)
     if (!confirmed) return
 
     setBulkUpdating(true)
     setError(null)
 
     const { error } = await supabase.rpc('bulk_update_checklist_item', {
-      p_entry_ids: visibleEntries.map((entry) => entry.entryId),
+      p_entry_ids: selectedBulkEntries.map((entry) => entry.entryId),
       p_topic_id: selectedBulkTopicId,
       p_is_checked: checked,
     })
@@ -285,6 +315,7 @@ export function ChecklistPage() {
     }
 
     await loadMatrix()
+    setSelectedEntryIds([])
     setBulkUpdating(false)
   }
 
@@ -425,18 +456,20 @@ export function ChecklistPage() {
               onClear={() => {
                 setSelectedSeries('all')
                 setSearchQuery('')
+                setSelectedEntryIds([])
               }}
             />
           </div>
         ) : null}
-        {!loading && matrix.canEdit && visibleEntries.length > 0 && eventTopics.length > 0 ? (
+        {!loading && matrix.canEdit && selectedBulkEntries.length > 0 && eventTopics.length > 0 ? (
           <BulkActionBar
             topics={eventTopics}
             selectedTopicId={selectedBulkTopicId}
-            visibleCount={visibleEntries.length}
+            selectedCount={selectedBulkEntries.length}
             updating={bulkUpdating}
             onTopicChange={setBulkTopicId}
             onBulkUpdate={bulkUpdateChecklistItems}
+            onClearSelection={() => setSelectedEntryIds([])}
           />
         ) : null}
         {!loading && visibleEntries.length > 0 && eventTopics.length > 0 ? (
@@ -450,6 +483,7 @@ export function ChecklistPage() {
           <ChecklistFilteredEmpty onClear={() => {
             setSelectedSeries('all')
             setSearchQuery('')
+            setSelectedEntryIds([])
           }} />
         ) : null}
         {!loading && visibleEntries.length > 0 && eventTopics.length > 0 ? (
@@ -459,7 +493,11 @@ export function ChecklistPage() {
             editable={matrix.canEdit}
             updatingKey={updatingKey}
             notesDraft={notesDraft}
+            selectedEntryIdSet={selectedEntryIdSet}
+            allVisibleEntriesSelected={allVisibleEntriesSelected}
             setNotesDraft={setNotesDraft}
+            onToggleEntrySelection={toggleEntrySelection}
+            onToggleVisibleEntrySelection={toggleVisibleEntrySelection}
             onUpdateItem={updateChecklistItem}
             onOpenAudit={openAudit}
             onSaveNotes={saveNotes}
@@ -539,17 +577,19 @@ function ChecklistSearch({ value, onChange }: { value: string; onChange: (value:
 function BulkActionBar({
   topics,
   selectedTopicId,
-  visibleCount,
+  selectedCount,
   updating,
   onTopicChange,
   onBulkUpdate,
+  onClearSelection,
 }: {
   topics: ChecklistTopic[]
   selectedTopicId: string
-  visibleCount: number
+  selectedCount: number
   updating: boolean
   onTopicChange: (value: string) => void
   onBulkUpdate: (checked: boolean) => Promise<void>
+  onClearSelection: () => void
 }) {
   return (
     <motion.section
@@ -558,11 +598,11 @@ function BulkActionBar({
       transition={{ duration: 0.16 }}
       className="mb-4 border border-zinc-200 p-4 dark:border-zinc-800"
     >
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,18rem)_auto_auto] lg:items-end">
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,18rem)_auto_auto_auto] lg:items-end">
         <div>
           <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Bulk action</p>
           <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-            Applies only to the {visibleCount} visible row(s) after Event, Series Race, and Search filters.
+            Applies only to {selectedCount} selected row(s).
           </p>
         </div>
         <label className="block min-w-0">
@@ -585,7 +625,7 @@ function BulkActionBar({
           className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
         >
           {updating ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
-          Check Visible
+          Check Selected
         </motion.button>
         <motion.button
           whileTap={{ scale: 0.98 }}
@@ -595,7 +635,16 @@ function BulkActionBar({
           className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-zinc-300 px-4 text-sm font-semibold text-zinc-800 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800 dark:text-zinc-100"
         >
           <X size={16} />
-          Uncheck Visible
+          Uncheck Selected
+        </motion.button>
+        <motion.button
+          whileTap={{ scale: 0.98 }}
+          type="button"
+          disabled={updating}
+          onClick={onClearSelection}
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-zinc-300 px-4 text-sm font-semibold text-zinc-800 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800 dark:text-zinc-100"
+        >
+          Clear
         </motion.button>
       </div>
     </motion.section>
@@ -791,7 +840,11 @@ function ChecklistTable({
   editable,
   updatingKey,
   notesDraft,
+  selectedEntryIdSet,
+  allVisibleEntriesSelected,
   setNotesDraft,
+  onToggleEntrySelection,
+  onToggleVisibleEntrySelection,
   onUpdateItem,
   onOpenAudit,
   onSaveNotes,
@@ -801,7 +854,11 @@ function ChecklistTable({
   editable: boolean
   updatingKey: string | null
   notesDraft: Record<string, string>
+  selectedEntryIdSet: Set<string>
+  allVisibleEntriesSelected: boolean
   setNotesDraft: Dispatch<SetStateAction<Record<string, string>>>
+  onToggleEntrySelection: (entryId: string, selected: boolean) => void
+  onToggleVisibleEntrySelection: (selected: boolean) => void
   onUpdateItem: (entry: ChecklistEntry, topic: ChecklistTopic, checked: boolean) => Promise<void>
   onOpenAudit: (entry: ChecklistEntry) => Promise<void>
   onSaveNotes: (entry: ChecklistEntry) => Promise<void>
@@ -813,10 +870,21 @@ function ChecklistTable({
           <table className="w-full min-w-[980px] border-collapse text-left">
             <thead className="border-b border-zinc-200 text-sm text-zinc-500 dark:border-zinc-800">
               <tr>
+                {editable ? (
+                  <th className="w-12 px-4 py-3">
+                    <input
+                      type="checkbox"
+                      aria-label="Select all visible checklist rows"
+                      checked={allVisibleEntriesSelected}
+                      onChange={(event) => onToggleVisibleEntrySelection(event.target.checked)}
+                      className="h-4 w-4 accent-primary"
+                    />
+                  </th>
+                ) : null}
                 <th className="sticky left-0 z-10 bg-zinc-50 px-4 py-3 font-medium dark:bg-zinc-950">Competitor</th>
                 <th className="px-4 py-3 font-medium">Series</th>
                 <th className="px-4 py-3 font-medium">Car</th>
-                  {topics.map((topic) => (
+                {topics.map((topic) => (
                   <th key={topic.topicId} className="min-w-40 px-3 py-3 text-left font-medium">{topic.shortTitle}</th>
                 ))}
                 <th className="min-w-80 px-4 py-3 font-medium">Notes & Row Log</th>
@@ -825,6 +893,17 @@ function ChecklistTable({
             <tbody>
               {entries.map((entry) => (
                 <tr key={entry.entryId} className="border-b border-zinc-200 last:border-0 dark:border-zinc-800">
+                  {editable ? (
+                    <td className="px-4 py-4 align-top">
+                      <input
+                        type="checkbox"
+                        aria-label={`Select ${entry.competitorName}`}
+                        checked={selectedEntryIdSet.has(entry.entryId)}
+                        onChange={(event) => onToggleEntrySelection(entry.entryId, event.target.checked)}
+                        className="mt-1 h-4 w-4 accent-primary"
+                      />
+                    </td>
+                  ) : null}
                   <td className="sticky left-0 z-10 bg-zinc-50 px-4 py-4 dark:bg-zinc-950">
                     <p className="font-medium">{entry.competitorName}</p>
                     <p className="mt-1 text-sm text-zinc-500">{entry.competitorEmail}</p>
@@ -869,10 +948,21 @@ function ChecklistTable({
         {entries.map((entry) => (
           <article key={entry.entryId} className="p-4">
             <div className="flex items-start justify-between gap-4">
-              <div>
-                <h2 className="font-semibold">{entry.competitorName}</h2>
-                <p className="mt-1 text-sm text-zinc-500">{entry.eventName} / {entry.seriesClass}</p>
-                <EntryCompletionStatus entry={entry} topics={topics} />
+              <div className="flex min-w-0 items-start gap-3">
+                {editable ? (
+                  <input
+                    type="checkbox"
+                    aria-label={`Select ${entry.competitorName}`}
+                    checked={selectedEntryIdSet.has(entry.entryId)}
+                    onChange={(event) => onToggleEntrySelection(entry.entryId, event.target.checked)}
+                    className="mt-1 h-4 w-4 shrink-0 accent-primary"
+                  />
+                ) : null}
+                <div className="min-w-0">
+                  <h2 className="font-semibold">{entry.competitorName}</h2>
+                  <p className="mt-1 text-sm text-zinc-500">{entry.eventName} / {entry.seriesClass}</p>
+                  <EntryCompletionStatus entry={entry} topics={topics} />
+                </div>
               </div>
               <span className="font-mono text-sm tabular-nums">#{entry.carNumber ?? '--'}</span>
             </div>

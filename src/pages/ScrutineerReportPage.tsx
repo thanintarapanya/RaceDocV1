@@ -253,7 +253,7 @@ export function ScrutineerReportPage() {
     setSubmitting(false)
   }
 
-  async function confirmPrintBackground(report: ScrutineerReport, printBackgroundId: string) {
+  async function confirmPrintBackground(report: ScrutineerReport, printBackgroundId: string, printBackgroundUrl: string | null) {
     setSubmitting(true)
     setError(null)
 
@@ -272,7 +272,7 @@ export function ScrutineerReportPage() {
     setPrintOptions(nextPrintOptions)
     setSelectedPrintBackgroundId(nextPrintOptions?.selectedBackgroundId ?? printBackgroundId)
     await loadData()
-    window.setTimeout(() => window.print(), 80)
+    await printWhenBackgroundReady(printBackgroundUrl)
     setSubmitting(false)
   }
 
@@ -449,7 +449,7 @@ function ReportPreview({
   onLoadPrintOptions: (report: ScrutineerReport) => Promise<void>
   onSelectedPrintBackgroundIdChange: (printBackgroundId: string) => void
   onPrintOrientationChange: (orientation: 'portrait' | 'landscape') => void
-  onConfirmPrintBackground: (report: ScrutineerReport, printBackgroundId: string) => Promise<void>
+  onConfirmPrintBackground: (report: ScrutineerReport, printBackgroundId: string, printBackgroundUrl: string | null) => Promise<void>
   canSoftDelete: boolean
   deletingReportId: string | null
 }) {
@@ -558,11 +558,11 @@ function ReportPreview({
                 type="button"
                 onClick={() => {
                   if (printOptions.canManage) {
-                    onConfirmPrintBackground(report, selectedPrintBackgroundId)
+                    onConfirmPrintBackground(report, selectedPrintBackgroundId, printBackgroundUrl)
                     return
                   }
 
-                  window.print()
+                  printWhenBackgroundReady(printBackgroundUrl)
                 }}
                 disabled={submitting || !selectedPrintBackgroundId}
                 className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
@@ -833,4 +833,26 @@ function formatDateTime(value: string | null) {
 function getDefaultPrintBackgroundId(options: PrintOptions | null, orientation: 'portrait' | 'landscape') {
   const orientedOptions = getPrintBackgroundOptionsForOrientation(options, orientation)
   return orientedOptions.find((asset) => asset.isDefault)?.printBackgroundAssetId ?? orientedOptions[0]?.printBackgroundAssetId ?? ''
+}
+
+async function printWhenBackgroundReady(backgroundUrl: string | null) {
+  if (backgroundUrl) {
+    await preloadImage(backgroundUrl)
+  }
+
+  await new Promise((resolve) => window.requestAnimationFrame(() => resolve(undefined)))
+  window.print()
+}
+
+function preloadImage(src: string) {
+  return new Promise<void>((resolve) => {
+    const image = new window.Image()
+    image.onload = () => resolve()
+    image.onerror = () => resolve()
+    image.src = src
+
+    if (image.decode) {
+      image.decode().then(resolve).catch(resolve)
+    }
+  })
 }
