@@ -1,12 +1,12 @@
 # Graph Report - RaceDocV1Github  (2026-05-24)
 
 ## Corpus Check
-- 65 files · ~77,945 words
+- 65 files · ~79,538 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 440 nodes · 499 edges · 22 communities detected
-- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 29 edges (avg confidence: 0.8)
+- 449 nodes · 513 edges · 22 communities detected
+- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 30 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -22,8 +22,8 @@
 - [[_COMMUNITY_Community 9|Community 9]]
 - [[_COMMUNITY_Community 10|Community 10]]
 - [[_COMMUNITY_Community 11|Community 11]]
-- [[_COMMUNITY_Community 13|Community 13]]
-- [[_COMMUNITY_Community 15|Community 15]]
+- [[_COMMUNITY_Community 12|Community 12]]
+- [[_COMMUNITY_Community 14|Community 14]]
 - [[_COMMUNITY_Community 16|Community 16]]
 - [[_COMMUNITY_Community 17|Community 17]]
 - [[_COMMUNITY_Community 18|Community 18]]
@@ -101,23 +101,23 @@ Nodes (6): calculateItemWeight(), createInspectionVersionDiff(), getSelectedValu
 
 ### Community 10 - "Community 10"
 Cohesion: 0.2
-Nodes (8): buildAuditTrailCsv(), normalizeAuditTrailPayload(), applyFilters(), exportVisibleRows(), fetchAuditTrail(), loadAuditTrail(), movePage(), run()
+Nodes (12): loadMatches(), firstNonEmpty(), getPaperEntryImportRowSummary(), getPaperEntryMatchPayload(), getPayloadRecord(), hasValue(), isPaperEntryDraftStageable(), normalizeHeader() (+4 more)
 
 ### Community 11 - "Community 11"
+Cohesion: 0.2
+Nodes (8): buildAuditTrailCsv(), normalizeAuditTrailPayload(), applyFilters(), exportVisibleRows(), fetchAuditTrail(), loadAuditTrail(), movePage(), run()
+
+### Community 12 - "Community 12"
 Cohesion: 0.17
 Nodes (3): handleTeamInfoSubmit(), createTeamInfoPayload(), nullableTeamText()
 
-### Community 13 - "Community 13"
+### Community 14 - "Community 14"
 Cohesion: 0.22
 Nodes (5): getPrintBackgroundAsset(), getPrintBackgroundOptionsForOrientation(), normalizePrintOptions(), confirmPrintBackground(), loadPrintOptions()
 
-### Community 15 - "Community 15"
+### Community 16 - "Community 16"
 Cohesion: 0.29
 Nodes (2): getEntryListFilterOptions(), uniqueSorted()
-
-### Community 16 - "Community 16"
-Cohesion: 0.36
-Nodes (6): hasValue(), isPaperEntryDraftStageable(), normalizeHeader(), normalizeText(), parseCsv(), parsePaperEntryCsvImportRows()
 
 ### Community 17 - "Community 17"
 Cohesion: 0.29
@@ -150,7 +150,7 @@ Nodes (1): Branding
 ## Knowledge Gaps
 - **8 isolated node(s):** `Entry Form`, `Success Ballast`, `Audit Trail`, `RBAC`, `Competitor Request` (+3 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Community 15`** (8 nodes): `createEmptyEntryListFilters()`, `filterEntryList()`, `getEntryListFilterOptions()`, `getEntryStatusDisplay()`, `getPaperEntryReadiness()`, `hasActiveEntryListFilters()`, `uniqueSorted()`, `entryFormListHelpers.ts`
+- **Thin community `Community 16`** (8 nodes): `createEmptyEntryListFilters()`, `filterEntryList()`, `getEntryListFilterOptions()`, `getEntryStatusDisplay()`, `getPaperEntryReadiness()`, `hasActiveEntryListFilters()`, `uniqueSorted()`, `entryFormListHelpers.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 48`** (1 nodes): `Audit Trail`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
@@ -167,7 +167,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `prefillInspectionAnswers()` connect `Community 2` to `Community 9`?**
   _High betweenness centrality (0.005) - this node is a cross-community bridge._
 - **Why does `isAnswerFilled()` connect `Community 9` to `Community 2`?**
-  _High betweenness centrality (0.005) - this node is a cross-community bridge._
+  _High betweenness centrality (0.004) - this node is a cross-community bridge._
 - **Are the 6 inferred relationships involving `useAuth()` (e.g. with `ProtectedRoute()` and `AdminOrSecretaryRoute()`) actually correct?**
   _`useAuth()` has 6 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 6 inferred relationships involving `getAuthErrorMessage()` (e.g. with `handleEmailLogin()` and `handleGoogleLogin()`) actually correct?**

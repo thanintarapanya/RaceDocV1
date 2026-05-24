@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import {
   createEmptyPaperEntryDraft,
   createPaperEntryImportPayload,
+  getPaperEntryImportRowSummary,
+  getPaperEntryMatchTone,
   isPaperEntryDraftStageable,
   parsePaperEntryCsvImportRows,
 } from './paperEntryImportHelpers'
@@ -52,5 +54,29 @@ describe('paper entry import helpers', () => {
 
   it('returns a clear error for empty CSV input', () => {
     expect(parsePaperEntryCsvImportRows('  ').errors).toEqual(['CSV file is empty.'])
+  })
+
+  it('summarizes staged rows for review without exposing the full payload first', () => {
+    expect(getPaperEntryImportRowSummary({
+      raw_payload: {
+        firstNameEn: 'Max',
+        lastNameEn: 'Driver',
+        email: 'max@example.com',
+        carNumber: '39',
+        seriesName: 'SIAM ECO',
+        gradeName: 'PRO',
+      },
+    })).toEqual({
+      driverName: 'Max Driver',
+      identitySignal: 'max@example.com',
+      entrySignal: 'SIAM ECO / PRO',
+    })
+  })
+
+  it('classifies profile match confidence for UI badges', () => {
+    expect(getPaperEntryMatchTone(100)).toBe('strong')
+    expect(getPaperEntryMatchTone(75)).toBe('medium')
+    expect(getPaperEntryMatchTone(55)).toBe('weak')
+    expect(getPaperEntryMatchTone(null)).toBe('weak')
   })
 })

@@ -30,6 +30,17 @@ export type ParsedPaperEntryImportRow = PaperEntryImportPayload & {
   rowNumber: number
 }
 
+export type PaperEntryImportRowSummary = {
+  driverName: string
+  identitySignal: string
+  entrySignal: string
+}
+
+export type PaperEntryImportRowLike = {
+  raw_payload?: Record<string, unknown> | null
+  normalized_payload?: Record<string, unknown> | null
+}
+
 export function createEmptyPaperEntryDraft(): PaperEntryDraft {
   return {
     firstNameTh: '',
@@ -136,6 +147,41 @@ export function parsePaperEntryCsvImportRows(csvText: string) {
   return { rows, errors }
 }
 
+export function getPaperEntryImportRowSummary(row: PaperEntryImportRowLike): PaperEntryImportRowSummary {
+  const payload = getPayloadRecord(row)
+  const driverName = firstNonEmpty(
+    [payload.firstNameTh, payload.lastNameTh].join(' '),
+    [payload.firstNameEn, payload.lastNameEn].join(' '),
+    payload.email,
+    'Unidentified driver',
+  )
+  const identitySignal = firstNonEmpty(
+    payload.email,
+    payload.phone,
+    payload.identityNo,
+    payload.passportNo,
+    'No identity signal',
+  )
+  const entrySignal = firstNonEmpty(
+    [payload.eventName, payload.seriesName, payload.gradeName].filter(Boolean).join(' / '),
+    payload.carNumber ? `Car #${payload.carNumber}` : '',
+    'Entry scope not recorded',
+  )
+
+  return { driverName, identitySignal, entrySignal }
+}
+
+export function getPaperEntryMatchPayload(row: PaperEntryImportRowLike) {
+  return getPayloadRecord(row)
+}
+
+export function getPaperEntryMatchTone(confidence: number | null | undefined) {
+  if (typeof confidence !== 'number') return 'weak'
+  if (confidence >= 90) return 'strong'
+  if (confidence >= 70) return 'medium'
+  return 'weak'
+}
+
 function parseCsv(csvText: string) {
   const rows: string[][] = []
   let row: string[] = []
@@ -169,6 +215,27 @@ function parseCsv(csvText: string) {
   rows.push(row)
 
   return rows.filter((cells) => cells.some(hasValue))
+}
+
+function getPayloadRecord(row: PaperEntryImportRowLike): Record<string, string> {
+  const rawPayload = normalizeRecord(row.raw_payload)
+  const normalizedPayload = normalizeRecord(row.normalized_payload)
+  return { ...normalizedPayload, ...rawPayload }
+}
+
+function normalizeRecord(value: Record<string, unknown> | null | undefined) {
+  const record: Record<string, string> = {}
+  if (!value) return record
+
+  Object.entries(value).forEach(([key, item]) => {
+    if (typeof item === 'string') record[key] = normalizeText(item)
+  })
+
+  return record
+}
+
+function firstNonEmpty(...values: unknown[]) {
+  return values.map(normalizeText).find(Boolean) ?? ''
 }
 
 function headerToDraftKey(header: string): keyof PaperEntryDraft | null {
@@ -219,8 +286,8 @@ function normalizeHeader(value: string) {
   return normalizeText(value).toLowerCase().replace(/[^a-z0-9]/g, '')
 }
 
-function normalizeText(value: string) {
-  return value.trim().replace(/\s+/g, ' ')
+function normalizeText(value: unknown) {
+  return typeof value === 'string' ? value.trim().replace(/\s+/g, ' ') : ''
 }
 
 function hasValue(value: string) {

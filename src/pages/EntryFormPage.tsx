@@ -28,7 +28,7 @@ import {
 import { filterBySeriesRace, getSeriesRaceOptions } from '@/lib/series-race-filter'
 import { supabase } from '@/lib/supabase'
 import { createEmptyEntryListFilters, filterEntryList, getEntryListFilterOptions, getEntryStatusDisplay, getPaperEntryReadiness, hasActiveEntryListFilters, type EntryListFilters, type EntryListRow } from './entryFormListHelpers'
-import { createEmptyPaperEntryDraft, createPaperEntryImportPayload, isPaperEntryDraftStageable, parsePaperEntryCsvImportRows, type PaperEntryDraft } from './paperEntryImportHelpers'
+import { createEmptyPaperEntryDraft, createPaperEntryImportPayload, getPaperEntryImportRowSummary, getPaperEntryMatchPayload, getPaperEntryMatchTone, isPaperEntryDraftStageable, parsePaperEntryCsvImportRows, type PaperEntryDraft } from './paperEntryImportHelpers'
 
 type EntryStatus = 'draft' | 'pending' | 'active' | 'inactive' | 'rejected'
 
@@ -181,6 +181,41 @@ type TeamPrefill = {
   pit_share_request: string | null
   document_address: string | null
   postcode: string | null
+}
+
+type EntryImportBatch = {
+  id: string
+  source: 'ManualPaper' | 'ExcelUpload'
+  status: 'Draft' | 'Reviewing' | 'ReadyToCommit' | 'Committed' | 'Cancelled'
+  original_filename: string | null
+  row_count: number
+  created_at: string
+  notes: string | null
+}
+
+type EntryImportRow = {
+  id: string
+  batch_id: string
+  row_number: number
+  status: 'NeedsReview' | 'Matched' | 'Invalid' | 'Committed' | 'Skipped'
+  raw_payload: Record<string, unknown>
+  normalized_payload: Record<string, unknown>
+  matched_profile_id: string | null
+  match_method: EntryImportMatchMethod | null
+  match_confidence: number | null
+  validation_errors: unknown[]
+  reviewed_at: string | null
+}
+
+type EntryImportMatchMethod = 'Email' | 'Phone' | 'IdentityNo' | 'PassportNo' | 'NameFallback' | 'Manual'
+
+type EntryImportProfileMatch = {
+  profile_id: string
+  display_name: string | null
+  email: string | null
+  phone: string | null
+  match_method: EntryImportMatchMethod
+  match_confidence: number
 }
 
 const steps = [
@@ -1029,10 +1064,138 @@ function PaperEntryImportModal({ onClose }: { onClose: () => void }) {
   const [mode, setMode] = useState<'manual' | 'csv'>('manual')
   const [draft, setDraft] = useState<PaperEntryDraft>(() => createEmptyPaperEntryDraft())
   const [csvFileName, setCsvFileName] = useState('')
+  const [batches, setBatches] = useState<EntryImportBatch[]>([])
+  const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null)
+  const [rows, setRows] = useState<EntryImportRow[]>([])
+  const [selectedRow, setSelectedRow] = useState<EntryImportRow | null>(null)
+  const [batchesLoading, setBatchesLoading] = useState(true)
+  const [rowsLoading, setRowsLoading] = useState(false)
+  const [matches, setMatches] = useState<EntryImportProfileMatch[]>([])
+  const [matchesLoading, setMatchesLoading] = useState(false)
+  const [matchingRowId, setMatchingRowId] = useState<string | null>(null)
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [staging, setStaging] = useState(false)
   const canStageManual = isPaperEntryDraftStageable(draft)
+  const selectedBatch = batches.find((batch) => batch.id === selectedBatchId) ?? null
+
+  const loadBatches = useCallback(async (isActive: () => boolean = () => true) => {
+    setBatchesLoading(true)
+    setError(null)
+
+    const { data, error: batchError } = await supabase
+      .from('entry_import_batches')
+      .select('id, source, status, original_filename, row_count, created_at, notes')
+      .order('created_at', { ascending: false })
+      .limit(12)
+
+    if (!isActive()) return
+
+    if (batchError) {
+      setBatches([])
+      setError(batchError.message)
+    } else {
+      const nextBatches = (data ?? []) as EntryImportBatch[]
+      setBatches(nextBatches)
+      setSelectedBatchId((current) => current ?? nextBatches[0]?.id ?? null)
+    }
+
+    setBatchesLoading(false)
+  }, [])
+
+  const loadRows = useCallback(async (batchId: string | null, isActive: () => boolean = () => true) => {
+    if (!batchId) {
+      setRows([])
+      setSelectedRow(null)
+      return
+    }
+
+    setRowsLoading(true)
+    setError(null)
+
+    const { data, error: rowError } = await supabase
+      .from('entry_import_rows')
+      .select('id, batch_id, row_number, status, raw_payload, normalized_payload, matched_profile_id, match_method, match_confidence, validation_errors, reviewed_at')
+      .eq('batch_id', batchId)
+      .order('row_number', { ascending: true })
+
+    if (!isActive()) return
+
+    if (rowError) {
+      setRows([])
+      setSelectedRow(null)
+      setError(rowError.message)
+    } else {
+      const nextRows = (data ?? []) as EntryImportRow[]
+      setRows(nextRows)
+      setSelectedRow((current) => nextRows.find((row) => row.id === current?.id) ?? nextRows[0] ?? null)
+    }
+
+    setRowsLoading(false)
+  }, [])
+
+  useEffect(() => {
+    let active = true
+
+    async function run() {
+      await loadBatches(() => active)
+    }
+
+    run()
+
+    return () => {
+      active = false
+    }
+  }, [loadBatches])
+
+  useEffect(() => {
+    let active = true
+
+    async function run() {
+      await loadRows(selectedBatchId, () => active)
+    }
+
+    run()
+
+    return () => {
+      active = false
+    }
+  }, [loadRows, selectedBatchId])
+
+  useEffect(() => {
+    let active = true
+
+    async function loadMatches() {
+      if (!selectedRow) {
+        setMatches([])
+        return
+      }
+
+      setMatchesLoading(true)
+      setError(null)
+
+      const { data, error: matchError } = await supabase.rpc('find_entry_import_profile_matches', {
+        p_row_payload: getPaperEntryMatchPayload(selectedRow),
+      })
+
+      if (!active) return
+
+      if (matchError) {
+        setMatches([])
+        setError(matchError.message)
+      } else {
+        setMatches((data ?? []) as EntryImportProfileMatch[])
+      }
+
+      setMatchesLoading(false)
+    }
+
+    loadMatches()
+
+    return () => {
+      active = false
+    }
+  }, [selectedRow])
 
   function updateDraft<Key extends keyof PaperEntryDraft>(key: Key, value: PaperEntryDraft[Key]) {
     setDraft((current) => ({ ...current, [key]: value }))
@@ -1072,6 +1235,9 @@ function PaperEntryImportModal({ onClose }: { onClose: () => void }) {
       await stageRow(batchId, 1, createPaperEntryImportPayload(draft))
       setStatusMessage(`Manual paper row staged in batch ${batchId}. Match the profile before committing Entry Forms.`)
       setDraft(createEmptyPaperEntryDraft())
+      setSelectedBatchId(batchId)
+      await loadBatches()
+      await loadRows(batchId)
     } catch (stageError) {
       setError(stageError instanceof Error ? stageError.message : 'Paper entry staging failed')
     } finally {
@@ -1098,10 +1264,39 @@ function PaperEntryImportModal({ onClose }: { onClose: () => void }) {
       }
 
       setStatusMessage(`${parsed.rows.length} row(s) staged in batch ${batchId}. Resolve profile matches before commit.`)
+      setSelectedBatchId(batchId)
+      await loadBatches()
+      await loadRows(batchId)
     } catch (stageError) {
       setError(stageError instanceof Error ? stageError.message : 'CSV staging failed')
     } finally {
       setStaging(false)
+    }
+  }
+
+  async function acceptMatch(match: EntryImportProfileMatch) {
+    if (!selectedRow || matchingRowId) return
+
+    setMatchingRowId(selectedRow.id)
+    setError(null)
+    setStatusMessage(null)
+
+    try {
+      const { error: matchError } = await supabase.rpc('set_entry_import_row_match', {
+        p_row_id: selectedRow.id,
+        p_profile_id: match.profile_id,
+        p_match_method: match.match_method,
+        p_match_confidence: match.match_confidence,
+      })
+
+      if (matchError) throw matchError
+
+      setStatusMessage(`Row ${selectedRow.row_number} matched to ${match.display_name || match.email || 'selected profile'}.`)
+      await loadRows(selectedBatchId)
+    } catch (matchError) {
+      setError(matchError instanceof Error ? matchError.message : 'Profile match failed')
+    } finally {
+      setMatchingRowId(null)
     }
   }
 
@@ -1201,6 +1396,26 @@ function PaperEntryImportModal({ onClose }: { onClose: () => void }) {
             </div>
           )}
 
+          <PaperEntryMatchReviewBoard
+            batches={batches}
+            batchesLoading={batchesLoading}
+            rows={rows}
+            rowsLoading={rowsLoading}
+            selectedBatch={selectedBatch}
+            selectedBatchId={selectedBatchId}
+            selectedRow={selectedRow}
+            matches={matches}
+            matchesLoading={matchesLoading}
+            matchingRowId={matchingRowId}
+            onSelectBatch={(batchId) => setSelectedBatchId(batchId)}
+            onSelectRow={setSelectedRow}
+            onAcceptMatch={acceptMatch}
+            onRefresh={() => {
+              loadBatches()
+              loadRows(selectedBatchId)
+            }}
+          />
+
           {error ? <div className="mt-5"><ErrorPanel message={error} /></div> : null}
           {statusMessage ? (
             <div className="mt-5 border border-emerald-200 bg-emerald-500/10 p-4 text-sm text-emerald-700 dark:border-emerald-900/60 dark:text-emerald-400">
@@ -1240,6 +1455,220 @@ function PaperEntryModeButton({ active, title, description, onClick }: { active:
       <p className="font-semibold">{title}</p>
       <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{description}</p>
     </motion.button>
+  )
+}
+
+function PaperEntryMatchReviewBoard({
+  batches,
+  batchesLoading,
+  rows,
+  rowsLoading,
+  selectedBatch,
+  selectedBatchId,
+  selectedRow,
+  matches,
+  matchesLoading,
+  matchingRowId,
+  onSelectBatch,
+  onSelectRow,
+  onAcceptMatch,
+  onRefresh,
+}: {
+  batches: EntryImportBatch[]
+  batchesLoading: boolean
+  rows: EntryImportRow[]
+  rowsLoading: boolean
+  selectedBatch: EntryImportBatch | null
+  selectedBatchId: string | null
+  selectedRow: EntryImportRow | null
+  matches: EntryImportProfileMatch[]
+  matchesLoading: boolean
+  matchingRowId: string | null
+  onSelectBatch: (batchId: string) => void
+  onSelectRow: (row: EntryImportRow) => void
+  onAcceptMatch: (match: EntryImportProfileMatch) => void
+  onRefresh: () => void
+}) {
+  return (
+    <section className="mt-8 border-t border-zinc-200 pt-6 dark:border-zinc-800">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="font-mono text-xs uppercase tracking-[0.18em] text-zinc-500">Match review</p>
+          <h3 className="mt-2 text-xl font-semibold tracking-tight">Staged Import Rows</h3>
+          <p className="mt-1 max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">
+            Pick a batch, review each staged row, and lock the profile match before any future Entry Form commit.
+          </p>
+        </div>
+        <motion.button
+          whileTap={{ scale: 0.98 }}
+          type="button"
+          onClick={onRefresh}
+          className="inline-flex min-h-10 items-center justify-center rounded-md border border-zinc-300 px-3 text-sm font-semibold dark:border-zinc-800"
+        >
+          Refresh staged rows
+        </motion.button>
+      </div>
+
+      {batchesLoading ? (
+        <div className="mt-5 flex items-center gap-3 text-sm text-zinc-500">
+          <Loader2 size={16} className="animate-spin" />
+          Loading import batches
+        </div>
+      ) : null}
+
+      {!batchesLoading && batches.length === 0 ? (
+        <div className="mt-5 border border-zinc-200 p-4 dark:border-zinc-800">
+          <FileText size={22} className="text-primary" />
+          <p className="mt-3 font-semibold">No staged paper batches yet.</p>
+          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">Stage a manual row or CSV file first.</p>
+        </div>
+      ) : null}
+
+      {batches.length > 0 ? (
+        <div className="mt-5 grid gap-5 xl:grid-cols-[18rem_1fr]">
+          <div className="space-y-2">
+            {batches.map((batch) => (
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                type="button"
+                key={batch.id}
+                onClick={() => onSelectBatch(batch.id)}
+                className={`w-full rounded-md border p-3 text-left ${batch.id === selectedBatchId ? 'border-primary bg-zinc-100 dark:bg-zinc-900' : 'border-zinc-200 dark:border-zinc-800'}`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-sm font-semibold">{batch.source === 'ExcelUpload' ? 'CSV Import' : 'Manual Paper'}</p>
+                  <span className="rounded-sm bg-zinc-500/10 px-2 py-1 font-mono text-[0.68rem] uppercase tracking-[0.12em] text-zinc-600 dark:text-zinc-400">
+                    {batch.status}
+                  </span>
+                </div>
+                <p className="mt-2 truncate text-sm text-zinc-500">{batch.original_filename || batch.notes || batch.id}</p>
+                <p className="mt-2 font-mono text-xs text-zinc-500 tabular-nums">
+                  {batch.row_count} row(s) / {formatDateTime(batch.created_at)}
+                </p>
+              </motion.button>
+            ))}
+          </div>
+
+          <div className="min-w-0 border border-zinc-200 dark:border-zinc-800">
+            <div className="border-b border-zinc-200 p-4 dark:border-zinc-800">
+              <p className="font-semibold">{selectedBatch ? `${selectedBatch.source} batch` : 'Select a batch'}</p>
+              <p className="mt-1 text-sm text-zinc-500">{selectedBatch?.original_filename || selectedBatch?.notes || selectedBatch?.id || 'Rows will appear here.'}</p>
+            </div>
+
+            {rowsLoading ? (
+              <div className="flex items-center gap-3 p-4 text-sm text-zinc-500">
+                <Loader2 size={16} className="animate-spin" />
+                Loading rows
+              </div>
+            ) : null}
+
+            {!rowsLoading && rows.length === 0 ? (
+              <p className="p-4 text-sm text-zinc-500">No rows in this batch.</p>
+            ) : null}
+
+            {!rowsLoading && rows.length > 0 ? (
+              <div className="grid min-h-[24rem] lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)]">
+                <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                  {rows.map((row) => {
+                    const summary = getPaperEntryImportRowSummary(row)
+                    return (
+                      <button
+                        key={row.id}
+                        type="button"
+                        onClick={() => onSelectRow(row)}
+                        className={`block w-full p-4 text-left hover:bg-zinc-100/70 dark:hover:bg-zinc-900 ${row.id === selectedRow?.id ? 'border-l-2 border-l-primary bg-orange-500/5' : ''}`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="font-semibold">Row {row.row_number}: {summary.driverName}</p>
+                            <p className="mt-1 text-sm text-zinc-500">{summary.identitySignal}</p>
+                          </div>
+                          <PaperImportRowStatusBadge row={row} />
+                        </div>
+                        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">{summary.entrySignal}</p>
+                      </button>
+                    )
+                  })}
+                </div>
+
+                <PaperEntryMatchPanel
+                  row={selectedRow}
+                  matches={matches}
+                  matchesLoading={matchesLoading}
+                  matchingRowId={matchingRowId}
+                  onAcceptMatch={onAcceptMatch}
+                />
+              </div>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+    </section>
+  )
+}
+
+function PaperImportRowStatusBadge({ row }: { row: EntryImportRow }) {
+  const matched = row.status === 'Matched'
+  return (
+    <span className={`rounded-sm px-2 py-1 font-mono text-xs uppercase tracking-[0.12em] ${matched ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : 'bg-amber-500/10 text-amber-700 dark:text-amber-500'}`}>
+      {matched ? `${row.match_method ?? 'Matched'} ${row.match_confidence ?? ''}` : row.status}
+    </span>
+  )
+}
+
+function PaperEntryMatchPanel({ row, matches, matchesLoading, matchingRowId, onAcceptMatch }: { row: EntryImportRow | null; matches: EntryImportProfileMatch[]; matchesLoading: boolean; matchingRowId: string | null; onAcceptMatch: (match: EntryImportProfileMatch) => void }) {
+  if (!row) {
+    return <div className="border-t border-zinc-200 p-4 lg:border-t-0 lg:border-l dark:border-zinc-800"><p className="text-sm text-zinc-500">Select a row to review profile matches.</p></div>
+  }
+
+  return (
+    <aside className="border-t border-zinc-200 p-4 lg:border-t-0 lg:border-l dark:border-zinc-800">
+      <p className="font-mono text-xs uppercase tracking-[0.16em] text-zinc-500">Candidate profiles</p>
+      <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+        Matching checks email, phone, ID/passport, then name fallback. Use high-confidence matches first.
+      </p>
+
+      {matchesLoading ? (
+        <div className="mt-4 flex items-center gap-3 text-sm text-zinc-500">
+          <Loader2 size={16} className="animate-spin" />
+          Searching profiles
+        </div>
+      ) : null}
+
+      {!matchesLoading && matches.length === 0 ? (
+        <p className="mt-4 text-sm text-amber-700 dark:text-amber-500">No profile candidates found. Ask Admin to verify the racer profile before commit.</p>
+      ) : null}
+
+      <div className="mt-4 space-y-2">
+        {matches.map((match) => {
+          const tone = getPaperEntryMatchTone(match.match_confidence)
+          return (
+            <article key={match.profile_id} className="border border-zinc-200 p-3 dark:border-zinc-800">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-semibold">{match.display_name || match.email || 'Unnamed profile'}</p>
+                  <p className="mt-1 text-sm text-zinc-500">{match.email || match.phone || match.profile_id}</p>
+                </div>
+                <span className={`rounded-sm px-2 py-1 font-mono text-[0.68rem] uppercase tracking-[0.12em] ${tone === 'strong' ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : tone === 'medium' ? 'bg-amber-500/10 text-amber-700 dark:text-amber-500' : 'bg-zinc-500/10 text-zinc-600 dark:text-zinc-400'}`}>
+                  {match.match_confidence}%
+                </span>
+              </div>
+              <p className="mt-2 font-mono text-xs text-zinc-500">{match.match_method}</p>
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                type="button"
+                onClick={() => onAcceptMatch(match)}
+                disabled={matchingRowId === row.id || row.status === 'Committed'}
+                className="mt-3 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-md border border-zinc-300 px-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-45 dark:border-zinc-800"
+              >
+                {matchingRowId === row.id ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />}
+                Accept Match
+              </motion.button>
+            </article>
+          )
+        })}
+      </div>
+    </aside>
   )
 }
 
