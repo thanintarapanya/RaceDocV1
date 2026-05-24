@@ -1,12 +1,12 @@
 # Graph Report - RaceDocV1Github  (2026-05-24)
 
 ## Corpus Check
-- 61 files · ~74,952 words
+- 63 files · ~75,822 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 416 nodes · 468 edges · 20 communities detected
-- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 26 edges (avg confidence: 0.8)
+- 425 nodes · 476 edges · 21 communities detected
+- Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 26 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -26,10 +26,11 @@
 - [[_COMMUNITY_Community 15|Community 15]]
 - [[_COMMUNITY_Community 16|Community 16]]
 - [[_COMMUNITY_Community 17|Community 17]]
-- [[_COMMUNITY_Community 44|Community 44]]
-- [[_COMMUNITY_Community 45|Community 45]]
+- [[_COMMUNITY_Community 18|Community 18]]
 - [[_COMMUNITY_Community 46|Community 46]]
 - [[_COMMUNITY_Community 47|Community 47]]
+- [[_COMMUNITY_Community 48|Community 48]]
+- [[_COMMUNITY_Community 49|Community 49]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `finishSave()` - 18 edges
@@ -114,39 +115,45 @@ Cohesion: 0.29
 Nodes (8): Graphify, Balance of Performance (BOP), Entry Form, Inspection Form, RacedocV1, Success Ballast, Supabase, Weight-In
 
 ### Community 16 - "Community 16"
+Cohesion: 0.33
+Nodes (2): getEntryListFilterOptions(), uniqueSorted()
+
+### Community 17 - "Community 17"
 Cohesion: 0.38
 Nodes (4): createCard(), createDashboardCards(), getFallbackScope(), normalizeDashboardSummary()
 
-### Community 17 - "Community 17"
+### Community 18 - "Community 18"
 Cohesion: 0.4
 Nodes (3): handleNotificationClick(), refreshNotifications(), getNotificationTargetPath()
 
-### Community 44 - "Community 44"
+### Community 46 - "Community 46"
 Cohesion: 1.0
 Nodes (1): Audit Trail
 
-### Community 45 - "Community 45"
+### Community 47 - "Community 47"
 Cohesion: 1.0
 Nodes (1): RBAC
 
-### Community 46 - "Community 46"
+### Community 48 - "Community 48"
 Cohesion: 1.0
 Nodes (1): Competitor Request
 
-### Community 47 - "Community 47"
+### Community 49 - "Community 49"
 Cohesion: 1.0
 Nodes (1): Branding
 
 ## Knowledge Gaps
 - **8 isolated node(s):** `Entry Form`, `Success Ballast`, `Audit Trail`, `RBAC`, `Competitor Request` (+3 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Community 44`** (1 nodes): `Audit Trail`
+- **Thin community `Community 16`** (7 nodes): `createEmptyEntryListFilters()`, `filterEntryList()`, `getEntryListFilterOptions()`, `getEntryStatusDisplay()`, `hasActiveEntryListFilters()`, `uniqueSorted()`, `entryFormListHelpers.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 45`** (1 nodes): `RBAC`
+- **Thin community `Community 46`** (1 nodes): `Audit Trail`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 46`** (1 nodes): `Competitor Request`
+- **Thin community `Community 47`** (1 nodes): `RBAC`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 47`** (1 nodes): `Branding`
+- **Thin community `Community 48`** (1 nodes): `Competitor Request`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 49`** (1 nodes): `Branding`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
