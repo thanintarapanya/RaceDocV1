@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion'
-import { CheckCircle2, FilePlus2, Loader2, Lock, RefreshCcw, Save, Trophy } from 'lucide-react'
+import { CheckCircle2, FilePlus2, Loader2, Lock, Printer, RefreshCcw, Save, Trophy } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { canPrintRaceResult, getRaceResultPrintSummary } from './raceResultPrintHelpers'
 
 type RaceOption = {
   raceId: string
@@ -269,6 +270,11 @@ export function RaceResultPage() {
     setSubmitting(false)
   }
 
+  function printSelectedResult() {
+    if (!selectedResult || !canPrintRaceResult(selectedResult.is_official, entries.length)) return
+    window.setTimeout(() => window.print(), 80)
+  }
+
   function updateDraft(entryId: string, patch: Partial<EntryDraft>) {
     setDrafts((current) => ({
       ...current,
@@ -350,6 +356,7 @@ export function RaceResultPage() {
           onDraftChange={updateDraft}
           onSaveEntry={saveEntry}
           onPublish={publishResult}
+          onPrint={printSelectedResult}
         />
       </div>
     </section>
@@ -412,6 +419,7 @@ function ResultEditor({
   onDraftChange,
   onSaveEntry,
   onPublish,
+  onPrint,
 }: {
   result: RaceResult | null
   entries: RaceResultEntry[]
@@ -422,6 +430,7 @@ function ResultEditor({
   onDraftChange: (entryId: string, patch: Partial<EntryDraft>) => void
   onSaveEntry: (entry: RaceResultEntry) => Promise<void>
   onPublish: () => Promise<void>
+  onPrint: () => void
 }) {
   if (!result) {
     return (
@@ -439,6 +448,9 @@ function ResultEditor({
       transition={{ duration: 0.16 }}
       className="border border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950"
     >
+      <div id="race-result-print-sheet" className="hidden">
+        <PrintableRaceResult result={result} entries={entries} />
+      </div>
       <header className="flex flex-col gap-4 border-b border-zinc-200 p-5 sm:flex-row sm:items-start sm:justify-between dark:border-zinc-800">
         <div>
           <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Manual result sheet</p>
@@ -450,6 +462,27 @@ function ResultEditor({
           {result.is_official ? <span className="inline-flex items-center gap-1 rounded-sm bg-zinc-200 px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"><Lock size={13} />Locked</span> : null}
         </div>
       </header>
+
+      {result.is_official ? (
+        <section className="border-b border-zinc-200 p-5 dark:border-zinc-800">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">A4 result sheet</p>
+              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">Print the official classification currently loaded from the database.</p>
+            </div>
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              type="button"
+              onClick={onPrint}
+              disabled={!canPrintRaceResult(result.is_official, entries.length)}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-zinc-300 px-4 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800"
+            >
+              <Printer size={17} />
+              Print A4 Result
+            </motion.button>
+          </div>
+        </section>
+      ) : null}
 
       {loading ? <ResultSkeleton /> : null}
       {!loading && entries.length === 0 ? (
@@ -592,6 +625,77 @@ function ResultSkeleton() {
   )
 }
 
+function PrintableRaceResult({ result, entries }: { result: RaceResult; entries: RaceResultEntry[] }) {
+  const summary = getRaceResultPrintSummary(entries)
+  const sortedEntries = [...entries].sort(compareResultEntries)
+
+  return (
+    <div className="print-sheet-content race-result-print-content">
+      <header className="border-b border-zinc-300 pb-4">
+        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">Official classification</p>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight">Race Result</h1>
+        <p className="mt-2 text-sm text-zinc-700">{result.event_name} / {result.race_name}</p>
+        <p className="text-sm text-zinc-700">{result.series_class} / Season {result.season_year}</p>
+      </header>
+
+      <section className="mt-5 grid grid-cols-4 gap-3">
+        <PrintMetric label="Classified" value={summary.classified} />
+        <PrintMetric label="NC" value={summary.nonClassified} />
+        <PrintMetric label="Points" value={summary.totalPoints} />
+        <PrintMetric label="Ballast kg" value={summary.ballastAssignedKg} />
+      </section>
+
+      <section className="mt-6">
+        <h2 className="text-sm font-semibold uppercase tracking-[0.12em]">Classification</h2>
+        <table className="mt-3 w-full border-collapse text-left text-xs">
+          <thead className="border-b border-zinc-300 text-zinc-500">
+            <tr>
+              <th className="py-2 pr-2 font-medium">Pos</th>
+              <th className="px-2 py-2 font-medium">Car</th>
+              <th className="px-2 py-2 font-medium">Competitor</th>
+              <th className="px-2 py-2 font-medium">Code</th>
+              <th className="px-2 py-2 text-right font-medium">Points</th>
+              <th className="py-2 pl-2 text-right font-medium">Ballast</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedEntries.map((entry) => (
+              <tr key={entry.entry_id} className="border-b border-zinc-200">
+                <td className="py-2 pr-2 font-mono tabular-nums">{entry.finish_position ?? '--'}</td>
+                <td className="px-2 py-2 font-mono font-semibold tabular-nums">#{entry.car_number}</td>
+                <td className="px-2 py-2">{entry.competitor_name}</td>
+                <td className="px-2 py-2 font-mono text-[11px] tabular-nums">{entry.result_code}</td>
+                <td className="px-2 py-2 text-right font-mono tabular-nums">{entry.points}</td>
+                <td className="py-2 pl-2 text-right font-mono tabular-nums">{formatKg(entry.success_ballast_delta_kg)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <footer className="mt-8 grid grid-cols-[minmax(0,1fr)_14rem] gap-6 border-t border-zinc-300 pt-5 text-sm text-zinc-700">
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-zinc-500">RaceDoc Official Result</p>
+          <p className="mt-1">Published result locks classification and updates championship standings.</p>
+        </div>
+        <div>
+          <p className="border-t border-zinc-400 pt-2">{result.signed_off_by_name ?? 'Official'}</p>
+          <p className="mt-1 text-xs text-zinc-500">Signed {formatDateTime(result.signed_off_at)}</p>
+        </div>
+      </footer>
+    </div>
+  )
+}
+
+function PrintMetric({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="border border-zinc-300 p-3">
+      <p className="text-xs uppercase tracking-[0.12em] text-zinc-500">{label}</p>
+      <p className="mt-2 font-mono text-2xl font-semibold tabular-nums">{value}</p>
+    </div>
+  )
+}
+
 function normalizeOptions(options: RaceResultOptions): RaceResultOptions {
   return {
     canEdit: Boolean(options.canEdit),
@@ -632,4 +736,11 @@ function formatDateTime(value: string | null) {
 
 function formatKg(value: number) {
   return `${Number(value || 0).toFixed(1)} kg`
+}
+
+function compareResultEntries(a: RaceResultEntry, b: RaceResultEntry) {
+  if (a.finish_position !== null && b.finish_position !== null) return a.finish_position - b.finish_position
+  if (a.finish_position !== null) return -1
+  if (b.finish_position !== null) return 1
+  return a.car_number.localeCompare(b.car_number, undefined, { numeric: true })
 }

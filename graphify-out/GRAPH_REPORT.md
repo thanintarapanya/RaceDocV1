@@ -1,12 +1,12 @@
 # Graph Report - RaceDocV1Github  (2026-05-24)
 
 ## Corpus Check
-- 55 files · ~68,569 words
+- 57 files · ~69,168 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 371 nodes · 419 edges · 17 communities detected
-- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 24 edges (avg confidence: 0.8)
+- 382 nodes · 430 edges · 18 communities detected
+- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 25 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -19,14 +19,15 @@
 - [[_COMMUNITY_Community 6|Community 6]]
 - [[_COMMUNITY_Community 7|Community 7]]
 - [[_COMMUNITY_Community 8|Community 8]]
-- [[_COMMUNITY_Community 10|Community 10]]
+- [[_COMMUNITY_Community 9|Community 9]]
 - [[_COMMUNITY_Community 11|Community 11]]
-- [[_COMMUNITY_Community 14|Community 14]]
+- [[_COMMUNITY_Community 12|Community 12]]
 - [[_COMMUNITY_Community 15|Community 15]]
-- [[_COMMUNITY_Community 41|Community 41]]
+- [[_COMMUNITY_Community 16|Community 16]]
 - [[_COMMUNITY_Community 42|Community 42]]
 - [[_COMMUNITY_Community 43|Community 43]]
 - [[_COMMUNITY_Community 44|Community 44]]
+- [[_COMMUNITY_Community 45|Community 45]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `finishSave()` - 18 edges
@@ -79,70 +80,74 @@ Cohesion: 0.13
 Nodes (8): getAuthErrorMessage(), handleEmailLogin(), handleGoogleLogin(), handleSubmit(), validateIdentity(), updatePassword(), handleSignUp(), handleSubmit()
 
 ### Community 6 - "Community 6"
-Cohesion: 0.17
-Nodes (6): calculateItemWeight(), createInspectionVersionDiff(), getSelectedValues(), getSingleSelectedValue(), isAnswerFilled(), mapReviews()
+Cohesion: 0.13
+Nodes (4): parseNullableInteger(), printSelectedResult(), saveEntry(), canPrintRaceResult()
 
 ### Community 7 - "Community 7"
 Cohesion: 0.17
-Nodes (4): getInvitationNotice(), inviteRoleByEmail(), resendInvitation(), sendRoleInvitation()
+Nodes (6): calculateItemWeight(), createInspectionVersionDiff(), getSelectedValues(), getSingleSelectedValue(), isAnswerFilled(), mapReviews()
 
 ### Community 8 - "Community 8"
+Cohesion: 0.17
+Nodes (4): getInvitationNotice(), inviteRoleByEmail(), resendInvitation(), sendRoleInvitation()
+
+### Community 9 - "Community 9"
 Cohesion: 0.2
 Nodes (8): buildAuditTrailCsv(), normalizeAuditTrailPayload(), applyFilters(), exportVisibleRows(), fetchAuditTrail(), loadAuditTrail(), movePage(), run()
 
-### Community 10 - "Community 10"
+### Community 11 - "Community 11"
 Cohesion: 0.22
 Nodes (5): clean(), loadInitialProfile(), saveProfile(), loadInitialData(), normalizePayload()
 
-### Community 11 - "Community 11"
+### Community 12 - "Community 12"
 Cohesion: 0.22
 Nodes (3): normalizePrintOptions(), confirmPrintBackground(), loadPrintOptions()
 
-### Community 14 - "Community 14"
+### Community 15 - "Community 15"
 Cohesion: 0.29
 Nodes (8): Graphify, Balance of Performance (BOP), Entry Form, Inspection Form, RacedocV1, Success Ballast, Supabase, Weight-In
 
-### Community 15 - "Community 15"
+### Community 16 - "Community 16"
 Cohesion: 0.4
 Nodes (3): handleNotificationClick(), refreshNotifications(), getNotificationTargetPath()
 
-### Community 41 - "Community 41"
+### Community 42 - "Community 42"
 Cohesion: 1.0
 Nodes (1): Audit Trail
 
-### Community 42 - "Community 42"
+### Community 43 - "Community 43"
 Cohesion: 1.0
 Nodes (1): RBAC
 
-### Community 43 - "Community 43"
+### Community 44 - "Community 44"
 Cohesion: 1.0
 Nodes (1): Competitor Request
 
-### Community 44 - "Community 44"
+### Community 45 - "Community 45"
 Cohesion: 1.0
 Nodes (1): Branding
 
 ## Knowledge Gaps
 - **8 isolated node(s):** `Entry Form`, `Success Ballast`, `Audit Trail`, `RBAC`, `Competitor Request` (+3 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Community 41`** (1 nodes): `Audit Trail`
+- **Thin community `Community 42`** (1 nodes): `Audit Trail`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 42`** (1 nodes): `RBAC`
+- **Thin community `Community 43`** (1 nodes): `RBAC`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 43`** (1 nodes): `Competitor Request`
+- **Thin community `Community 44`** (1 nodes): `Competitor Request`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 44`** (1 nodes): `Branding`
+- **Thin community `Community 45`** (1 nodes): `Branding`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `prefillInspectionAnswers()` connect `Community 2` to `Community 6`?**
-  _High betweenness centrality (0.007) - this node is a cross-community bridge._
-- **Why does `isAnswerFilled()` connect `Community 6` to `Community 2`?**
-  _High betweenness centrality (0.007) - this node is a cross-community bridge._
-- **Why does `normalizePayload()` connect `Community 10` to `Community 7`?**
-  _High betweenness centrality (0.003) - this node is a cross-community bridge._
+- **Why does `prefillInspectionAnswers()` connect `Community 2` to `Community 7`?**
+  _High betweenness centrality (0.006) - this node is a cross-community bridge._
+- **Why does `isAnswerFilled()` connect `Community 7` to `Community 2`?**
+  _High betweenness centrality (0.006) - this node is a cross-community bridge._
+- **Why does `normalizePayload()` connect `Community 11` to `Community 8`?**
+  _High betweenness centrality (0.002) - this node is a cross-community bridge._
 - **Are the 6 inferred relationships involving `useAuth()` (e.g. with `ProtectedRoute()` and `AdminOrSecretaryRoute()`) actually correct?**
   _`useAuth()` has 6 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 6 inferred relationships involving `getAuthErrorMessage()` (e.g. with `handleEmailLogin()` and `handleGoogleLogin()`) actually correct?**

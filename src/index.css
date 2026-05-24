@@ -106,11 +106,14 @@ body {
   }
 
   #scrutineer-report-print-sheet,
-  #scrutineer-report-print-sheet * {
+  #scrutineer-report-print-sheet *,
+  #race-result-print-sheet,
+  #race-result-print-sheet * {
     visibility: visible;
   }
 
-  #scrutineer-report-print-sheet {
+  #scrutineer-report-print-sheet,
+  #race-result-print-sheet {
     position: fixed;
     inset: 0;
     display: block !important;
@@ -131,5 +134,9 @@ body {
     min-height: 297mm;
     padding: 24mm 18mm 18mm;
     background: rgb(250 250 250 / 0.9);
+  }
+
+  .race-result-print-content {
+    background: #fafafa;
   }
 }
