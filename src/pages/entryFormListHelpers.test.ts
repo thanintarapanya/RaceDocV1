@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createEmptyEntryListFilters, filterEntryList, getEntryListFilterOptions, getEntryStatusDisplay, hasActiveEntryListFilters, type EntryListRow } from './entryFormListHelpers'
+import { createEmptyEntryListFilters, filterEntryList, getEntryListFilterOptions, getEntryStatusDisplay, getPaperEntryReadiness, hasActiveEntryListFilters, type EntryListRow } from './entryFormListHelpers'
 
 const entries: EntryListRow[] = [
   { event_name: 'Event 1 Chang', season_year: 2026, series_class: 'Siam Series / PRO', car_number: '39', status: 'active', created_at: '2026-01-01' },
@@ -36,5 +36,14 @@ describe('Entry Form list helpers', () => {
   it('explains operational status meaning', () => {
     expect(getEntryStatusDisplay('active')).toEqual({ label: 'Active / Locked', description: 'Approved source data' })
     expect(getEntryStatusDisplay('pending').description).toContain('Secretary')
+  })
+
+  it('gates paper entry preparation to Admin and Secretary roles', () => {
+    expect(getPaperEntryReadiness(['ADMIN']).canPreparePaperEntry).toBe(true)
+    expect(getPaperEntryReadiness(['SECRETARY']).canPreparePaperEntry).toBe(true)
+    expect(getPaperEntryReadiness(['COMPETITOR']).canPreparePaperEntry).toBe(false)
+    expect(getPaperEntryReadiness(['ADMIN']).manualEntryReady).toBe(false)
+    expect(getPaperEntryReadiness(['ADMIN']).excelImportReady).toBe(false)
+    expect(getPaperEntryReadiness(['ADMIN']).nextBackendStep).toContain('profile matching')
   })
 })

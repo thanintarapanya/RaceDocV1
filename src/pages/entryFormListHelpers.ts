@@ -65,6 +65,16 @@ export function getEntryStatusDisplay(status: EntryListStatus) {
   }
 }
 
+export function getPaperEntryReadiness(roles: string[]) {
+  const canPreparePaperEntry = roles.includes('ADMIN') || roles.includes('SECRETARY')
+  return {
+    canPreparePaperEntry,
+    manualEntryReady: false,
+    excelImportReady: false,
+    nextBackendStep: 'Create Admin/Secretary RPC for paper Entry Forms with profile matching and import batch audit trail.',
+  }
+}
+
 function uniqueSorted(values: string[], compareFn?: (first: string, second: string) => number) {
   return Array.from(new Set(values.filter(Boolean))).sort(compareFn ?? ((first, second) => first.localeCompare(second)))
 }

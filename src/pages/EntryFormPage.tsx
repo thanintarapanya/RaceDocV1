@@ -9,6 +9,7 @@ import {
   FilePlus2,
   FileText,
   FolderCheck,
+  Import,
   Loader2,
   PenLine,
   Plus,
@@ -25,7 +26,7 @@ import {
 } from '@/components/SeriesRaceFilter'
 import { filterBySeriesRace, getSeriesRaceOptions } from '@/lib/series-race-filter'
 import { supabase } from '@/lib/supabase'
-import { createEmptyEntryListFilters, filterEntryList, getEntryListFilterOptions, getEntryStatusDisplay, hasActiveEntryListFilters, type EntryListFilters, type EntryListRow } from './entryFormListHelpers'
+import { createEmptyEntryListFilters, filterEntryList, getEntryListFilterOptions, getEntryStatusDisplay, getPaperEntryReadiness, hasActiveEntryListFilters, type EntryListFilters, type EntryListRow } from './entryFormListHelpers'
 
 type EntryStatus = 'draft' | 'pending' | 'active' | 'inactive' | 'rejected'
 
@@ -310,6 +311,7 @@ export function EntryFormPage() {
   const [filters, setFilters] = useState<EntryListFilters>(() => createEmptyEntryListFilters())
   const isApprovalRole = roles.includes('ADMIN') || roles.includes('SECRETARY')
   const canSoftDelete = roles.includes('ADMIN')
+  const paperEntryReadiness = useMemo(() => getPaperEntryReadiness(roles), [roles])
   const [deletingEntryId, setDeletingEntryId] = useState<string | null>(null)
   const linkedEntryFormId = searchParams.get('entryFormId')
   const filterOptions = useMemo(() => getEntryListFilterOptions(entries), [entries])
@@ -399,6 +401,8 @@ export function EntryFormPage() {
           </motion.button>
         </div>
       </motion.header>
+
+      {paperEntryReadiness.canPreparePaperEntry ? <PaperEntryOperationsPanel readiness={paperEntryReadiness} /> : null}
 
       <section className="mt-6">
         {!entriesLoading && !entriesError && entries.length > 0 ? (
@@ -951,6 +955,71 @@ function EntryTable({
         ))}
       </div>
     </motion.div>
+  )
+}
+
+function PaperEntryOperationsPanel({ readiness }: { readiness: ReturnType<typeof getPaperEntryReadiness> }) {
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.16, delay: 0.03 }}
+      className="mt-6 border border-zinc-200 p-5 dark:border-zinc-800"
+    >
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex items-start gap-3">
+          <Import className="mt-1 text-primary" size={22} />
+          <div>
+            <p className="font-mono text-xs uppercase tracking-[0.16em] text-zinc-500">Race office intake</p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight">Paper Entry Operations</h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+              Prepare paper registrations here. Manual admin fill-in and Excel import require profile matching plus import-batch audit trail before they can safely create Entry Forms for another racer.
+            </p>
+          </div>
+        </div>
+        <span className="inline-flex min-h-8 items-center rounded-md border border-amber-300 bg-amber-500/10 px-3 font-mono text-xs uppercase tracking-[0.12em] text-amber-700 dark:border-amber-900/70 dark:text-amber-400">
+          Backend required
+        </span>
+      </div>
+
+      <div className="mt-5 grid gap-3 md:grid-cols-2">
+        <PaperEntryActionCard
+          title="Manual Paper Fill-In"
+          description="Admin or Secretary selects the racer profile, enters the paper form data, then submits as official intake with actor audit trail."
+          ready={readiness.manualEntryReady}
+        />
+        <PaperEntryActionCard
+          title="Excel Bulk Import"
+          description="Upload the race-office spreadsheet, preview row validation, match profiles, resolve conflicts, then confirm a batch import."
+          ready={readiness.excelImportReady}
+        />
+      </div>
+
+      <p className="mt-4 border-t border-zinc-200 pt-4 text-sm text-zinc-600 dark:border-zinc-800 dark:text-zinc-400">
+        Next backend step: {readiness.nextBackendStep}
+      </p>
+    </motion.section>
+  )
+}
+
+function PaperEntryActionCard({ title, description, ready }: { title: string; description: string; ready: boolean }) {
+  return (
+    <article className="border border-zinc-200 p-4 dark:border-zinc-800">
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="font-semibold">{title}</h3>
+        <span className={`rounded-sm px-2 py-1 font-mono text-xs uppercase tracking-[0.12em] ${ready ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : 'bg-zinc-500/10 text-zinc-600 dark:text-zinc-400'}`}>
+          {ready ? 'Ready' : 'Staged'}
+        </span>
+      </div>
+      <p className="mt-3 text-sm leading-6 text-zinc-600 dark:text-zinc-400">{description}</p>
+      <button
+        type="button"
+        disabled
+        className="mt-4 inline-flex min-h-10 w-full cursor-not-allowed items-center justify-center rounded-md border border-zinc-300 px-3 text-sm font-semibold text-zinc-400 dark:border-zinc-800"
+      >
+        {ready ? 'Open' : 'Waiting for backend'}
+      </button>
+    </article>
   )
 }
 
