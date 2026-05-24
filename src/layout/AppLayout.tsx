@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { Bell, Gauge, LogOut, Menu, Settings, X } from 'lucide-react'
+import { Bell, ChevronDown, Gauge, LogOut, Menu, Settings, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/auth/useAuth'
@@ -304,14 +304,40 @@ function UserPanel({
   onSignOut: () => Promise<void>
   hideNotifications?: boolean
 }) {
+  const [accountOpen, setAccountOpen] = useState(false)
+
   return (
     <div className="relative border border-zinc-200 p-3 dark:border-zinc-800">
-      <p className="truncate text-sm font-medium">{displayName}</p>
-      <p className="mt-1 font-mono text-xs uppercase tracking-[0.12em] text-zinc-500">{roleLabel}</p>
-      <div className="mt-4 grid gap-2 border-t border-zinc-200 pt-3 dark:border-zinc-800">
-        <AccountLink to="/settings/profile" label="Profile" icon={<Settings size={16} />} />
-        <AccountLink to="/settings/privacy" label="Privacy" icon={<Gauge size={16} />} />
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium">{displayName}</p>
+          <p className="mt-1 font-mono text-xs uppercase tracking-[0.12em] text-zinc-500">{roleLabel}</p>
+        </div>
+        <motion.button
+          whileTap={{ scale: 0.98 }}
+          type="button"
+          onClick={() => setAccountOpen((open) => !open)}
+          className="inline-flex min-h-9 min-w-9 items-center justify-center rounded-md border border-zinc-300 text-zinc-600 transition hover:text-zinc-950 dark:border-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-50"
+          aria-expanded={accountOpen}
+          aria-label="Open account menu"
+        >
+          <ChevronDown size={16} className={`transition-transform ${accountOpen ? 'rotate-180' : ''}`} />
+        </motion.button>
       </div>
+      <AnimatePresence initial={false}>
+        {accountOpen ? (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.12 }}
+            className="mt-3 grid gap-2 border-t border-zinc-200 pt-3 dark:border-zinc-800"
+          >
+            <AccountLink to="/settings/profile" label="Profile" icon={<Settings size={16} />} onClick={() => setAccountOpen(false)} />
+            <AccountLink to="/settings/privacy" label="Privacy" icon={<Gauge size={16} />} onClick={() => setAccountOpen(false)} />
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
       {!hideNotifications ? (
         <>
           <div className="mt-4">
@@ -342,10 +368,11 @@ function UserPanel({
   )
 }
 
-function AccountLink({ to, label, icon }: { to: string; label: string; icon: React.ReactNode }) {
+function AccountLink({ to, label, icon, onClick }: { to: string; label: string; icon: React.ReactNode; onClick?: () => void }) {
   return (
     <NavLink
       to={to}
+      onClick={onClick}
       className={({ isActive }) =>
         `flex min-h-10 items-center justify-between rounded-md border px-3 text-sm font-medium transition ${
           isActive
