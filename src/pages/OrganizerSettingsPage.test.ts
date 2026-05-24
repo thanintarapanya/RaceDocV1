@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import {
   createOrganizerSetupBoard,
   getEligibleGradesForEventSeries,
+  getRulePackageReadiness,
+  getSelectedEventId,
   groupBallastRulesByEventRule,
   groupEventSeriesRulesByEvent,
   groupInspectionTemplatesByEventRule,
@@ -182,6 +184,32 @@ describe('OrganizerSettingsPage helpers', () => {
     expect(board.nextStep.key).toBe('rules')
     expect(board.nextStep.primaryActionLabel).toBe('Create Rule Package')
     expect(board.steps.find((step) => step.key === 'classes')).toMatchObject({ complete: 4, total: 4 })
+  })
+
+  it('selects the requested event or falls back to the first event', () => {
+    const events = [
+      { eventId: 'event-1', seasonId: 'season-1', circuitId: null, circuitName: null, name: 'Event 1', eventOrder: 1, startsOn: null, endsOn: null, status: 'Draft' as const },
+      { eventId: 'event-2', seasonId: 'season-1', circuitId: null, circuitName: null, name: 'Event 2', eventOrder: 2, startsOn: null, endsOn: null, status: 'Draft' as const },
+    ]
+
+    expect(getSelectedEventId(events, 'event-2')).toBe('event-2')
+    expect(getSelectedEventId(events, 'missing-event')).toBe('event-1')
+    expect(getSelectedEventId([], 'event-2')).toBeNull()
+  })
+
+  it('reports missing rule package setup items', () => {
+    const rule = createEventRule('rule-1', 'event-1', 'series-1', 'grade-pro')
+    const readiness = getRulePackageReadiness(
+      rule,
+      groupWeightRulesByEventRule([createWeightRule('weight-1', 'rule-1')]),
+      groupBallastRulesByEventRule([]),
+      groupTireRulesByEventRule([createTireRule('tire-1', 'rule-1')]),
+      groupSponsorStickerAssetsByEventRule([]),
+      groupInspectionTemplatesByEventRule([createInspectionTemplate('template-1', 'rule-1', 1)]),
+    )
+
+    expect(readiness.ready).toBe(false)
+    expect(readiness.missingLabels).toEqual(['Success ballast', 'Sponsor sticker'])
   })
 })
 

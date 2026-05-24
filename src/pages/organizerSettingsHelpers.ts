@@ -277,6 +277,11 @@ export type OrganizerSetupBoard = {
   stats: OrganizerSetupStat[]
 }
 
+export type RulePackageReadiness = {
+  ready: boolean
+  missingLabels: string[]
+}
+
 export function normalizeOrganizerSettingsPayload(payload: OrganizerPayload | null): OrganizerPayload {
   return {
     canManage: Boolean(payload?.canManage),
@@ -412,6 +417,33 @@ export function createOrganizerSetupBoard(payload: OrganizerPayload): OrganizerS
         tone: missingCount === 0 ? 'success' : 'warning',
       },
     ],
+  }
+}
+
+export function getSelectedEventId(events: EventRow[], selectedEventId: string | null) {
+  if (selectedEventId && events.some((event) => event.eventId === selectedEventId)) return selectedEventId
+  return events[0]?.eventId ?? null
+}
+
+export function getRulePackageReadiness(
+  rule: EventSeriesRuleRow,
+  weightRulesByEventRule: Map<string, WeightRuleRow[]>,
+  ballastRulesByEventRule: Map<string, BallastRuleRow[]>,
+  tireRulesByEventRule: Map<string, TireRuleRow[]>,
+  sponsorStickerAssetsByEventRule: Map<string, SponsorStickerAssetRow[]>,
+  inspectionTemplatesByEventRule: Map<string, InspectionTemplateRow[]>,
+): RulePackageReadiness {
+  const missingLabels = [
+    { label: 'Weight rule', ready: (weightRulesByEventRule.get(rule.eventSeriesRuleId) ?? []).length > 0 },
+    { label: 'Success ballast', ready: (ballastRulesByEventRule.get(rule.eventSeriesRuleId) ?? []).length > 0 },
+    { label: 'Tire rule', ready: (tireRulesByEventRule.get(rule.eventSeriesRuleId) ?? []).length > 0 },
+    { label: 'Inspection form', ready: (inspectionTemplatesByEventRule.get(rule.eventSeriesRuleId) ?? []).length > 0 },
+    { label: 'Sponsor sticker', ready: (sponsorStickerAssetsByEventRule.get(rule.eventSeriesRuleId) ?? []).length > 0 },
+  ].filter((item) => !item.ready).map((item) => item.label)
+
+  return {
+    ready: missingLabels.length === 0,
+    missingLabels,
   }
 }
 

@@ -1,11 +1,11 @@
 # Graph Report - RaceDocV1Github  (2026-05-24)
 
 ## Corpus Check
-- 59 files · ~71,904 words
+- 59 files · ~72,891 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 398 nodes · 450 edges · 20 communities detected
+- 400 nodes · 452 edges · 20 communities detected
 - Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 25 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -78,7 +78,7 @@ Cohesion: 0.13
 Nodes (11): AuthRedirect(), OnboardingRoute(), ProtectedRoute(), AdminOnlyRoute(), AdminOrSecretaryRoute(), ScrutineerReportRoute(), useAuth(), canSeeAdminNavigation() (+3 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.15
+Cohesion: 0.13
 Nodes (5): createOrganizerSetupBoard(), createSetupStep(), getClassActionLabel(), getClassEditorKey(), getRuleEditorKey()
 
 ### Community 6 - "Community 6"

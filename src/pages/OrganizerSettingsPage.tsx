@@ -13,6 +13,8 @@ import {
   groupInspectionTemplatesByEventRule,
   groupWeightRulesByEventRule,
   createOrganizerSetupBoard,
+  getRulePackageReadiness,
+  getSelectedEventId,
   getEligibleGradesForEventSeries,
   normalizeOrganizerSettingsPayload,
   type BallastRuleRow,
@@ -29,6 +31,7 @@ import {
   type OrganizerPayload,
   type OrganizerSetupBoard,
   type OrganizerSetupStep,
+  type RulePackageReadiness,
   type PrintBackgroundAssetRow,
   type RaceRow,
   type SeasonRow,
@@ -316,6 +319,7 @@ export function OrganizerSettingsPage() {
   const [activeEditor, setActiveEditor] = useState<SettingsEditorKey>('season')
   const [editorOpen, setEditorOpen] = useState(false)
   const [duplicateDraft, setDuplicateDraft] = useState<DuplicateDraft | null>(null)
+  const [selectedEventBySeason, setSelectedEventBySeason] = useState<Record<string, string>>({})
 
   const loadData = useCallback(async (isActive: () => boolean = () => true) => {
     setLoading(true)
@@ -1322,6 +1326,8 @@ export function OrganizerSettingsPage() {
                   inspectionTemplatesByEventRule={inspectionTemplatesByEventRule}
                   seasonSeries={seasonSeriesBySeason.get(season.seasonId) ?? []}
                   seasonSeriesGradesBySeries={seasonSeriesGradesBySeries}
+                  selectedEventId={selectedEventBySeason[season.seasonId] ?? null}
+                  onSelectEvent={(eventId) => setSelectedEventBySeason((current) => ({ ...current, [season.seasonId]: eventId }))}
                   onEditSeason={() => {
                     setSeasonForm(createSeasonForm(season))
                     openEditor('season')
@@ -1332,6 +1338,38 @@ export function OrganizerSettingsPage() {
                     openEditor('event')
                   }}
                   onDuplicateEvent={startDuplicateEvent}
+                  onCreateRace={(event) => {
+                    setRaceForm(createEmptyRaceForm(event.eventId))
+                    openEditor('race')
+                  }}
+                  onCreatePrintBackgroundAsset={(event) => {
+                    setPrintBackgroundAssetForm(createEmptyPrintBackgroundAssetForm(event.eventId))
+                    openEditor('printBackgroundAsset')
+                  }}
+                  onCreateEventSeriesRule={(event) => {
+                    setEventSeriesRuleForm(createEmptyEventSeriesRuleForm(event.eventId, payload.seriesRaces[0]?.seriesRaceId ?? ''))
+                    openEditor('eventSeriesRule')
+                  }}
+                  onCreateWeightRule={(rule) => {
+                    setWeightRuleForm(createEmptyWeightRuleForm(rule.eventSeriesRuleId))
+                    openEditor('weightRule')
+                  }}
+                  onCreateBallastRule={(rule) => {
+                    setBallastRuleForm(createEmptyBallastRuleForm(rule.eventSeriesRuleId))
+                    openEditor('ballastRule')
+                  }}
+                  onCreateTireRule={(rule) => {
+                    setTireRuleForm(createEmptyTireRuleForm(rule.eventSeriesRuleId))
+                    openEditor('tireRule')
+                  }}
+                  onCreateSponsorStickerAsset={(rule) => {
+                    setSponsorStickerAssetForm(createEmptySponsorStickerAssetForm(rule.eventSeriesRuleId))
+                    openEditor('sponsorStickerAsset')
+                  }}
+                  onCreateInspectionTemplate={(rule) => {
+                    setInspectionTemplateForm(createEmptyInspectionTemplateForm(rule.eventSeriesRuleId))
+                    openEditor('inspectionTemplate')
+                  }}
                   onEditRace={(race) => {
                     setRaceForm(createRaceForm(race))
                     openEditor('race')
@@ -1411,6 +1449,8 @@ function SettingsForm({
   buttonLabel: string
 }) {
   if (!active) return null
+  const guidance = getEditorGuidance(editorKey)
+  const mapLocation = getEditorMapLocation(editorKey)
 
   return (
     <motion.form
@@ -1418,40 +1458,70 @@ function SettingsForm({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.16 }}
       onSubmit={onSubmit}
-      className="border border-zinc-200 p-5 dark:border-zinc-800"
+      className="border border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950"
     >
-      <div className="flex items-start gap-3 border-b border-zinc-200 pb-4 dark:border-zinc-800">
+      <div className="flex items-start gap-3 border-b border-zinc-200 p-5 dark:border-zinc-800">
         <Icon className="mt-1 text-primary" size={20} />
         <div>
-          <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Configure</p>
+          <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Focused editor</p>
           <h2 className="mt-1 text-xl font-semibold">{title}</h2>
+          <p className="mt-2 font-mono text-xs uppercase tracking-[0.12em] text-zinc-500">{mapLocation}</p>
+          <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">{guidance.title}</p>
         </div>
       </div>
       <EditorGuidance editorKey={editorKey} />
-      <div className="mt-5 space-y-4">{children}</div>
-      <motion.button
-        whileTap={{ scale: 0.98 }}
-        type="submit"
-        disabled={updating}
-        className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-      >
-        {updating ? <Loader2 size={17} className="animate-spin" /> : <Save size={17} />}
-        {buttonLabel}
-      </motion.button>
+      <div className="space-y-4 p-5">{children}</div>
+      <div className="sticky bottom-0 border-t border-zinc-200 bg-zinc-50 p-5 dark:border-zinc-800 dark:bg-zinc-950">
+        <motion.button
+          whileTap={{ scale: 0.98 }}
+          type="submit"
+          disabled={updating}
+          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {updating ? <Loader2 size={17} className="animate-spin" /> : <Save size={17} />}
+          {buttonLabel}
+        </motion.button>
+        <p className="mt-2 text-xs leading-5 text-zinc-500">Saved changes refresh the Season Map automatically.</p>
+      </div>
     </motion.form>
   )
 }
 
 function EditorGuidance({ editorKey }: { editorKey: SettingsEditorKey }) {
   const guidance = getEditorGuidance(editorKey)
+  const mapLocation = getEditorMapLocation(editorKey)
 
   return (
-    <div className="mt-4 rounded-md border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-950">
-      <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Configuration path</p>
-      <p className="mt-2 text-sm font-semibold">{guidance.title}</p>
+    <div className="border-b border-zinc-200 bg-zinc-100/70 p-5 dark:border-zinc-800 dark:bg-zinc-900/30">
+      <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Where this appears</p>
+      <p className="mt-2 text-sm font-semibold">{mapLocation}</p>
       <p className="mt-1 text-sm leading-6 text-zinc-600 dark:text-zinc-400">{guidance.body}</p>
     </div>
   )
+}
+
+function getEditorMapLocation(editorKey: SettingsEditorKey) {
+  const locations: Record<SettingsEditorKey, string> = {
+    season: 'Season Map / Season Header',
+    circuit: 'Global Library / Circuit used by Event',
+    seriesRace: 'Global Library / Series used by Season Classes',
+    grade: 'Global Library / Grade used by Season Classes',
+    seasonSeries: 'Season Map / Series & Classes',
+    seasonSeriesGrade: 'Season Map / Series & Classes',
+    event: 'Season Map / Selected Event Header',
+    race: 'Season Map / Selected Event / Race Sessions',
+    eventSeriesRule: 'Season Map / Selected Event / Rule Packages',
+    weightRule: 'Season Map / Rule Package / Weight Rule',
+    ballastRule: 'Season Map / Rule Package / Success Ballast',
+    tireRule: 'Season Map / Rule Package / Tire Rule',
+    sponsorStickerAsset: 'Season Map / Rule Package / Sponsor Sticker',
+    printBackgroundAsset: 'Season Map / Selected Event / Official Assets',
+    inspectionTemplate: 'Season Map / Rule Package / Inspection Form',
+    inspectionSection: 'Season Map / Inspection Form / Section',
+    inspectionItem: 'Season Map / Inspection Form / Item',
+  }
+
+  return locations[editorKey]
 }
 
 function DuplicateConfigDialog({
@@ -1697,9 +1767,9 @@ function SettingsEditorDrawer({
               <div className="flex items-start gap-3">
                 <Icon className="mt-1 text-primary" size={20} />
                 <div>
-                  <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Off-canvas editor</p>
+                  <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Focused editor</p>
                   <h2 id="settings-editor-title" className="mt-1 text-2xl font-semibold">{activeEditorMeta.label}</h2>
-                  <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-600 dark:text-zinc-400">{activeEditorMeta.hint}</p>
+                  <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-600 dark:text-zinc-400">Opened from the Season Map. Complete this one setup item, then return to the selected Event.</p>
                 </div>
               </div>
               <motion.button
@@ -1735,16 +1805,22 @@ function SettingsFocusPanel({
   setupBoard: OrganizerSetupBoard
   onSelect: (editor: SettingsEditorKey) => void
 }) {
-  const quickEditors = editors.filter((editor) => ['season', 'event', 'eventSeriesRule', 'weightRule', 'printBackgroundAsset'].includes(editor.key))
+  const mapQuickActions = [
+    { editorKey: 'season' as const, label: 'Season', helper: 'Racing year and active season.' },
+    { editorKey: 'event' as const, label: 'Event', helper: 'Race weekend, circuit, and dates.' },
+    { editorKey: 'eventSeriesRule' as const, label: 'Rule Package', helper: 'Event + series + grade anchor.' },
+    { editorKey: 'race' as const, label: 'Race Session', helper: 'Practice, qualifying, and race sessions.' },
+    { editorKey: 'printBackgroundAsset' as const, label: 'Official Assets', helper: 'A4 backgrounds for documents.' },
+  ]
   const phases = [...new Set(editors.map((editor) => editor.phase))]
 
   return (
     <section className="border border-zinc-200 dark:border-zinc-800">
       <div className="border-b border-zinc-200 p-4 dark:border-zinc-800">
-        <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Season setup board</p>
-        <h2 className="mt-2 text-xl font-semibold">Build the season in order</h2>
+        <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Setup command panel</p>
+        <h2 className="mt-2 text-xl font-semibold">Control the Season Map</h2>
         <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">
-          Follow the checklist from top to bottom. Each step opens one focused editor, while the season map stays visible on the right.
+          Work left to right: choose the next setup action here, inspect the selected Event in the center, then edit one item in the drawer.
         </p>
       </div>
 
@@ -1784,18 +1860,19 @@ function SettingsFocusPanel({
       </div>
 
       <div className="border-t border-zinc-200 p-4 dark:border-zinc-800">
-        <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Quick editors</p>
+        <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Season Map actions</p>
         <div className="mt-3 grid gap-2">
-          {quickEditors.map((editor) => {
+          {mapQuickActions.map((action) => {
+            const editor = editors.find((item) => item.key === action.editorKey) ?? activeEditorMeta
             const Icon = editor.icon
-            const isActive = editor.key === activeEditor
+            const isActive = action.editorKey === activeEditor
 
             return (
               <motion.button
-                key={editor.key}
+                key={action.editorKey}
                 whileTap={{ scale: 0.98 }}
                 type="button"
-                onClick={() => onSelect(editor.key)}
+                onClick={() => onSelect(action.editorKey)}
                 className={`flex min-h-11 items-center gap-3 rounded-md border px-3 py-2 text-left text-sm transition ${
                   isActive
                     ? 'border-zinc-300 border-l-2 border-l-primary bg-orange-500/5 dark:border-zinc-700 dark:border-l-primary'
@@ -1803,14 +1880,17 @@ function SettingsFocusPanel({
                 }`}
               >
                 <Icon size={17} className={isActive ? 'text-primary' : 'text-zinc-500'} />
-                <span className="font-semibold">{editor.label}</span>
+                <span>
+                  <span className="block font-semibold">{action.label}</span>
+                  <span className="mt-0.5 block text-xs leading-5 text-zinc-500">{action.helper}</span>
+                </span>
               </motion.button>
             )
           })}
         </div>
 
         <div className="mt-4 rounded-md border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-950">
-          <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Current focus</p>
+          <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Editor focus</p>
           <div className="mt-3 flex items-start gap-3">
             <activeEditorMeta.icon className="mt-1 text-primary" size={19} />
             <div>
@@ -1822,11 +1902,11 @@ function SettingsFocusPanel({
 
         <details className="mt-4 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
           <summary className="cursor-pointer list-none text-sm font-semibold">
-            All setup tools
+            All editors
             <span className="ml-2 font-mono text-xs uppercase tracking-[0.12em] text-zinc-500">advanced</span>
           </summary>
           <p className="mt-2 text-xs leading-5 text-zinc-500">
-            Use this when you need a specific editor that is not the recommended next action.
+            Use this only when you need a specific setup item outside the main Season Map flow.
           </p>
           <div className="mt-3 space-y-4">
             {phases.map((phase) => (
@@ -1907,6 +1987,9 @@ function SetupStepCard({ step, activeEditor, onSelect }: { step: OrganizerSetupS
           {step.complete}/{step.total}
         </span>
       </div>
+      <div className="mt-3 h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-800">
+        <div className="h-1.5 rounded-full bg-primary" style={{ width: `${Math.round((step.complete / step.total) * 100)}%` }} />
+      </div>
       <div className="mt-3 grid gap-2">
         {step.requirements.map((requirement) => (
           <span key={requirement.label} className="flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400">
@@ -1932,10 +2015,20 @@ function SeasonPanel({
   inspectionTemplatesByEventRule,
   seasonSeries,
   seasonSeriesGradesBySeries,
+  selectedEventId,
+  onSelectEvent,
   onEditSeason,
   onDuplicateSeason,
   onEditEvent,
   onDuplicateEvent,
+  onCreateRace,
+  onCreatePrintBackgroundAsset,
+  onCreateEventSeriesRule,
+  onCreateWeightRule,
+  onCreateBallastRule,
+  onCreateTireRule,
+  onCreateSponsorStickerAsset,
+  onCreateInspectionTemplate,
   onEditRace,
   onEditPrintBackgroundAsset,
   onEditEventSeriesRule,
@@ -1959,10 +2052,20 @@ function SeasonPanel({
   inspectionTemplatesByEventRule: Map<string, InspectionTemplateRow[]>
   seasonSeries: SeasonSeriesRow[]
   seasonSeriesGradesBySeries: Map<string, SeasonSeriesGradeRow[]>
+  selectedEventId: string | null
+  onSelectEvent: (eventId: string) => void
   onEditSeason: () => void
   onDuplicateSeason: () => void
   onEditEvent: (event: EventRow) => void
   onDuplicateEvent: (event: EventRow) => void
+  onCreateRace: (event: EventRow) => void
+  onCreatePrintBackgroundAsset: (event: EventRow) => void
+  onCreateEventSeriesRule: (event: EventRow) => void
+  onCreateWeightRule: (rule: EventSeriesRuleRow) => void
+  onCreateBallastRule: (rule: EventSeriesRuleRow) => void
+  onCreateTireRule: (rule: EventSeriesRuleRow) => void
+  onCreateSponsorStickerAsset: (rule: EventSeriesRuleRow) => void
+  onCreateInspectionTemplate: (rule: EventSeriesRuleRow) => void
   onEditRace: (race: RaceRow) => void
   onEditPrintBackgroundAsset: (asset: PrintBackgroundAssetRow) => void
   onEditEventSeriesRule: (rule: EventSeriesRuleRow) => void
@@ -1974,6 +2077,8 @@ function SeasonPanel({
   onEditInspectionSection: (section: InspectionTemplateSectionRow) => void
   onEditInspectionItem: (item: InspectionTemplateItemRow) => void
 }) {
+  const expandedEventId = getSelectedEventId(events, selectedEventId)
+
   return (
     <details className="group p-4" open={season.isActive || events.length === 0}>
       <summary className="flex cursor-pointer list-none flex-col gap-3 rounded-md border border-zinc-200 p-4 transition hover:border-zinc-400 lg:flex-row lg:items-start lg:justify-between dark:border-zinc-800 dark:hover:border-zinc-600">
@@ -2012,171 +2117,232 @@ function SeasonPanel({
         {events.length === 0 ? <p className="text-sm text-zinc-500">No events configured for this season.</p> : null}
         {events.map((event) => {
           const printBackgroundAssets = printBackgroundAssetsByEvent.get(event.eventId) ?? []
+          const rules = eventSeriesRulesByEvent.get(event.eventId) ?? []
+          const races = racesByEvent.get(event.eventId) ?? []
+          const isExpanded = event.eventId === expandedEventId
 
           return (
-          <details key={event.eventId} className="group/event border border-zinc-200 p-3 dark:border-zinc-800" open={events.length === 1}>
-            <summary className="flex cursor-pointer list-none flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-              <span>
-                <span className="font-medium">{event.eventOrder}. {event.name}</span>
-                <span className="mt-1 block text-sm text-zinc-500">{event.circuitName ?? 'No circuit'} / {formatDateRange(event.startsOn, event.endsOn)}</span>
-                <span className="mt-2 block font-mono text-xs uppercase tracking-[0.12em] text-zinc-500">
-                  {(racesByEvent.get(event.eventId) ?? []).length} race(s) / {(eventSeriesRulesByEvent.get(event.eventId) ?? []).length} rule package(s)
-                </span>
-              </span>
-              <span className="flex flex-wrap items-center gap-2">
-                <StatusBadge label={event.status} tone={event.status === 'Active' ? 'success' : 'neutral'} />
-                <span className="font-mono text-xs uppercase tracking-[0.12em] text-zinc-500 group-open/event:hidden">Expand</span>
-                <span className="hidden font-mono text-xs uppercase tracking-[0.12em] text-zinc-500 group-open/event:inline">Collapse</span>
-                <TextButton label="Edit event" onClick={() => onEditEvent(event)} />
-                <TextButton label="Duplicate event" onClick={() => onDuplicateEvent(event)} />
-              </span>
-            </summary>
-            <div className="mt-3 flex flex-wrap gap-2 border-t border-zinc-200 pt-3 dark:border-zinc-800">
-              {printBackgroundAssets.length === 0 ? <span className="text-xs text-zinc-500">No A4 background.</span> : null}
-              {printBackgroundAssets.map((asset) => (
-                <button
-                  key={asset.printBackgroundAssetId}
-                  type="button"
-                  onClick={() => onEditPrintBackgroundAsset(asset)}
-                  className="rounded-md border border-zinc-200 px-2 py-1 text-left text-xs transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600"
-                >
-                  A4 {formatOrientation(asset.orientation)} / {asset.title} / {asset.isDefault ? 'Default' : 'Optional'}
-                </button>
-              ))}
-            </div>
-            <div className="mt-3 grid gap-2">
-              {(eventSeriesRulesByEvent.get(event.eventId) ?? []).map((rule) => {
-                const templates = inspectionTemplatesByEventRule.get(rule.eventSeriesRuleId) ?? []
-                const weightRules = weightRulesByEventRule.get(rule.eventSeriesRuleId) ?? []
-                const ballastRules = ballastRulesByEventRule.get(rule.eventSeriesRuleId) ?? []
-                const tireRules = tireRulesByEventRule.get(rule.eventSeriesRuleId) ?? []
-                const sponsorStickerAssets = sponsorStickerAssetsByEventRule.get(rule.eventSeriesRuleId) ?? []
+              <div
+                key={event.eventId}
+                className={`border p-3 transition ${
+                  isExpanded
+                    ? 'border-zinc-300 border-l-2 border-l-primary bg-zinc-50 dark:border-zinc-700 dark:border-l-primary dark:bg-zinc-950'
+                    : 'border-zinc-200 dark:border-zinc-800'
+                }`}
+              >
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <button type="button" onClick={() => onSelectEvent(event.eventId)} className="min-h-11 flex-1 text-left">
+                    <span className="font-medium">Event {event.eventOrder}: {event.name}</span>
+                    <span className="mt-1 block text-sm text-zinc-500">{event.circuitName ?? 'No circuit'} / {formatDateRange(event.startsOn, event.endsOn)}</span>
+                    <span className="mt-2 block font-mono text-xs uppercase tracking-[0.12em] text-zinc-500">
+                      {rules.length} rule package(s) / {races.length} race session(s) / {printBackgroundAssets.length} A4 background(s)
+                    </span>
+                  </button>
+                  <span className="flex flex-wrap items-center gap-2">
+                    <StatusBadge label={event.status} tone={event.status === 'Active' ? 'success' : 'neutral'} />
+                    <button type="button" onClick={() => onSelectEvent(event.eventId)} className="min-h-11 rounded-md border border-zinc-200 px-3 text-xs font-semibold transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600">
+                      {isExpanded ? 'Selected' : 'View event'}
+                    </button>
+                    <TextButton label="Edit event" onClick={() => onEditEvent(event)} />
+                    <TextButton label="Duplicate event" onClick={() => onDuplicateEvent(event)} />
+                  </span>
+                </div>
 
-                return (
-                  <details key={rule.eventSeriesRuleId} className="group/rule rounded-md border border-zinc-200 p-2 dark:border-zinc-800">
-                    <summary className="flex cursor-pointer list-none flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                      <span>
-                        <span className="text-sm font-semibold">{rule.seriesName} / {rule.gradeName}</span>
-                        <span className="mt-1 block font-mono text-xs uppercase tracking-[0.12em] text-zinc-500">v{rule.version} / {rule.status}</span>
-                        <span className="mt-1 block text-xs text-zinc-500">
-                          {weightRules.length} weight / {ballastRules.length} ballast / {tireRules.length} tire / {templates.length} template
-                        </span>
-                      </span>
-                      <span className="flex flex-wrap items-center gap-2">
-                        <span className="font-mono text-xs uppercase tracking-[0.12em] text-zinc-500 group-open/rule:hidden">Expand</span>
-                        <span className="hidden font-mono text-xs uppercase tracking-[0.12em] text-zinc-500 group-open/rule:inline">Collapse</span>
-                        <TextButton label="Edit rule" onClick={() => onEditEventSeriesRule(rule)} />
-                      </span>
-                    </summary>
-                    <div className="mt-3 flex flex-wrap gap-2 border-t border-zinc-200 pt-3 dark:border-zinc-800">
-                      {weightRules.length === 0 ? <span className="text-xs text-zinc-500">No weight rule.</span> : null}
-                      {weightRules.map((weightRule) => (
-                        <button
-                          key={weightRule.weightRuleId}
-                          type="button"
-                          onClick={() => onEditWeightRule(weightRule)}
-                          className="rounded-md border border-zinc-200 px-2 py-1 text-left text-xs transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600"
-                        >
-                          Weight rule / {weightRule.name} / base {weightRule.baseWeightKg} kg
+                {isExpanded ? (
+                  <div className="mt-4 space-y-4 border-t border-zinc-200 pt-4 dark:border-zinc-800">
+                    <MapSectionHeader index="1" title="Rule Packages" description="Event + series + grade technical setup." actionLabel="Add rule package" onAction={() => onCreateEventSeriesRule(event)} />
+                    <div className="grid gap-3">
+                      {rules.length === 0 ? <p className="text-sm text-zinc-500">No rule packages yet. Add one for each series and grade running in this event.</p> : null}
+                      {rules.map((rule) => (
+                        <RulePackageCard
+                          key={rule.eventSeriesRuleId}
+                          rule={rule}
+                          readiness={getRulePackageReadiness(rule, weightRulesByEventRule, ballastRulesByEventRule, tireRulesByEventRule, sponsorStickerAssetsByEventRule, inspectionTemplatesByEventRule)}
+                          weightRules={weightRulesByEventRule.get(rule.eventSeriesRuleId) ?? []}
+                          ballastRules={ballastRulesByEventRule.get(rule.eventSeriesRuleId) ?? []}
+                          tireRules={tireRulesByEventRule.get(rule.eventSeriesRuleId) ?? []}
+                          sponsorStickerAssets={sponsorStickerAssetsByEventRule.get(rule.eventSeriesRuleId) ?? []}
+                          templates={inspectionTemplatesByEventRule.get(rule.eventSeriesRuleId) ?? []}
+                          onEditRule={onEditEventSeriesRule}
+                          onCreateWeightRule={onCreateWeightRule}
+                          onCreateBallastRule={onCreateBallastRule}
+                          onCreateTireRule={onCreateTireRule}
+                          onCreateSponsorStickerAsset={onCreateSponsorStickerAsset}
+                          onCreateInspectionTemplate={onCreateInspectionTemplate}
+                          onEditWeightRule={onEditWeightRule}
+                          onEditBallastRule={onEditBallastRule}
+                          onEditTireRule={onEditTireRule}
+                          onEditSponsorStickerAsset={onEditSponsorStickerAsset}
+                          onEditInspectionTemplate={onEditInspectionTemplate}
+                          onEditInspectionSection={onEditInspectionSection}
+                          onEditInspectionItem={onEditInspectionItem}
+                        />
+                      ))}
+                    </div>
+
+                    <MapSectionHeader index="2" title="Race Sessions" description="Practice, qualifying, and race sessions for timing/results." actionLabel="Add race session" onAction={() => onCreateRace(event)} />
+                    <div className="flex flex-wrap gap-2">
+                      {races.length === 0 ? <span className="text-sm text-zinc-500">No race sessions yet.</span> : null}
+                      {races.map((race) => (
+                        <button key={race.raceId} type="button" onClick={() => onEditRace(race)} className="rounded-md border border-zinc-200 px-3 py-2 text-left text-xs font-semibold transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600">
+                          {race.raceOrder}. {race.name} / {race.sessionType}
                         </button>
                       ))}
                     </div>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {ballastRules.length === 0 ? <span className="text-xs text-zinc-500">No ballast rule.</span> : null}
-                      {ballastRules.map((ballastRule) => (
-                        <button
-                          key={ballastRule.ballastRuleId}
-                          type="button"
-                          onClick={() => onEditBallastRule(ballastRule)}
-                          className="rounded-md border border-zinc-200 px-2 py-1 text-left text-xs transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600"
-                        >
-                          Success ballast / {ballastRule.ballastType} / max {ballastRule.maxBallastKg ?? 'none'} kg
+
+                    <MapSectionHeader index="3" title="Official Assets" description="A4 print backgrounds for official document output." actionLabel="Add A4 background" onAction={() => onCreatePrintBackgroundAsset(event)} />
+                    <div className="flex flex-wrap gap-2">
+                      {printBackgroundAssets.length === 0 ? <span className="text-sm text-zinc-500">No A4 background yet.</span> : null}
+                      {printBackgroundAssets.map((asset) => (
+                        <button key={asset.printBackgroundAssetId} type="button" onClick={() => onEditPrintBackgroundAsset(asset)} className="rounded-md border border-zinc-200 px-3 py-2 text-left text-xs font-semibold transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600">
+                          A4 {formatOrientation(asset.orientation)} / {asset.title} / {asset.isDefault ? 'Default' : 'Optional'}
                         </button>
                       ))}
                     </div>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {tireRules.length === 0 ? <span className="text-xs text-zinc-500">No tire rule.</span> : null}
-                      {tireRules.map((tireRule) => (
-                        <button
-                          key={tireRule.tireRuleId}
-                          type="button"
-                          onClick={() => onEditTireRule(tireRule)}
-                          className="rounded-md border border-zinc-200 px-2 py-1 text-left text-xs transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600"
-                        >
-                          Tire rule / {tireRule.tireBrand}{tireRule.tireModel ? ` ${tireRule.tireModel}` : ''} / {tireRule.isAllowed ? 'Allowed' : 'Disallowed'}
-                        </button>
-                      ))}
-                    </div>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {sponsorStickerAssets.length === 0 ? <span className="text-xs text-zinc-500">No sponsor sticker.</span> : null}
-                      {sponsorStickerAssets.map((asset) => (
-                        <button
-                          key={asset.sponsorStickerAssetId}
-                          type="button"
-                          onClick={() => onEditSponsorStickerAsset(asset)}
-                          className="rounded-md border border-zinc-200 px-2 py-1 text-left text-xs transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600"
-                        >
-                          Sponsor sticker / {asset.title} / {asset.filename}
-                        </button>
-                      ))}
-                    </div>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {templates.length === 0 ? <span className="text-xs text-zinc-500">No inspection template.</span> : null}
-                      {templates.map((template) => (
-                        <button
-                          key={template.templateId}
-                          type="button"
-                          onClick={() => onEditInspectionTemplate(template)}
-                          className="rounded-md border border-zinc-200 px-2 py-1 text-left text-xs transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600"
-                        >
-                          Inspection template / {template.name} / v{template.version} / {template.isActive ? 'Active' : 'Inactive'}
-                        </button>
-                      ))}
-                    </div>
-                    {templates.map((template) => (
-                      <div key={`${template.templateId}-sections`} className="mt-2 flex flex-wrap gap-2">
-                        {template.sections.map((section) => (
-                          <button
-                            key={section.sectionId}
-                            type="button"
-                            onClick={() => onEditInspectionSection(section)}
-                            className="rounded-md border border-zinc-200 px-2 py-1 text-left text-xs transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600"
-                          >
-                            Inspection section / {section.title} / {section.items.length} item(s)
-                          </button>
-                        ))}
-                        {template.sections.flatMap((section) => section.items).map((item) => (
-                          <button
-                            key={item.itemId}
-                            type="button"
-                            onClick={() => onEditInspectionItem(item)}
-                            className="rounded-md border border-zinc-200 px-2 py-1 text-left text-xs transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600"
-                          >
-                            Inspection item / {item.labelTh} / {item.inputType}
-                          </button>
-                        ))}
-                      </div>
-                    ))}
-                  </details>
-                )
-              })}
-              {(racesByEvent.get(event.eventId) ?? []).map((race) => (
-                <button
-                  key={race.raceId}
-                  type="button"
-                  onClick={() => onEditRace(race)}
-                  className="rounded-md border border-zinc-200 px-2 py-1 text-left text-xs font-semibold transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600"
-                >
-                  {race.raceOrder}. {race.name} / {race.sessionType}
-                </button>
-              ))}
-              {(racesByEvent.get(event.eventId) ?? []).length === 0 ? <span className="text-sm text-zinc-500">No races.</span> : null}
-            </div>
-          </details>
+                  </div>
+                ) : null}
+              </div>
           )
         })}
       </div>
     </details>
+  )
+}
+
+function MapSectionHeader({ index, title, description, actionLabel, onAction }: { index: string; title: string; description: string; actionLabel: string; onAction: () => void }) {
+  return (
+    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+      <div>
+        <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">{index}. {title}</p>
+        <p className="mt-1 text-sm text-zinc-500">{description}</p>
+      </div>
+      <TextButton label={actionLabel} onClick={onAction} />
+    </div>
+  )
+}
+
+function RulePackageCard({
+  rule,
+  readiness,
+  weightRules,
+  ballastRules,
+  tireRules,
+  sponsorStickerAssets,
+  templates,
+  onEditRule,
+  onCreateWeightRule,
+  onCreateBallastRule,
+  onCreateTireRule,
+  onCreateSponsorStickerAsset,
+  onCreateInspectionTemplate,
+  onEditWeightRule,
+  onEditBallastRule,
+  onEditTireRule,
+  onEditSponsorStickerAsset,
+  onEditInspectionTemplate,
+  onEditInspectionSection,
+  onEditInspectionItem,
+}: {
+  rule: EventSeriesRuleRow
+  readiness: RulePackageReadiness
+  weightRules: WeightRuleRow[]
+  ballastRules: BallastRuleRow[]
+  tireRules: TireRuleRow[]
+  sponsorStickerAssets: SponsorStickerAssetRow[]
+  templates: InspectionTemplateRow[]
+  onEditRule: (rule: EventSeriesRuleRow) => void
+  onCreateWeightRule: (rule: EventSeriesRuleRow) => void
+  onCreateBallastRule: (rule: EventSeriesRuleRow) => void
+  onCreateTireRule: (rule: EventSeriesRuleRow) => void
+  onCreateSponsorStickerAsset: (rule: EventSeriesRuleRow) => void
+  onCreateInspectionTemplate: (rule: EventSeriesRuleRow) => void
+  onEditWeightRule: (rule: WeightRuleRow) => void
+  onEditBallastRule: (rule: BallastRuleRow) => void
+  onEditTireRule: (rule: TireRuleRow) => void
+  onEditSponsorStickerAsset: (asset: SponsorStickerAssetRow) => void
+  onEditInspectionTemplate: (template: InspectionTemplateRow) => void
+  onEditInspectionSection: (section: InspectionTemplateSectionRow) => void
+  onEditInspectionItem: (item: InspectionTemplateItemRow) => void
+}) {
+  return (
+    <div className="rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-sm font-semibold">{rule.seriesName} / {rule.gradeName}</p>
+            <StatusBadge label={readiness.ready ? 'Ready' : 'Missing setup'} tone={readiness.ready ? 'success' : 'warning'} />
+          </div>
+          <p className="mt-1 font-mono text-xs uppercase tracking-[0.12em] text-zinc-500">Rule package v{rule.version} / {rule.status}</p>
+          {readiness.missingLabels.length > 0 ? <p className="mt-1 text-xs text-amber-700 dark:text-amber-400">Missing: {readiness.missingLabels.join(', ')}</p> : null}
+        </div>
+        <TextButton label="Edit package" onClick={() => onEditRule(rule)} />
+      </div>
+
+      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+        <RuleAssetGroup title="Weight Rule" emptyLabel="Missing weight rule" onCreate={() => onCreateWeightRule(rule)}>
+          {weightRules.map((weightRule) => (
+            <AssetPill key={weightRule.weightRuleId} label={`${weightRule.name} / base ${weightRule.baseWeightKg} kg`} onClick={() => onEditWeightRule(weightRule)} />
+          ))}
+        </RuleAssetGroup>
+        <RuleAssetGroup title="Success Ballast" emptyLabel="Missing success ballast" onCreate={() => onCreateBallastRule(rule)}>
+          {ballastRules.map((ballastRule) => (
+            <AssetPill key={ballastRule.ballastRuleId} label={`${ballastRule.ballastType} / max ${ballastRule.maxBallastKg ?? 'none'} kg`} onClick={() => onEditBallastRule(ballastRule)} />
+          ))}
+        </RuleAssetGroup>
+        <RuleAssetGroup title="Tire Rule" emptyLabel="Missing tire rule" onCreate={() => onCreateTireRule(rule)}>
+          {tireRules.map((tireRule) => (
+            <AssetPill key={tireRule.tireRuleId} label={`${tireRule.tireBrand}${tireRule.tireModel ? ` ${tireRule.tireModel}` : ''} / ${tireRule.isAllowed ? 'Allowed' : 'Disallowed'}`} onClick={() => onEditTireRule(tireRule)} />
+          ))}
+        </RuleAssetGroup>
+        <RuleAssetGroup title="Sponsor Sticker" emptyLabel="Missing sponsor sticker" onCreate={() => onCreateSponsorStickerAsset(rule)}>
+          {sponsorStickerAssets.map((asset) => (
+            <AssetPill key={asset.sponsorStickerAssetId} label={`${asset.title} / ${asset.filename}`} onClick={() => onEditSponsorStickerAsset(asset)} />
+          ))}
+        </RuleAssetGroup>
+      </div>
+
+      <div className="mt-3 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold">Inspection Form</p>
+            <p className="mt-1 text-xs text-zinc-500">Template, sections, and field items for scrutineering.</p>
+          </div>
+          {templates.length === 0 ? <TextButton label="Missing inspection form" onClick={() => onCreateInspectionTemplate(rule)} /> : null}
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {templates.map((template) => (
+            <AssetPill key={template.templateId} label={`${template.name} / v${template.version} / ${template.isActive ? 'Active' : 'Inactive'}`} onClick={() => onEditInspectionTemplate(template)} />
+          ))}
+          {templates.flatMap((template) => template.sections).map((section) => (
+            <AssetPill key={section.sectionId} label={`Section / ${section.title} / ${section.items.length} item(s)`} onClick={() => onEditInspectionSection(section)} />
+          ))}
+          {templates.flatMap((template) => template.sections).flatMap((section) => section.items).map((item) => (
+            <AssetPill key={item.itemId} label={`Item / ${item.labelTh} / ${item.inputType}`} onClick={() => onEditInspectionItem(item)} />
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function RuleAssetGroup({ title, emptyLabel, onCreate, children }: { title: string; emptyLabel: string; onCreate: () => void; children: React.ReactNode }) {
+  const hasChildren = Array.isArray(children) ? children.length > 0 : Boolean(children)
+
+  return (
+    <div className="rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
+      <p className="text-sm font-semibold">{title}</p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {hasChildren ? children : <TextButton label={emptyLabel} onClick={onCreate} />}
+      </div>
+    </div>
+  )
+}
+
+function AssetPill({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} className="rounded-md border border-zinc-200 px-2 py-1 text-left text-xs font-semibold transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600">
+      {label}
+    </button>
   )
 }
 
@@ -2262,10 +2428,12 @@ function SummaryCard({ label, value }: { label: string; value: number }) {
   )
 }
 
-function StatusBadge({ label, tone }: { label: string; tone: 'success' | 'neutral' }) {
+function StatusBadge({ label, tone }: { label: string; tone: 'success' | 'warning' | 'neutral' }) {
   const className = tone === 'success'
     ? 'border-emerald-200 bg-emerald-500/10 text-emerald-700 dark:border-emerald-900/60 dark:text-emerald-400'
-    : 'border-zinc-200 text-zinc-600 dark:border-zinc-800 dark:text-zinc-400'
+    : tone === 'warning'
+      ? 'border-amber-200 bg-amber-500/10 text-amber-700 dark:border-amber-900/60 dark:text-amber-400'
+      : 'border-zinc-200 text-zinc-600 dark:border-zinc-800 dark:text-zinc-400'
 
   return <span className={`rounded-md border px-2 py-1 text-xs font-semibold ${className}`}>{label}</span>
 }
