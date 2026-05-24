@@ -1,17 +1,9 @@
 import { motion } from 'framer-motion'
-import { RefreshCcw, Send, ShieldCheck, UserCheck, UserMinus, Users, type LucideIcon } from 'lucide-react'
+import { Building2, RefreshCcw, Save, Send, ShieldCheck, UserCheck, UserMinus, Users, type LucideIcon } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react'
 import { useAuth } from '@/auth/useAuth'
 import { supabase } from '@/lib/supabase'
-
-type TeamInfo = {
-  id: string
-  teamName: string
-  managerName: string | null
-  managerPhone: string | null
-  address: string | null
-  postcode: string | null
-}
+import { createTeamInfoForm, createTeamInfoPayload, getTeamInfoCompletionLabel, type TeamInfo, type TeamInfoForm } from './teamPageHelpers'
 
 type TeamMembership = {
   id: string
@@ -67,7 +59,9 @@ export function TeamPage() {
   const [relationships, setRelationships] = useState<TeamRelationships>(emptyRelationships)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [savingTeamInfo, setSavingTeamInfo] = useState(false)
   const [email, setEmail] = useState('')
+  const [teamInfoForm, setTeamInfoForm] = useState<TeamInfoForm>(() => createTeamInfoForm())
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
   const isTeamManager = relationships.isTeamManager || roles.includes('TEAM_MANAGER')
@@ -87,9 +81,12 @@ export function TeamPage() {
 
     if (error) {
       setRelationships(emptyRelationships)
+      setTeamInfoForm(createTeamInfoForm())
       setError(error.message)
     } else {
-      setRelationships(normalizeRelationships(data))
+      const nextRelationships = normalizeRelationships(data)
+      setRelationships(nextRelationships)
+      setTeamInfoForm(createTeamInfoForm(nextRelationships.myTeam))
     }
 
     setLoading(false)
@@ -134,6 +131,30 @@ export function TeamPage() {
     }
 
     setSubmitting(false)
+  }
+
+  async function handleTeamInfoSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setSavingTeamInfo(true)
+    setError(null)
+    setNotice(null)
+
+    if (!teamInfoForm.teamName.trim()) {
+      setError('Team name is required.')
+      setSavingTeamInfo(false)
+      return
+    }
+
+    const { error } = await supabase.rpc('complete_team_manager_onboarding', createTeamInfoPayload(teamInfoForm))
+
+    if (error) {
+      setError(error.message)
+    } else {
+      setNotice('Team Info updated.')
+      await loadRelationships()
+    }
+
+    setSavingTeamInfo(false)
   }
 
   async function respondToInvitation(invitationId: string, accept: boolean) {
@@ -226,61 +247,65 @@ export function TeamPage() {
       {notice ? <Alert tone="success" message={notice} /> : null}
 
       <section className="mt-6 grid gap-4 xl:grid-cols-[0.85fr_1.15fr]">
-        <motion.article
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.16, delay: 0.04 }}
-          className="border border-zinc-200 p-5 dark:border-zinc-800"
-        >
-          <div className="flex items-start gap-3">
-            <Send className="mt-1 text-primary" size={20} />
-            <div>
-              <h2 className="text-xl font-semibold">Create Request</h2>
-              <p className="mt-2 text-zinc-600 dark:text-zinc-400">{formDescription}</p>
+        <div className="space-y-4">
+          {isTeamManager ? <TeamInfoEditor form={teamInfoForm} loading={loading} saving={savingTeamInfo} onChange={setTeamInfoForm} onSubmit={handleTeamInfoSubmit} /> : null}
+
+          <motion.article
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.16, delay: 0.04 }}
+            className="border border-zinc-200 p-5 dark:border-zinc-800"
+          >
+            <div className="flex items-start gap-3">
+              <Send className="mt-1 text-primary" size={20} />
+              <div>
+                <h2 className="text-xl font-semibold">Create Request</h2>
+                <p className="mt-2 text-zinc-600 dark:text-zinc-400">{formDescription}</p>
+              </div>
             </div>
-          </div>
 
-          <form className="mt-5 space-y-4" onSubmit={handleSubmit}>
-            <label className="block text-sm font-medium" htmlFor="relationship-email">
-              {formLabel}
-            </label>
-            <input
-              id="relationship-email"
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="name@example.com"
-              className="min-h-11 w-full rounded-md border border-zinc-300 bg-zinc-50 px-3 text-base outline-none transition focus:border-primary dark:border-zinc-800 dark:bg-zinc-950"
-              required
-            />
-            <motion.button
-              whileTap={{ scale: 0.98 }}
-              type="submit"
-              disabled={loading || submitting || (!isTeamManager && !isCompetitor)}
-              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-            >
-              <Send size={16} />
-              {isTeamManager ? 'Invite Competitor' : 'Request Team Manager'}
-            </motion.button>
-          </form>
+            <form className="mt-5 space-y-4" onSubmit={handleSubmit}>
+              <label className="block text-sm font-medium" htmlFor="relationship-email">
+                {formLabel}
+              </label>
+              <input
+                id="relationship-email"
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="name@example.com"
+                className="min-h-11 w-full rounded-md border border-zinc-300 bg-zinc-50 px-3 text-base outline-none transition focus:border-primary dark:border-zinc-800 dark:bg-zinc-950"
+                required
+              />
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                type="submit"
+                disabled={loading || submitting || (!isTeamManager && !isCompetitor)}
+                className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+              >
+                <Send size={16} />
+                {isTeamManager ? 'Invite Competitor' : 'Request Team Manager'}
+              </motion.button>
+            </form>
 
-          <div className="mt-6 border-t border-zinc-200 pt-5 dark:border-zinc-800">
-            <p className="font-mono text-xs uppercase tracking-[0.16em] text-zinc-500">Current scope</p>
-            {relationships.myTeam ? (
-              <div className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
-                <p className="font-medium text-zinc-950 dark:text-zinc-50">{relationships.myTeam.teamName}</p>
-                <p className="mt-1">{relationships.myTeam.managerName ?? 'Team Manager name not set'}</p>
-              </div>
-            ) : primaryMembership ? (
-              <div className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
-                <p className="font-medium text-zinc-950 dark:text-zinc-50">{primaryMembership.teamName}</p>
-                <p className="mt-1">Accepted Team Manager relationship</p>
-              </div>
-            ) : (
-              <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">No active team relationship yet.</p>
-            )}
-          </div>
-        </motion.article>
+            <div className="mt-6 border-t border-zinc-200 pt-5 dark:border-zinc-800">
+              <p className="font-mono text-xs uppercase tracking-[0.16em] text-zinc-500">Current scope</p>
+              {relationships.myTeam ? (
+                <div className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
+                  <p className="font-medium text-zinc-950 dark:text-zinc-50">{relationships.myTeam.teamName}</p>
+                  <p className="mt-1">{relationships.myTeam.managerName ?? 'Team Manager name not set'}</p>
+                </div>
+              ) : primaryMembership ? (
+                <div className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
+                  <p className="font-medium text-zinc-950 dark:text-zinc-50">{primaryMembership.teamName}</p>
+                  <p className="mt-1">Accepted Team Manager relationship</p>
+                </div>
+              ) : (
+                <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">No active team relationship yet.</p>
+              )}
+            </div>
+          </motion.article>
+        </div>
 
         <div className="space-y-4">
           <RelationshipPanel
@@ -331,6 +356,79 @@ export function TeamPage() {
         </div>
       </section>
     </div>
+  )
+}
+
+function TeamInfoEditor({ form, loading, saving, onChange, onSubmit }: { form: TeamInfoForm; loading: boolean; saving: boolean; onChange: (form: TeamInfoForm) => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void }) {
+  function updateField(field: keyof TeamInfoForm, value: string) {
+    onChange({ ...form, [field]: value })
+  }
+
+  return (
+    <motion.form
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.16, delay: 0.03 }}
+      onSubmit={onSubmit}
+      className="border border-zinc-200 p-5 dark:border-zinc-800"
+    >
+      <div className="flex flex-col gap-3 border-b border-zinc-200 pb-4 sm:flex-row sm:items-start sm:justify-between dark:border-zinc-800">
+        <div className="flex items-start gap-3">
+          <Building2 className="mt-1 text-primary" size={20} />
+          <div>
+            <h2 className="text-xl font-semibold">Team Info</h2>
+            <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">Keep official team details current for Entry Form prefills and team documents.</p>
+          </div>
+        </div>
+        <span className="inline-flex min-h-8 items-center rounded-md border border-zinc-200 px-3 font-mono text-xs uppercase tracking-[0.12em] text-zinc-500 dark:border-zinc-800">
+          {getTeamInfoCompletionLabel(form)}
+        </span>
+      </div>
+
+      <div className="mt-5 grid gap-4 md:grid-cols-2">
+        <TeamTextField label="Team Name" value={form.teamName} onChange={(value) => updateField('teamName', value)} required />
+        <TeamTextField label="Manager Name" value={form.managerName} onChange={(value) => updateField('managerName', value)} />
+        <TeamTextField label="Manager Mobile No." value={form.managerPhone} onChange={(value) => updateField('managerPhone', value)} inputMode="tel" />
+        <TeamTextField label="Postcode" value={form.postcode} onChange={(value) => updateField('postcode', value)} inputMode="numeric" />
+        <label className="block md:col-span-2">
+          <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">Document Address</span>
+          <textarea
+            value={form.address}
+            onChange={(event) => updateField('address', event.target.value)}
+            rows={3}
+            className="mt-2 w-full rounded-md border border-zinc-300 bg-zinc-50 px-3 py-3 text-base outline-none transition focus:border-primary dark:border-zinc-800 dark:bg-zinc-950"
+          />
+        </label>
+      </div>
+
+      <div className="mt-5 flex justify-end border-t border-zinc-200 pt-4 dark:border-zinc-800">
+        <motion.button
+          whileTap={{ scale: 0.98 }}
+          type="submit"
+          disabled={loading || saving}
+          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+        >
+          <Save size={16} />
+          {saving ? 'Saving Team Info' : 'Save Team Info'}
+        </motion.button>
+      </div>
+    </motion.form>
+  )
+}
+
+function TeamTextField({ label, value, onChange, required = false, inputMode }: { label: string; value: string; onChange: (value: string) => void; required?: boolean; inputMode?: 'text' | 'tel' | 'numeric' }) {
+  return (
+    <label className="block">
+      <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">{label}</span>
+      <input
+        type="text"
+        inputMode={inputMode}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        required={required}
+        className="mt-2 min-h-11 w-full rounded-md border border-zinc-300 bg-zinc-50 px-3 text-base outline-none transition focus:border-primary dark:border-zinc-800 dark:bg-zinc-950"
+      />
+    </label>
   )
 }
 

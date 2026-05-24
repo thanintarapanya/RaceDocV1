@@ -12,10 +12,17 @@ import {
   groupEventSeriesRulesByEvent,
   groupInspectionTemplatesByEventRule,
   groupWeightRulesByEventRule,
+  createEmptyScopeFilter,
   createOrganizerSetupBoard,
+  eventNeedsAttention,
+  filterByQuery,
+  getScopeFilterSummary,
   getRulePackageReadiness,
   getEligibleGradesForEventSeries,
+  hasActiveScopeFilter,
   normalizeOrganizerSettingsPayload,
+  raceEventNeedsAttention,
+  seasonNeedsAttention,
   type BallastRuleRow,
   type BallastType,
   type CircuitOption,
@@ -29,6 +36,7 @@ import {
   type InspectionTemplateSectionRow,
   type OrganizerPayload,
   type OrganizerSetupBoard,
+  type ScopeFilter,
   type RulePackageReadiness,
   type PrintBackgroundAssetRow,
   type RaceRow,
@@ -279,11 +287,6 @@ type OrganizerScopeTab = {
   description: string
 }
 
-type ScopeFilter = {
-  query: string
-  needsAttentionOnly: boolean
-}
-
 const organizerScopeTabs: OrganizerScopeTab[] = [
   { key: 'global', label: 'Global Library', description: 'Reusable master data.' },
   { key: 'season', label: 'Season Setup', description: 'Racing year setup.' },
@@ -337,7 +340,7 @@ export function OrganizerSettingsPage() {
   const [raceForm, setRaceForm] = useState<RaceForm>(() => createEmptyRaceForm())
   const [activeEditor, setActiveEditor] = useState<SettingsEditorKey>('season')
   const [activeScope, setActiveScope] = useState<OrganizerScope>('season')
-  const [scopeFilter, setScopeFilter] = useState<ScopeFilter>({ query: '', needsAttentionOnly: false })
+  const [scopeFilter, setScopeFilter] = useState<ScopeFilter>(() => createEmptyScopeFilter())
   const [editorOpen, setEditorOpen] = useState(false)
   const [duplicateDraft, setDuplicateDraft] = useState<DuplicateDraft | null>(null)
 
@@ -1787,6 +1790,8 @@ function ScopeSwitcher({ activeScope, onSelectScope }: { activeScope: OrganizerS
 }
 
 function ScopeToolbar({ filter, onChange }: { filter: ScopeFilter; onChange: (filter: ScopeFilter) => void }) {
+  const hasActiveFilter = hasActiveScopeFilter(filter)
+
   return (
     <div className="grid gap-3 border border-zinc-200 p-4 md:grid-cols-[1fr_auto] md:items-end dark:border-zinc-800">
       <label className="block">
@@ -1799,15 +1804,21 @@ function ScopeToolbar({ filter, onChange }: { filter: ScopeFilter; onChange: (fi
           className="mt-2 min-h-11 w-full rounded-md border border-zinc-300 bg-zinc-50 px-3 text-base outline-none transition focus:border-primary dark:border-zinc-800 dark:bg-zinc-950"
         />
       </label>
-      <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-md border border-zinc-200 px-3 text-sm font-semibold dark:border-zinc-800">
-        <input
-          type="checkbox"
-          checked={filter.needsAttentionOnly}
-          onChange={(event) => onChange({ ...filter, needsAttentionOnly: event.target.checked })}
-          className="size-4 accent-primary"
-        />
-        Needs attention only
-      </label>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-md border border-zinc-200 px-3 text-sm font-semibold dark:border-zinc-800">
+          <input
+            type="checkbox"
+            checked={filter.needsAttentionOnly}
+            onChange={(event) => onChange({ ...filter, needsAttentionOnly: event.target.checked })}
+            className="size-4 accent-primary"
+          />
+          Needs attention only
+        </label>
+        {hasActiveFilter ? <TextButton label="Clear filters" onClick={() => onChange(createEmptyScopeFilter())} /> : null}
+      </div>
+      <div className={`md:col-span-2 rounded-md border px-3 py-2 text-sm ${hasActiveFilter ? 'border-amber-200 bg-amber-500/10 text-amber-700 dark:border-amber-900/60 dark:text-amber-400' : 'border-zinc-200 text-zinc-500 dark:border-zinc-800'}`}>
+        {getScopeFilterSummary(filter)}
+      </div>
     </div>
   )
 }
@@ -1839,12 +1850,6 @@ function ScopeBoardHeader({ scope, title, description, actionLabel, onAction }: 
       {actionLabel && onAction ? <PrimaryActionButton label={actionLabel} onClick={onAction} /> : null}
     </div>
   )
-}
-
-function filterByQuery<T>(items: T[], query: string, getValues: (item: T) => string[]) {
-  const normalizedQuery = query.trim().toLowerCase()
-  if (!normalizedQuery) return items
-  return items.filter((item) => getValues(item).some((value) => value.toLowerCase().includes(normalizedQuery)))
 }
 
 function ScopeEmptyMessage({ filter, defaultMessage }: { filter: ScopeFilter; defaultMessage: string }) {
@@ -1991,7 +1996,7 @@ function RuleScopeBoard(props: ScopeBoardProps & { event: EventRow | null; event
 
 function RaceScopeBoard({ event, events, filter, racesByEvent, onCreateRace, onEditRace }: ScopeBoardProps & { event: EventRow | null; events: EventRow[] }) {
   const filteredEvents = filterByQuery(events, filter.query, (eventRow) => [eventRow.name, eventRow.circuitName ?? '', eventRow.status, String(eventRow.eventOrder), ...(racesByEvent.get(eventRow.eventId) ?? []).flatMap((race) => [race.name, race.sessionType, String(race.raceOrder)])])
-    .filter((eventRow) => !filter.needsAttentionOnly || (racesByEvent.get(eventRow.eventId) ?? []).length === 0)
+    .filter((eventRow) => !filter.needsAttentionOnly || raceEventNeedsAttention(eventRow, racesByEvent))
 
   return (
     <>
@@ -2010,15 +2015,6 @@ function RaceScopeBoard({ event, events, filter, racesByEvent, onCreateRace, onE
       </div>
     </>
   )
-}
-
-function seasonNeedsAttention(season: SeasonRow, seasonSeriesBySeason: Map<string, SeasonSeriesRow[]>, seasonSeriesGradesBySeries: Map<string, SeasonSeriesGradeRow[]>) {
-  const seasonSeries = seasonSeriesBySeason.get(season.seasonId) ?? []
-  return seasonSeries.length === 0 || seasonSeries.some((series) => (seasonSeriesGradesBySeries.get(series.seasonSeriesId) ?? []).length === 0)
-}
-
-function eventNeedsAttention(event: EventRow, printBackgroundAssetsByEvent: Map<string, PrintBackgroundAssetRow[]>) {
-  return !event.circuitId || (printBackgroundAssetsByEvent.get(event.eventId) ?? []).length === 0
 }
 
 function ScopeCard({ scope, title, description, statusLabel, actionLabel, onAction, children }: { scope: OrganizerScope; title: string; description: string; statusLabel: string; actionLabel?: string; onAction?: () => void; children?: React.ReactNode }) {

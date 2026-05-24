@@ -4,13 +4,11 @@ import {
   ClipboardCheck,
   FilePenLine,
   FileText,
-  Gauge,
   History,
   HeartPulse,
   LayoutDashboard,
   Scale,
   ScrollText,
-  Settings,
   ShieldCheck,
   Trophy,
   Users,
@@ -45,8 +43,6 @@ export const adminNavItems: AppNavItem[] = [
 
 export const settingsNavItems: AppNavItem[] = [
   { label: 'User & Role', path: '/settings/user-roles', icon: ShieldCheck },
-  { label: 'Profile', path: '/settings/profile', icon: Settings },
-  { label: 'Privacy', path: '/settings/privacy', icon: Gauge },
 ]
 
 const elevatedRoles: RoleCode[] = ['ADMIN', 'SECRETARY']
@@ -91,7 +87,7 @@ export function getNavigationItems(roles: RoleCode[]) {
     ...baseNavItems,
     ...scrutineerReportItem,
     ...adminOnlyItems,
-    ...(canSeeAdminNavigation(roles) ? settingsNavItems : settingsNavItems.slice(1)),
+    ...(canSeeAdminNavigation(roles) ? settingsNavItems : []),
   ]
 }
 

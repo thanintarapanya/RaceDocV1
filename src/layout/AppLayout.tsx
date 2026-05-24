@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { Bell, LogOut, Menu, X } from 'lucide-react'
+import { Bell, Gauge, LogOut, Menu, Settings, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/auth/useAuth'
@@ -308,6 +308,10 @@ function UserPanel({
     <div className="relative border border-zinc-200 p-3 dark:border-zinc-800">
       <p className="truncate text-sm font-medium">{displayName}</p>
       <p className="mt-1 font-mono text-xs uppercase tracking-[0.12em] text-zinc-500">{roleLabel}</p>
+      <div className="mt-4 grid gap-2 border-t border-zinc-200 pt-3 dark:border-zinc-800">
+        <AccountLink to="/settings/profile" label="Profile" icon={<Settings size={16} />} />
+        <AccountLink to="/settings/privacy" label="Privacy" icon={<Gauge size={16} />} />
+      </div>
       {!hideNotifications ? (
         <>
           <div className="mt-4">
@@ -335,6 +339,24 @@ function UserPanel({
         <LogOut size={16} />
       </motion.button>
     </div>
+  )
+}
+
+function AccountLink({ to, label, icon }: { to: string; label: string; icon: React.ReactNode }) {
+  return (
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        `flex min-h-10 items-center justify-between rounded-md border px-3 text-sm font-medium transition ${
+          isActive
+            ? 'border-primary text-zinc-950 dark:text-zinc-50'
+            : 'border-zinc-200 text-zinc-600 hover:text-zinc-950 dark:border-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-50'
+        }`
+      }
+    >
+      <span>{label}</span>
+      {icon}
+    </NavLink>
   )
 }
 

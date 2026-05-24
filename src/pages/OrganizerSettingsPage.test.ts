@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import {
+  createEmptyScopeFilter,
   createOrganizerSetupBoard,
+  eventNeedsAttention,
+  filterByQuery,
+  getScopeFilterSummary,
   getEligibleGradesForEventSeries,
   getRulePackageReadiness,
   getSelectedEventId,
@@ -13,7 +17,10 @@ import {
   groupSponsorStickerAssetsByEventRule,
   groupTireRulesByEventRule,
   groupWeightRulesByEventRule,
+  hasActiveScopeFilter,
   normalizeOrganizerSettingsPayload,
+  raceEventNeedsAttention,
+  seasonNeedsAttention,
 } from './organizerSettingsHelpers'
 import type { OrganizerPayload } from './organizerSettingsHelpers'
 
@@ -195,6 +202,71 @@ describe('OrganizerSettingsPage helpers', () => {
     expect(getSelectedEventId(events, 'event-2')).toBe('event-2')
     expect(getSelectedEventId(events, 'missing-event')).toBe('event-1')
     expect(getSelectedEventId([], 'event-2')).toBeNull()
+  })
+
+  it('filters organizer scope rows by normalized query values', () => {
+    const rows = [
+      { name: 'Chang International Circuit', country: 'Thailand' },
+      { name: 'Sepang International Circuit', country: 'Malaysia' },
+    ]
+
+    expect(filterByQuery(rows, ' chang ', (row) => [row.name, row.country]).map((row) => row.name)).toEqual(['Chang International Circuit'])
+    expect(filterByQuery(rows, 'MALAYSIA', (row) => [row.name, row.country]).map((row) => row.name)).toEqual(['Sepang International Circuit'])
+    expect(filterByQuery(rows, '', (row) => [row.name])).toBe(rows)
+  })
+
+  it('summarizes active scope filters for the toolbar', () => {
+    expect(createEmptyScopeFilter()).toEqual({ query: '', needsAttentionOnly: false })
+    expect(hasActiveScopeFilter(createEmptyScopeFilter())).toBe(false)
+    expect(getScopeFilterSummary(createEmptyScopeFilter())).toBe('Showing all settings')
+
+    const queryFilter = { query: '  Event 1  ', needsAttentionOnly: false }
+    expect(hasActiveScopeFilter(queryFilter)).toBe(true)
+    expect(getScopeFilterSummary(queryFilter)).toBe('Search: Event 1')
+
+    const combinedFilter = { query: 'Series', needsAttentionOnly: true }
+    expect(hasActiveScopeFilter(combinedFilter)).toBe(true)
+    expect(getScopeFilterSummary(combinedFilter)).toBe('Search: Series / Needs attention')
+  })
+
+  it('flags seasons missing series or grade links as attention items', () => {
+    const completeSeason = { seasonId: 'season-1', organizationId: 'org-1', name: '2026 Season', year: 2026, status: 'Active' as const, isActive: true, activatedAt: '2026-01-01' }
+    const missingGradeSeason = { ...completeSeason, seasonId: 'season-2', name: '2027 Season', year: 2027 }
+    const emptySeason = { ...completeSeason, seasonId: 'season-3', name: '2028 Season', year: 2028 }
+    const seriesBySeason = groupSeasonSeriesBySeason([
+      { seasonSeriesId: 'ss-1', seasonId: 'season-1', seriesRaceId: 'series-1', seriesName: 'Siam Series', isActive: true },
+      { seasonSeriesId: 'ss-2', seasonId: 'season-2', seriesRaceId: 'series-1', seriesName: 'Siam Series', isActive: true },
+    ])
+    const gradesBySeries = groupSeasonSeriesGradesBySeries([
+      { seasonSeriesGradeId: 'ssg-1', seasonSeriesId: 'ss-1', seasonId: 'season-1', seriesRaceId: 'series-1', gradeId: 'grade-pro', gradeName: 'PRO', isActive: true },
+    ])
+
+    expect(seasonNeedsAttention(completeSeason, seriesBySeason, gradesBySeries)).toBe(false)
+    expect(seasonNeedsAttention(missingGradeSeason, seriesBySeason, gradesBySeries)).toBe(true)
+    expect(seasonNeedsAttention(emptySeason, seriesBySeason, gradesBySeries)).toBe(true)
+  })
+
+  it('flags events missing a circuit or A4 background as attention items', () => {
+    const eventWithCircuit = { eventId: 'event-1', seasonId: 'season-1', circuitId: 'circuit-1', circuitName: 'Chang International Circuit', name: 'Event 1', eventOrder: 1, startsOn: null, endsOn: null, status: 'Draft' as const }
+    const eventWithoutCircuit = { ...eventWithCircuit, eventId: 'event-2', circuitId: null, circuitName: null, name: 'Event 2', eventOrder: 2 }
+    const backgroundsByEvent = groupPrintBackgroundAssetsByEvent([createPrintBackgroundAsset('background-1', 'event-1')])
+
+    expect(eventNeedsAttention(eventWithCircuit, backgroundsByEvent)).toBe(false)
+    expect(eventNeedsAttention(eventWithoutCircuit, backgroundsByEvent)).toBe(true)
+    expect(eventNeedsAttention({ ...eventWithCircuit, eventId: 'event-3' }, backgroundsByEvent)).toBe(true)
+  })
+
+  it('flags events with no race sessions as race attention items', () => {
+    const events = [
+      { eventId: 'event-1', seasonId: 'season-1', circuitId: null, circuitName: null, name: 'Event 1', eventOrder: 1, startsOn: null, endsOn: null, status: 'Draft' as const },
+      { eventId: 'event-2', seasonId: 'season-1', circuitId: null, circuitName: null, name: 'Event 2', eventOrder: 2, startsOn: null, endsOn: null, status: 'Draft' as const },
+    ]
+    const racesByEvent = new Map([
+      ['event-1', [{ raceId: 'race-1', eventId: 'event-1', name: 'Race 1', raceOrder: 1, sessionType: 'Race', scheduledAt: null, resultsImportUnlocked: false }]],
+    ])
+
+    expect(raceEventNeedsAttention(events[0], racesByEvent)).toBe(false)
+    expect(raceEventNeedsAttention(events[1], racesByEvent)).toBe(true)
   })
 
   it('reports missing rule package setup items', () => {

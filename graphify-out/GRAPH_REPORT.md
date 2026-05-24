@@ -1,12 +1,12 @@
 # Graph Report - RaceDocV1Github  (2026-05-24)
 
 ## Corpus Check
-- 59 files · ~72,825 words
+- 61 files · ~74,853 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 402 nodes · 454 edges · 20 communities detected
-- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 25 edges (avg confidence: 0.8)
+- 416 nodes · 468 edges · 20 communities detected
+- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 26 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -21,7 +21,7 @@
 - [[_COMMUNITY_Community 8|Community 8]]
 - [[_COMMUNITY_Community 9|Community 9]]
 - [[_COMMUNITY_Community 10|Community 10]]
-- [[_COMMUNITY_Community 12|Community 12]]
+- [[_COMMUNITY_Community 11|Community 11]]
 - [[_COMMUNITY_Community 13|Community 13]]
 - [[_COMMUNITY_Community 15|Community 15]]
 - [[_COMMUNITY_Community 16|Community 16]]
@@ -58,7 +58,7 @@
 ## Communities
 
 ### Community 0 - "Community 0"
-Cohesion: 0.04
+Cohesion: 0.05
 Nodes (53): createBallastRuleForm(), createCircuitForm(), createEmptyBallastRuleForm(), createEmptyCircuitForm(), createEmptyEventForm(), createEmptyEventSeriesRuleForm(), createEmptyGradeForm(), createEmptyInspectionItemForm() (+45 more)
 
 ### Community 1 - "Community 1"
@@ -70,44 +70,44 @@ Cohesion: 0.08
 Nodes (14): createInspectionFilePath(), createInspectionForm(), flattenSnapshot(), normalizeLabel(), openInspectionForm(), prefillInspectionAnswers(), refreshDetail(), refreshEntries() (+6 more)
 
 ### Community 3 - "Community 3"
+Cohesion: 0.09
+Nodes (5): createOrganizerSetupBoard(), createSetupStep(), getClassActionLabel(), getClassEditorKey(), getRuleEditorKey()
+
+### Community 4 - "Community 4"
+Cohesion: 0.1
+Nodes (9): clean(), loadInitialProfile(), saveProfile(), loadInitialData(), getInvitationNotice(), inviteRoleByEmail(), normalizePayload(), resendInvitation() (+1 more)
+
+### Community 5 - "Community 5"
 Cohesion: 0.11
 Nodes (3): addReviewerDraft(), removeReviewerDraft(), updateReviewerDraft()
 
-### Community 4 - "Community 4"
+### Community 6 - "Community 6"
 Cohesion: 0.13
 Nodes (11): AuthRedirect(), OnboardingRoute(), ProtectedRoute(), AdminOnlyRoute(), AdminOrSecretaryRoute(), ScrutineerReportRoute(), useAuth(), canSeeAdminNavigation() (+3 more)
 
-### Community 5 - "Community 5"
-Cohesion: 0.13
-Nodes (5): createOrganizerSetupBoard(), createSetupStep(), getClassActionLabel(), getClassEditorKey(), getRuleEditorKey()
-
-### Community 6 - "Community 6"
+### Community 7 - "Community 7"
 Cohesion: 0.13
 Nodes (8): getAuthErrorMessage(), handleEmailLogin(), handleGoogleLogin(), handleSubmit(), validateIdentity(), updatePassword(), handleSignUp(), handleSubmit()
 
-### Community 7 - "Community 7"
+### Community 8 - "Community 8"
 Cohesion: 0.13
 Nodes (4): parseNullableInteger(), printSelectedResult(), saveEntry(), canPrintRaceResult()
 
-### Community 8 - "Community 8"
-Cohesion: 0.17
-Nodes (6): calculateItemWeight(), createInspectionVersionDiff(), getSelectedValues(), getSingleSelectedValue(), isAnswerFilled(), mapReviews()
-
 ### Community 9 - "Community 9"
 Cohesion: 0.17
-Nodes (4): getInvitationNotice(), inviteRoleByEmail(), resendInvitation(), sendRoleInvitation()
+Nodes (6): calculateItemWeight(), createInspectionVersionDiff(), getSelectedValues(), getSingleSelectedValue(), isAnswerFilled(), mapReviews()
 
 ### Community 10 - "Community 10"
 Cohesion: 0.2
 Nodes (8): buildAuditTrailCsv(), normalizeAuditTrailPayload(), applyFilters(), exportVisibleRows(), fetchAuditTrail(), loadAuditTrail(), movePage(), run()
 
-### Community 12 - "Community 12"
-Cohesion: 0.22
-Nodes (5): getPrintBackgroundAsset(), getPrintBackgroundOptionsForOrientation(), normalizePrintOptions(), confirmPrintBackground(), loadPrintOptions()
+### Community 11 - "Community 11"
+Cohesion: 0.17
+Nodes (3): handleTeamInfoSubmit(), createTeamInfoPayload(), nullableTeamText()
 
 ### Community 13 - "Community 13"
 Cohesion: 0.22
-Nodes (5): clean(), loadInitialProfile(), saveProfile(), loadInitialData(), normalizePayload()
+Nodes (5): getPrintBackgroundAsset(), getPrintBackgroundOptionsForOrientation(), normalizePrintOptions(), confirmPrintBackground(), loadPrintOptions()
 
 ### Community 15 - "Community 15"
 Cohesion: 0.29
@@ -152,12 +152,10 @@ Nodes (1): Branding
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `prefillInspectionAnswers()` connect `Community 2` to `Community 8`?**
-  _High betweenness centrality (0.006) - this node is a cross-community bridge._
-- **Why does `isAnswerFilled()` connect `Community 8` to `Community 2`?**
-  _High betweenness centrality (0.006) - this node is a cross-community bridge._
-- **Why does `normalizePayload()` connect `Community 13` to `Community 9`?**
-  _High betweenness centrality (0.002) - this node is a cross-community bridge._
+- **Why does `prefillInspectionAnswers()` connect `Community 2` to `Community 9`?**
+  _High betweenness centrality (0.005) - this node is a cross-community bridge._
+- **Why does `isAnswerFilled()` connect `Community 9` to `Community 2`?**
+  _High betweenness centrality (0.005) - this node is a cross-community bridge._
 - **Are the 6 inferred relationships involving `useAuth()` (e.g. with `ProtectedRoute()` and `AdminOrSecretaryRoute()`) actually correct?**
   _`useAuth()` has 6 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 6 inferred relationships involving `getAuthErrorMessage()` (e.g. with `handleEmailLogin()` and `handleGoogleLogin()`) actually correct?**
@@ -165,4 +163,6 @@ _Questions this graph is uniquely positioned to answer:_
 - **What connects `Entry Form`, `Success Ballast`, `Audit Trail` to the rest of the system?**
   _8 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.04 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05 - nodes in this community are weakly interconnected._
+- **Should `Community 1` be split into smaller, more focused modules?**
+  _Cohesion score 0.06 - nodes in this community are weakly interconnected._

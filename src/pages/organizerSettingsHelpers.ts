@@ -242,6 +242,27 @@ export type OrganizerPayload = {
   races: RaceRow[]
 }
 
+export type ScopeFilter = {
+  query: string
+  needsAttentionOnly: boolean
+}
+
+export function createEmptyScopeFilter(): ScopeFilter {
+  return { query: '', needsAttentionOnly: false }
+}
+
+export function hasActiveScopeFilter(filter: ScopeFilter) {
+  return Boolean(filter.query.trim()) || filter.needsAttentionOnly
+}
+
+export function getScopeFilterSummary(filter: ScopeFilter) {
+  const labels = []
+  const query = filter.query.trim()
+  if (query) labels.push(`Search: ${query}`)
+  if (filter.needsAttentionOnly) labels.push('Needs attention')
+  return labels.length > 0 ? labels.join(' / ') : 'Showing all settings'
+}
+
 export type OrganizerSetupStepKey = 'foundation' | 'calendar' | 'classes' | 'rules' | 'assets'
 
 export type OrganizerSetupRequirement = {
@@ -302,6 +323,12 @@ export function normalizeOrganizerSettingsPayload(payload: OrganizerPayload | nu
     events: payload?.events ?? [],
     races: payload?.races ?? [],
   }
+}
+
+export function filterByQuery<T>(items: T[], query: string, getValues: (item: T) => string[]) {
+  const normalizedQuery = query.trim().toLowerCase()
+  if (!normalizedQuery) return items
+  return items.filter((item) => getValues(item).some((value) => value.toLowerCase().includes(normalizedQuery)))
 }
 
 export function createOrganizerSetupBoard(payload: OrganizerPayload): OrganizerSetupBoard {
@@ -423,6 +450,19 @@ export function createOrganizerSetupBoard(payload: OrganizerPayload): OrganizerS
 export function getSelectedEventId(events: EventRow[], selectedEventId: string | null) {
   if (selectedEventId && events.some((event) => event.eventId === selectedEventId)) return selectedEventId
   return events[0]?.eventId ?? null
+}
+
+export function seasonNeedsAttention(season: SeasonRow, seasonSeriesBySeason: Map<string, SeasonSeriesRow[]>, seasonSeriesGradesBySeries: Map<string, SeasonSeriesGradeRow[]>) {
+  const seasonSeries = seasonSeriesBySeason.get(season.seasonId) ?? []
+  return seasonSeries.length === 0 || seasonSeries.some((series) => (seasonSeriesGradesBySeries.get(series.seasonSeriesId) ?? []).length === 0)
+}
+
+export function eventNeedsAttention(event: EventRow, printBackgroundAssetsByEvent: Map<string, PrintBackgroundAssetRow[]>) {
+  return !event.circuitId || (printBackgroundAssetsByEvent.get(event.eventId) ?? []).length === 0
+}
+
+export function raceEventNeedsAttention(event: EventRow, racesByEvent: Map<string, RaceRow[]>) {
+  return (racesByEvent.get(event.eventId) ?? []).length === 0
 }
 
 export function getRulePackageReadiness(
