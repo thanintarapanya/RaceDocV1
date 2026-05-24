@@ -279,6 +279,11 @@ type OrganizerScopeTab = {
   description: string
 }
 
+type ScopeFilter = {
+  query: string
+  needsAttentionOnly: boolean
+}
+
 const organizerScopeTabs: OrganizerScopeTab[] = [
   { key: 'global', label: 'Global Library', description: 'Reusable master data.' },
   { key: 'season', label: 'Season Setup', description: 'Racing year setup.' },
@@ -332,6 +337,7 @@ export function OrganizerSettingsPage() {
   const [raceForm, setRaceForm] = useState<RaceForm>(() => createEmptyRaceForm())
   const [activeEditor, setActiveEditor] = useState<SettingsEditorKey>('season')
   const [activeScope, setActiveScope] = useState<OrganizerScope>('season')
+  const [scopeFilter, setScopeFilter] = useState<ScopeFilter>({ query: '', needsAttentionOnly: false })
   const [editorOpen, setEditorOpen] = useState(false)
   const [duplicateDraft, setDuplicateDraft] = useState<DuplicateDraft | null>(null)
 
@@ -959,6 +965,7 @@ export function OrganizerSettingsPage() {
         <div className="mt-6 space-y-5">
           <ScopeDashboard setupBoard={setupBoard} activeScope={activeScope} />
           <ScopeSwitcher activeScope={activeScope} onSelectScope={selectScope} />
+          <ScopeToolbar filter={scopeFilter} onChange={setScopeFilter} />
             <SettingsEditorDrawer
               open={editorOpen}
               activeEditorMeta={activeEditorMeta}
@@ -1307,6 +1314,7 @@ export function OrganizerSettingsPage() {
 
           <ScopeBoard
             activeScope={activeScope}
+            filter={scopeFilter}
             payload={payload}
             eventsBySeason={eventsBySeason}
             racesByEvent={racesByEvent}
@@ -1681,6 +1689,7 @@ function DuplicateConfigDialog({
 
 type ScopeBoardProps = {
   activeScope: OrganizerScope
+  filter: ScopeFilter
   payload: OrganizerPayload
   eventsBySeason: Map<string, EventRow[]>
   racesByEvent: Map<string, RaceRow[]>
@@ -1777,6 +1786,32 @@ function ScopeSwitcher({ activeScope, onSelectScope }: { activeScope: OrganizerS
   )
 }
 
+function ScopeToolbar({ filter, onChange }: { filter: ScopeFilter; onChange: (filter: ScopeFilter) => void }) {
+  return (
+    <div className="grid gap-3 border border-zinc-200 p-4 md:grid-cols-[1fr_auto] md:items-end dark:border-zinc-800">
+      <label className="block">
+        <span className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Find setting</span>
+        <input
+          type="search"
+          value={filter.query}
+          onChange={(event) => onChange({ ...filter, query: event.target.value })}
+          placeholder="Search season, event, series, grade, circuit..."
+          className="mt-2 min-h-11 w-full rounded-md border border-zinc-300 bg-zinc-50 px-3 text-base outline-none transition focus:border-primary dark:border-zinc-800 dark:bg-zinc-950"
+        />
+      </label>
+      <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-md border border-zinc-200 px-3 text-sm font-semibold dark:border-zinc-800">
+        <input
+          type="checkbox"
+          checked={filter.needsAttentionOnly}
+          onChange={(event) => onChange({ ...filter, needsAttentionOnly: event.target.checked })}
+          className="size-4 accent-primary"
+        />
+        Needs attention only
+      </label>
+    </div>
+  )
+}
+
 function ScopeBoard(props: ScopeBoardProps) {
   const activeSeason = props.payload.seasons.find((season) => season.isActive) ?? props.payload.seasons[0] ?? null
   const activeSeasonEvents = activeSeason ? props.eventsBySeason.get(activeSeason.seasonId) ?? [] : []
@@ -1806,32 +1841,60 @@ function ScopeBoardHeader({ scope, title, description, actionLabel, onAction }: 
   )
 }
 
-function GlobalScopeBoard({ payload, onCreateCircuit, onEditCircuit, onCreateSeriesRace, onEditSeriesRace, onCreateGrade, onEditGrade }: ScopeBoardProps) {
+function filterByQuery<T>(items: T[], query: string, getValues: (item: T) => string[]) {
+  const normalizedQuery = query.trim().toLowerCase()
+  if (!normalizedQuery) return items
+  return items.filter((item) => getValues(item).some((value) => value.toLowerCase().includes(normalizedQuery)))
+}
+
+function ScopeEmptyMessage({ filter, defaultMessage }: { filter: ScopeFilter; defaultMessage: string }) {
+  const message = filter.needsAttentionOnly
+    ? 'No attention items in this card.'
+    : filter.query.trim()
+      ? 'No matching settings found.'
+      : defaultMessage
+
+  return <p className="text-sm leading-6 text-zinc-500">{message}</p>
+}
+
+function GlobalScopeBoard({ payload, filter, onCreateCircuit, onEditCircuit, onCreateSeriesRace, onEditSeriesRace, onCreateGrade, onEditGrade }: ScopeBoardProps) {
+  const circuits = filter.needsAttentionOnly ? [] : filterByQuery(payload.circuits, filter.query, (circuit) => [circuit.name, circuit.country, circuit.location ?? ''])
+  const seriesRaces = filter.needsAttentionOnly ? [] : filterByQuery(payload.seriesRaces, filter.query, (seriesRace) => [seriesRace.code, seriesRace.name, seriesRace.ballastType])
+  const grades = filter.needsAttentionOnly ? [] : filterByQuery(payload.grades, filter.query, (grade) => [grade.code, grade.name])
+
   return (
     <>
       <ScopeBoardHeader scope="global" title="Global Library" description="Reusable settings that can be used by many seasons and events. These are not tied to one race weekend." />
       <div className="grid gap-3 p-4 lg:grid-cols-3">
         <ScopeCard scope="global" title="Circuits" description="Tracks that Events can select." statusLabel={`${payload.circuits.length} configured`} actionLabel="Add Circuit" onAction={onCreateCircuit}>
-          {payload.circuits.map((circuit) => <AssetPill key={circuit.circuitId} label={`${circuit.name} / ${circuit.country}`} onClick={() => onEditCircuit(circuit)} />)}
+          {circuits.length === 0 ? <ScopeEmptyMessage filter={filter} defaultMessage="No circuits configured yet." /> : null}
+          {circuits.map((circuit) => <AssetPill key={circuit.circuitId} label={`${circuit.name} / ${circuit.country}`} onClick={() => onEditCircuit(circuit)} />)}
         </ScopeCard>
         <ScopeCard scope="global" title="Series" description="Competition groups reused across seasons." statusLabel={`${payload.seriesRaces.length} configured`} actionLabel="Add Series" onAction={onCreateSeriesRace}>
-          {payload.seriesRaces.map((seriesRace) => <AssetPill key={seriesRace.seriesRaceId} label={`${seriesRace.code} / ${seriesRace.name}`} onClick={() => onEditSeriesRace(seriesRace)} />)}
+          {seriesRaces.length === 0 ? <ScopeEmptyMessage filter={filter} defaultMessage="No series configured yet." /> : null}
+          {seriesRaces.map((seriesRace) => <AssetPill key={seriesRace.seriesRaceId} label={`${seriesRace.code} / ${seriesRace.name}`} onClick={() => onEditSeriesRace(seriesRace)} />)}
         </ScopeCard>
         <ScopeCard scope="global" title="Grades" description="Class levels such as PRO or AM." statusLabel={`${payload.grades.length} configured`} actionLabel="Add Grade" onAction={onCreateGrade}>
-          {payload.grades.map((grade) => <AssetPill key={grade.gradeId} label={`${grade.code} / ${grade.name}`} onClick={() => onEditGrade(grade)} />)}
+          {grades.length === 0 ? <ScopeEmptyMessage filter={filter} defaultMessage="No grades configured yet." /> : null}
+          {grades.map((grade) => <AssetPill key={grade.gradeId} label={`${grade.code} / ${grade.name}`} onClick={() => onEditGrade(grade)} />)}
         </ScopeCard>
       </div>
     </>
   )
 }
 
-function SeasonScopeBoard({ payload, activeSeason, seasonSeriesBySeason, seasonSeriesGradesBySeries, onCreateSeason, onEditSeason, onDuplicateSeason, onCreateSeasonSeries, onCreateSeasonGrade }: ScopeBoardProps & { activeSeason: SeasonRow | null }) {
+function SeasonScopeBoard({ payload, activeSeason, filter, seasonSeriesBySeason, seasonSeriesGradesBySeries, onCreateSeason, onEditSeason, onDuplicateSeason, onCreateSeasonSeries, onCreateSeasonGrade }: ScopeBoardProps & { activeSeason: SeasonRow | null }) {
+  const seasons = filterByQuery(payload.seasons, filter.query, (season) => [season.name, String(season.year), season.status, season.isActive ? 'active season' : 'inactive season'])
+    .filter((season) => !filter.needsAttentionOnly || seasonNeedsAttention(season, seasonSeriesBySeason, seasonSeriesGradesBySeries))
+  const showNoActiveSeason = !activeSeason && (!filter.query.trim() || 'no active season missing'.includes(filter.query.trim().toLowerCase()))
+
   return (
     <>
       <ScopeBoardHeader scope="season" title="Season Setup" description="This board controls the racing year: Season record, active Series, and available Grades. Start here before Events and Rule Packages." actionLabel="Create Season" onAction={onCreateSeason} />
       <div className="grid gap-3 p-4 xl:grid-cols-2">
-        {payload.seasons.length === 0 ? <EmptyState /> : null}
-        {payload.seasons.map((season) => {
+        {seasons.length === 0 && payload.seasons.length === 0 ? <ScopeCard scope="season" title="No Seasons yet" description="Create the first racing year before building Events and Rule Packages." statusLabel="Missing" actionLabel="Create Season" onAction={onCreateSeason}><ScopeEmptyMessage filter={filter} defaultMessage="No seasons configured. Create the first season to start building events and races." /></ScopeCard> : null}
+        {seasons.length === 0 && payload.seasons.length > 0 ? <ScopeCard scope="season" title="No Seasons match" description="Adjust search or clear the attention filter to return to the Season board." statusLabel="Filtered"><ScopeEmptyMessage filter={filter} defaultMessage="No seasons configured." /></ScopeCard> : null}
+        {seasons.map((season) => {
           const seasonSeries = seasonSeriesBySeason.get(season.seasonId) ?? []
           const gradeCount = seasonSeries.reduce((total, series) => total + (seasonSeriesGradesBySeries.get(series.seasonSeriesId) ?? []).length, 0)
 
@@ -1843,6 +1906,8 @@ function SeasonScopeBoard({ payload, activeSeason, seasonSeriesBySeason, seasonS
                 <TextButton label="Add Season Grade" onClick={() => onCreateSeasonGrade(season)} />
               </div>
               <p className="text-sm text-zinc-500">{seasonSeries.length} series link(s) / {gradeCount} grade link(s)</p>
+              {seasonSeries.length === 0 ? <p className="text-sm text-amber-700 dark:text-amber-400">Season series missing.</p> : null}
+              {seasonSeries.length > 0 && gradeCount === 0 ? <p className="text-sm text-amber-700 dark:text-amber-400">Season grades missing.</p> : null}
               {seasonSeries.map((series) => {
                 const grades = seasonSeriesGradesBySeries.get(series.seasonSeriesId) ?? []
                 return <AssetPill key={series.seasonSeriesId} label={`${series.seriesName} / ${grades.length > 0 ? grades.map((grade) => grade.gradeName).join(', ') : 'No grades'}`} onClick={() => onCreateSeasonGrade(season)} />
@@ -1850,19 +1915,22 @@ function SeasonScopeBoard({ payload, activeSeason, seasonSeriesBySeason, seasonS
             </ScopeCard>
           )
         })}
-        {activeSeason ? null : <ScopeCard scope="season" title="No active season" description="Create or activate a Season before building Events." statusLabel="Missing" actionLabel="Create Season" onAction={onCreateSeason} />}
+        {showNoActiveSeason ? <ScopeCard scope="season" title="No active season" description="Create or activate a Season before building Events." statusLabel="Missing" actionLabel="Create Season" onAction={onCreateSeason} /> : null}
       </div>
     </>
   )
 }
 
-function EventScopeBoard({ events, printBackgroundAssetsByEvent, onCreateEvent, onEditEvent, onDuplicateEvent, onCreatePrintBackgroundAsset, onEditPrintBackgroundAsset, activeSeason }: ScopeBoardProps & { events: EventRow[]; activeSeason: SeasonRow | null }) {
+function EventScopeBoard({ events, filter, printBackgroundAssetsByEvent, onCreateEvent, onEditEvent, onDuplicateEvent, onCreatePrintBackgroundAsset, onEditPrintBackgroundAsset, activeSeason }: ScopeBoardProps & { events: EventRow[]; activeSeason: SeasonRow | null }) {
+  const filteredEvents = filterByQuery(events, filter.query, (event) => [event.name, event.circuitName ?? 'no circuit', event.status, String(event.eventOrder), formatDateRange(event.startsOn, event.endsOn)])
+    .filter((event) => !filter.needsAttentionOnly || eventNeedsAttention(event, printBackgroundAssetsByEvent))
+
   return (
     <>
       <ScopeBoardHeader scope="event" title="Event Setup" description="Event-level settings belong to one race weekend: circuit, dates, status, and A4 print backgrounds." actionLabel="Create Event" onAction={() => onCreateEvent(activeSeason)} />
       <div className="grid gap-3 p-4 xl:grid-cols-2">
-        {events.length === 0 ? <ScopeCard scope="event" title="No Events yet" description="Create the first race weekend for this Season." statusLabel="Missing" actionLabel="Create Event" onAction={() => onCreateEvent(activeSeason)} /> : null}
-        {events.map((event) => {
+        {filteredEvents.length === 0 ? <ScopeCard scope="event" title={events.length === 0 ? 'No Events yet' : 'No Events match'} description={events.length === 0 ? 'Create the first race weekend for this Season.' : 'Adjust search or clear the attention filter to return to the Event board.'} statusLabel={events.length === 0 ? 'Missing' : 'Filtered'} actionLabel={events.length === 0 ? 'Create Event' : undefined} onAction={events.length === 0 ? () => onCreateEvent(activeSeason) : undefined}><ScopeEmptyMessage filter={filter} defaultMessage="No events configured yet." /></ScopeCard> : null}
+        {filteredEvents.map((event) => {
           const assets = printBackgroundAssetsByEvent.get(event.eventId) ?? []
           return (
             <ScopeCard key={event.eventId} scope="event" title={`Event ${event.eventOrder}: ${event.name}`} description={`${event.circuitName ?? 'No circuit'} / ${formatDateRange(event.startsOn, event.endsOn)}`} statusLabel={event.status} actionLabel="Edit Event" onAction={() => onEditEvent(event)}>
@@ -1870,6 +1938,7 @@ function EventScopeBoard({ events, printBackgroundAssetsByEvent, onCreateEvent, 
                 <TextButton label="Duplicate Event" onClick={() => onDuplicateEvent(event)} />
                 <TextButton label="Add A4 Background" onClick={() => onCreatePrintBackgroundAsset(event)} />
               </div>
+              {!event.circuitId ? <p className="text-sm text-amber-700 dark:text-amber-400">Circuit missing.</p> : null}
               {assets.length === 0 ? <p className="text-sm text-amber-700 dark:text-amber-400">A4 background missing.</p> : null}
               {assets.map((asset) => <AssetPill key={asset.printBackgroundAssetId} label={`${formatOrientation(asset.orientation)} / ${asset.title}${asset.isDefault ? ' / Default' : ''}`} onClick={() => onEditPrintBackgroundAsset(asset)} />)}
             </ScopeCard>
@@ -1882,12 +1951,15 @@ function EventScopeBoard({ events, printBackgroundAssetsByEvent, onCreateEvent, 
 
 function RuleScopeBoard(props: ScopeBoardProps & { event: EventRow | null; events: EventRow[] }) {
   const rules = props.events.flatMap((event) => props.eventSeriesRulesByEvent.get(event.eventId) ?? [])
+  const filteredRules = filterByQuery(rules, props.filter.query, (rule) => [rule.eventName, rule.seriesName, rule.gradeName, rule.status, `v${rule.version}`])
+    .filter((rule) => !props.filter.needsAttentionOnly || !getRulePackageReadiness(rule, props.weightRulesByEventRule, props.ballastRulesByEventRule, props.tireRulesByEventRule, props.sponsorStickerAssetsByEventRule, props.inspectionTemplatesByEventRule).ready)
+
   return (
     <>
       <ScopeBoardHeader scope="rule" title="Rule Packages" description="Rule Package-level settings are specific to one Event + Series + Grade. They drive Entry Forms, Inspection, Weight-In, sponsor stickers, and official documents." actionLabel="Create Rule Package" onAction={() => props.onCreateEventSeriesRule(props.event)} />
       <div className="grid gap-3 p-4 xl:grid-cols-2">
-        {rules.length === 0 ? <ScopeCard scope="rule" title="No Rule Packages yet" description="Create one for each Series and Grade running in the selected Event." statusLabel="Missing" actionLabel="Create Rule Package" onAction={() => props.onCreateEventSeriesRule(props.event)} /> : null}
-        {rules.map((rule) => (
+        {filteredRules.length === 0 ? <ScopeCard scope="rule" title={rules.length === 0 ? 'No Rule Packages yet' : 'No Rule Packages match'} description={rules.length === 0 ? 'Create one for each Series and Grade running in the selected Event.' : 'Adjust search or clear the attention filter to return to all Rule Packages.'} statusLabel={rules.length === 0 ? 'Missing' : 'Filtered'} actionLabel={rules.length === 0 ? 'Create Rule Package' : undefined} onAction={rules.length === 0 ? () => props.onCreateEventSeriesRule(props.event) : undefined}><ScopeEmptyMessage filter={props.filter} defaultMessage="No rule packages configured yet." /></ScopeCard> : null}
+        {filteredRules.map((rule) => (
           <RulePackageCard
             key={rule.eventSeriesRuleId}
             rule={rule}
@@ -1917,17 +1989,20 @@ function RuleScopeBoard(props: ScopeBoardProps & { event: EventRow | null; event
   )
 }
 
-function RaceScopeBoard({ event, events, racesByEvent, onCreateRace, onEditRace }: ScopeBoardProps & { event: EventRow | null; events: EventRow[] }) {
+function RaceScopeBoard({ event, events, filter, racesByEvent, onCreateRace, onEditRace }: ScopeBoardProps & { event: EventRow | null; events: EventRow[] }) {
+  const filteredEvents = filterByQuery(events, filter.query, (eventRow) => [eventRow.name, eventRow.circuitName ?? '', eventRow.status, String(eventRow.eventOrder), ...(racesByEvent.get(eventRow.eventId) ?? []).flatMap((race) => [race.name, race.sessionType, String(race.raceOrder)])])
+    .filter((eventRow) => !filter.needsAttentionOnly || (racesByEvent.get(eventRow.eventId) ?? []).length === 0)
+
   return (
     <>
       <ScopeBoardHeader scope="race" title="Race Sessions" description="Race-level settings are sessions inside Events. They do not control technical rules." actionLabel="Create Race Session" onAction={() => onCreateRace(event)} />
       <div className="grid gap-3 p-4 xl:grid-cols-2">
-        {events.length === 0 ? <ScopeCard scope="race" title="No Events yet" description="Create an Event before adding Race Sessions." statusLabel="Waiting" /> : null}
-        {events.map((eventRow) => {
+        {filteredEvents.length === 0 ? <ScopeCard scope="race" title={events.length === 0 ? 'No Events yet' : 'No Race Session groups match'} description={events.length === 0 ? 'Create an Event before adding Race Sessions.' : 'Adjust search or clear the attention filter to return to Race Sessions.'} statusLabel={events.length === 0 ? 'Waiting' : 'Filtered'}><ScopeEmptyMessage filter={filter} defaultMessage={events.length === 0 ? 'No Events available for Race Sessions yet.' : 'No race session groups found.'} /></ScopeCard> : null}
+        {filteredEvents.map((eventRow) => {
           const races = racesByEvent.get(eventRow.eventId) ?? []
           return (
             <ScopeCard key={eventRow.eventId} scope="race" title={`Event ${eventRow.eventOrder}: ${eventRow.name}`} description="Practice, qualifying, and race sessions." statusLabel={`${races.length} session(s)`} actionLabel="Add Race Session" onAction={() => onCreateRace(eventRow)}>
-              {races.length === 0 ? <p className="text-sm text-zinc-500">No race sessions yet.</p> : null}
+              {races.length === 0 ? <p className="text-sm text-amber-700 dark:text-amber-400">No race sessions yet.</p> : null}
               {races.map((race) => <AssetPill key={race.raceId} label={`${race.raceOrder}. ${race.name} / ${race.sessionType}`} onClick={() => onEditRace(race)} />)}
             </ScopeCard>
           )
@@ -1935,6 +2010,15 @@ function RaceScopeBoard({ event, events, racesByEvent, onCreateRace, onEditRace 
       </div>
     </>
   )
+}
+
+function seasonNeedsAttention(season: SeasonRow, seasonSeriesBySeason: Map<string, SeasonSeriesRow[]>, seasonSeriesGradesBySeries: Map<string, SeasonSeriesGradeRow[]>) {
+  const seasonSeries = seasonSeriesBySeason.get(season.seasonId) ?? []
+  return seasonSeries.length === 0 || seasonSeries.some((series) => (seasonSeriesGradesBySeries.get(series.seasonSeriesId) ?? []).length === 0)
+}
+
+function eventNeedsAttention(event: EventRow, printBackgroundAssetsByEvent: Map<string, PrintBackgroundAssetRow[]>) {
+  return !event.circuitId || (printBackgroundAssetsByEvent.get(event.eventId) ?? []).length === 0
 }
 
 function ScopeCard({ scope, title, description, statusLabel, actionLabel, onAction, children }: { scope: OrganizerScope; title: string; description: string; statusLabel: string; actionLabel?: string; onAction?: () => void; children?: React.ReactNode }) {
@@ -2363,10 +2447,6 @@ function OrganizerSkeleton() {
       <div className="h-96 animate-pulse border border-zinc-200 bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900" />
     </div>
   )
-}
-
-function EmptyState() {
-  return <div className="p-5 text-sm text-zinc-500">No seasons configured. Create the first season to start building events and races.</div>
 }
 
 function createEmptyCircuitForm(): CircuitForm {
