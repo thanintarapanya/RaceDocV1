@@ -152,7 +152,7 @@ export function createPaperEntryImportPayload(draft: PaperEntryDraft): PaperEntr
   }
 }
 
-export function parsePaperEntryCsvImportRows(csvText: string) {
+export function parsePaperEntryCsvImportRows(csvText: string, options: PaperEntryOptionLike[] = []) {
   const table = parseCsv(csvText)
   if (table.length === 0) return { rows: [] as ParsedPaperEntryImportRow[], errors: ['CSV file is empty.'] }
 
@@ -172,6 +172,8 @@ export function parsePaperEntryCsvImportRows(csvText: string) {
 
       if (!isPaperEntryDraftStageable(draft)) {
         errors.push(`Row ${rowNumber} needs event, series, grade, car number, plus identity, phone, email, or full name.`)
+      } else if (!isPaperEntryScopeAllowed(draft, options)) {
+        errors.push(`Row ${rowNumber} event/series/grade is not active in RaceDoc setup.`)
       }
 
       return {
@@ -291,6 +293,11 @@ export function createPaperEntryCsvTemplate(options: PaperEntryOptionLike[] = []
       'Replace this sample row before import.',
     ].map(escapeCsvCell).join(','),
   ].join('\n')
+}
+
+export function isPaperEntryScopeAllowed(draft: PaperEntryDraft, options: PaperEntryOptionLike[] = []) {
+  if (options.length === 0) return true
+  return options.some((option) => option.event_name === draft.eventName && option.series_name === draft.seriesName && option.grade_name === draft.gradeName)
 }
 
 function parseCsv(csvText: string) {

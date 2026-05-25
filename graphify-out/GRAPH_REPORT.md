@@ -1,11 +1,11 @@
 # Graph Report - RaceDocV1Github  (2026-05-25)
 
 ## Corpus Check
-- 65 files · ~80,595 words
+- 65 files · ~80,753 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 459 nodes · 523 edges · 22 communities detected
+- 460 nodes · 524 edges · 22 communities detected
 - Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 31 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -65,7 +65,7 @@ Nodes (53): createBallastRuleForm(), createCircuitForm(), createEmptyBallastRule
 
 ### Community 1 - "Community 1"
 Cohesion: 0.05
-Nodes (17): createInitialEntryFormState(), createPersonalSnapshot(), draw(), getCanvasPoint(), handleDocumentUpload(), handleSignatureUpload(), handleSubmitBatch(), loadOptions() (+9 more)
+Nodes (23): createBatch(), createInitialEntryFormState(), createPersonalSnapshot(), draw(), getCanvasPoint(), handleDocumentUpload(), handleSignatureUpload(), handleSubmitBatch() (+15 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.08
@@ -80,8 +80,8 @@ Cohesion: 0.1
 Nodes (9): clean(), loadInitialProfile(), saveProfile(), loadInitialData(), getInvitationNotice(), inviteRoleByEmail(), normalizePayload(), resendInvitation() (+1 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.1
-Nodes (18): createBatch(), downloadCsvTemplate(), loadMatches(), stageCsvFile(), stageManualRow(), stageRow(), createEmptyPaperEntryDraft(), createPaperEntryCsvTemplate() (+10 more)
+Cohesion: 0.12
+Nodes (12): downloadCsvTemplate(), loadMatches(), createPaperEntryCsvTemplate(), firstNonEmpty(), getPaperEntryImportRowSummary(), getPaperEntryMatchPayload(), getPayloadRecord(), normalizeHeader() (+4 more)
 
 ### Community 6 - "Community 6"
 Cohesion: 0.11
@@ -168,8 +168,6 @@ _Questions this graph is uniquely positioned to answer:_
   _High betweenness centrality (0.004) - this node is a cross-community bridge._
 - **Why does `isAnswerFilled()` connect `Community 10` to `Community 2`?**
   _High betweenness centrality (0.004) - this node is a cross-community bridge._
-- **Why does `stageManualRow()` connect `Community 5` to `Community 1`?**
-  _High betweenness centrality (0.004) - this node is a cross-community bridge._
 - **Are the 6 inferred relationships involving `useAuth()` (e.g. with `ProtectedRoute()` and `AdminOrSecretaryRoute()`) actually correct?**
   _`useAuth()` has 6 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 6 inferred relationships involving `getAuthErrorMessage()` (e.g. with `handleEmailLogin()` and `handleGoogleLogin()`) actually correct?**
@@ -178,3 +176,5 @@ _Questions this graph is uniquely positioned to answer:_
   _`stageManualRow()` has 2 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `Entry Form`, `Success Ballast`, `Audit Trail` to the rest of the system?**
   _8 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `Community 0` be split into smaller, more focused modules?**
+  _Cohesion score 0.05 - nodes in this community are weakly interconnected._

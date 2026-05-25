@@ -1310,7 +1310,7 @@ function PaperEntryImportModal({ onClose, onCommitted }: { onClose: () => void; 
 
     try {
       const text = await file.text()
-      const parsed = parsePaperEntryCsvImportRows(text)
+      const parsed = parsePaperEntryCsvImportRows(text, entryOptions)
       if (parsed.errors.length > 0) {
         throw new Error(parsed.errors.slice(0, 4).join(' '))
       }

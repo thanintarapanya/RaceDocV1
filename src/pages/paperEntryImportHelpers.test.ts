@@ -8,6 +8,7 @@ import {
   getPaperEntryImportRowSummary,
   getPaperEntryMatchTone,
   isPaperEntryDraftStageable,
+  isPaperEntryScopeAllowed,
   parsePaperEntryCsvImportRows,
 } from './paperEntryImportHelpers'
 
@@ -53,6 +54,21 @@ describe('paper entry import helpers', () => {
       rawPayload: { firstNameEn: 'Max', lastNameEn: 'Driver', email: 'max@example.com', carNumber: '39', eventName: 'Event 1' },
     })
     expect(result.errors).toEqual(['Row 3 needs event, series, grade, car number, plus identity, phone, email, or full name.'])
+  })
+
+  it('validates CSV event scope against active RaceDoc setup options', () => {
+    const csv = [
+      'Name EN,Surname EN,Email,Car No,Event,Series Race,Grade Race',
+      'Max,Driver,max@example.com,39,Event 1,SIAM ECO,PRO',
+      'Wrong,Scope,wrong@example.com,88,Event X,SIAM ECO,PRO',
+    ].join('\n')
+
+    const result = parsePaperEntryCsvImportRows(csv, [
+      { event_name: 'Event 1', series_name: 'SIAM ECO', grade_name: 'PRO' },
+    ])
+
+    expect(result.rows).toHaveLength(2)
+    expect(result.errors).toEqual(['Row 3 event/series/grade is not active in RaceDoc setup.'])
   })
 
   it('returns a clear error for empty CSV input', () => {
@@ -140,6 +156,15 @@ describe('paper entry import helpers', () => {
       seriesName: 'ISUZU',
       gradeName: 'PRO',
     })
+  })
+
+  it('allows paper entry scope only when it matches configured options', () => {
+    const draft = { ...createEmptyPaperEntryDraft(), eventName: 'Event 1', seriesName: 'SIAM ECO', gradeName: 'PRO' }
+    const options = [{ event_name: 'Event 1', series_name: 'SIAM ECO', grade_name: 'PRO' }]
+
+    expect(isPaperEntryScopeAllowed(draft, options)).toBe(true)
+    expect(isPaperEntryScopeAllowed({ ...draft, gradeName: 'AM' }, options)).toBe(false)
+    expect(isPaperEntryScopeAllowed(draft, [])).toBe(true)
   })
 
   it('creates a CSV template with active event scope sample values', () => {
