@@ -1,12 +1,12 @@
 # Graph Report - RaceDocV1Github  (2026-05-25)
 
 ## Corpus Check
-- 65 files · ~80,383 words
+- 65 files · ~80,595 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 456 nodes · 519 edges · 22 communities detected
-- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 30 edges (avg confidence: 0.8)
+- 459 nodes · 523 edges · 22 communities detected
+- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 31 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -80,8 +80,8 @@ Cohesion: 0.1
 Nodes (9): clean(), loadInitialProfile(), saveProfile(), loadInitialData(), getInvitationNotice(), inviteRoleByEmail(), normalizePayload(), resendInvitation() (+1 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.12
-Nodes (16): createBatch(), loadMatches(), stageCsvFile(), stageManualRow(), stageRow(), createEmptyPaperEntryDraft(), createPaperEntryImportPayload(), firstNonEmpty() (+8 more)
+Cohesion: 0.1
+Nodes (18): createBatch(), downloadCsvTemplate(), loadMatches(), stageCsvFile(), stageManualRow(), stageRow(), createEmptyPaperEntryDraft(), createPaperEntryCsvTemplate() (+10 more)
 
 ### Community 6 - "Community 6"
 Cohesion: 0.11
@@ -165,7 +165,7 @@ Nodes (1): Branding
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `prefillInspectionAnswers()` connect `Community 2` to `Community 10`?**
-  _High betweenness centrality (0.005) - this node is a cross-community bridge._
+  _High betweenness centrality (0.004) - this node is a cross-community bridge._
 - **Why does `isAnswerFilled()` connect `Community 10` to `Community 2`?**
   _High betweenness centrality (0.004) - this node is a cross-community bridge._
 - **Why does `stageManualRow()` connect `Community 5` to `Community 1`?**

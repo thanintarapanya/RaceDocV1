@@ -55,6 +55,29 @@ export type PaperEntryOptionLike = {
   grade_name: string
 }
 
+export const paperEntryCsvTemplateHeaders = [
+  'Name TH',
+  'Surname TH',
+  'Name EN',
+  'Surname EN',
+  'Email',
+  'Mobile No',
+  'ID Card No',
+  'Passport No',
+  'Competition License No',
+  'Car No',
+  'Event',
+  'Series Race',
+  'Grade Race',
+  'Team Name',
+  'Car Manufacturer',
+  'Model',
+  'Color',
+  'Year',
+  'Engine Size CC',
+  'Notes',
+]
+
 export function createEmptyPaperEntryDraft(): PaperEntryDraft {
   return {
     firstNameTh: '',
@@ -241,6 +264,35 @@ export function applyPaperEntryOptionDefaults<T extends PaperEntryDraft>(draft: 
   }
 }
 
+export function createPaperEntryCsvTemplate(options: PaperEntryOptionLike[] = []) {
+  const defaultOption = options[0]
+  return [
+    paperEntryCsvTemplateHeaders.map(escapeCsvCell).join(','),
+    [
+      '',
+      '',
+      'Example',
+      'Driver',
+      'driver@example.com',
+      '0812345678',
+      '',
+      '',
+      'RACING-LIC-001',
+      '39',
+      defaultOption?.event_name ?? '',
+      defaultOption?.series_name ?? '',
+      defaultOption?.grade_name ?? '',
+      'RaceDoc Team',
+      'Toyota',
+      'Yaris',
+      'White',
+      '2024',
+      '1500',
+      'Replace this sample row before import.',
+    ].map(escapeCsvCell).join(','),
+  ].join('\n')
+}
+
 function parseCsv(csvText: string) {
   const rows: string[][] = []
   let row: string[] = []
@@ -351,4 +403,8 @@ function normalizeText(value: unknown) {
 
 function hasValue(value: string) {
   return value.trim().length > 0
+}
+
+function escapeCsvCell(value: string) {
+  return /[",\n\r]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value
 }

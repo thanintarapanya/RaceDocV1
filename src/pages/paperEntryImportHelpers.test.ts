@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   applyPaperEntryOptionDefaults,
   createEmptyPaperEntryDraft,
+  createPaperEntryCsvTemplate,
   createPaperEntryImportPayload,
   getPaperEntryCommitReadiness,
   getPaperEntryImportRowSummary,
@@ -139,5 +140,15 @@ describe('paper entry import helpers', () => {
       seriesName: 'ISUZU',
       gradeName: 'PRO',
     })
+  })
+
+  it('creates a CSV template with active event scope sample values', () => {
+    const template = createPaperEntryCsvTemplate([
+      { event_name: 'Event 1, Chang', series_name: 'SIAM ECO', grade_name: 'PRO' },
+    ])
+
+    expect(template.split('\n')[0]).toContain('Event,Series Race,Grade Race')
+    expect(template).toContain('"Event 1, Chang",SIAM ECO,PRO')
+    expect(template).toContain('Replace this sample row before import.')
   })
 })

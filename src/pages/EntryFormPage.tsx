@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Download,
   FilePlus2,
   FileText,
   FolderCheck,
@@ -28,7 +29,7 @@ import {
 import { filterBySeriesRace, getSeriesRaceOptions } from '@/lib/series-race-filter'
 import { supabase } from '@/lib/supabase'
 import { createEmptyEntryListFilters, filterEntryList, getEntryListFilterOptions, getEntryStatusDisplay, getPaperEntryReadiness, hasActiveEntryListFilters, type EntryListFilters, type EntryListRow } from './entryFormListHelpers'
-import { applyPaperEntryOptionDefaults, createEmptyPaperEntryDraft, createPaperEntryImportPayload, getPaperEntryCommitReadiness, getPaperEntryImportRowSummary, getPaperEntryMatchPayload, getPaperEntryMatchTone, isPaperEntryDraftStageable, parsePaperEntryCsvImportRows, type PaperEntryDraft } from './paperEntryImportHelpers'
+import { applyPaperEntryOptionDefaults, createEmptyPaperEntryDraft, createPaperEntryCsvTemplate, createPaperEntryImportPayload, getPaperEntryCommitReadiness, getPaperEntryImportRowSummary, getPaperEntryMatchPayload, getPaperEntryMatchTone, isPaperEntryDraftStageable, parsePaperEntryCsvImportRows, type PaperEntryDraft } from './paperEntryImportHelpers'
 
 type EntryStatus = 'draft' | 'pending' | 'active' | 'inactive' | 'rejected'
 
@@ -1246,6 +1247,17 @@ function PaperEntryImportModal({ onClose, onCommitted }: { onClose: () => void; 
     setDraft((current) => applyPaperEntryOptionDefaults({ ...current, seriesName, gradeName: '' }, entryOptions))
   }
 
+  function downloadCsvTemplate() {
+    const template = createPaperEntryCsvTemplate(entryOptions)
+    const blob = new Blob([template], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'racedoc-paper-entry-template.csv'
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
   async function createBatch(source: 'ManualPaper' | 'ExcelUpload', originalFilename: string | null, notes: string | null) {
     const { data, error: batchError } = await supabase.rpc('create_entry_import_batch', {
       p_source: source,
@@ -1460,6 +1472,15 @@ function PaperEntryImportModal({ onClose, onCommitted }: { onClose: () => void; 
               <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600 dark:text-zinc-400">
                 Upload a CSV exported from Excel. Supported headers include Name EN, Surname EN, Email, Mobile No, ID Card No, Passport No, Car No, Event, Series Race, Grade Race, and Team Name.
               </p>
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                type="button"
+                onClick={downloadCsvTemplate}
+                className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-zinc-300 px-4 text-sm font-semibold dark:border-zinc-800"
+              >
+                <Download size={16} />
+                Download CSV template
+              </motion.button>
               <label className="mt-5 flex min-h-32 cursor-pointer flex-col items-center justify-center rounded-md border border-dashed border-zinc-300 px-4 text-center dark:border-zinc-800">
                 {staging ? <Loader2 size={24} className="animate-spin text-primary" /> : <UploadCloud size={24} className="text-primary" />}
                 <span className="mt-2 text-sm font-semibold">{staging ? 'Staging rows...' : 'Select CSV file'}</span>
