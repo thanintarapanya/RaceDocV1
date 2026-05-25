@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  applyPaperEntryOptionDefaults,
   createEmptyPaperEntryDraft,
   createPaperEntryImportPayload,
   getPaperEntryCommitReadiness,
@@ -12,9 +13,9 @@ import {
 describe('paper entry import helpers', () => {
   it('requires a car number plus an identity signal or full name before staging', () => {
     expect(isPaperEntryDraftStageable(createEmptyPaperEntryDraft())).toBe(false)
-    expect(isPaperEntryDraftStageable({ ...createEmptyPaperEntryDraft(), carNumber: '39', email: 'driver@example.com' })).toBe(true)
-    expect(isPaperEntryDraftStageable({ ...createEmptyPaperEntryDraft(), carNumber: '39', firstNameTh: 'สมชาย', lastNameTh: 'ใจดี' })).toBe(true)
-    expect(isPaperEntryDraftStageable({ ...createEmptyPaperEntryDraft(), email: 'driver@example.com' })).toBe(false)
+    expect(isPaperEntryDraftStageable({ ...createEmptyPaperEntryDraft(), eventName: 'Event 1', seriesName: 'SIAM ECO', gradeName: 'PRO', carNumber: '39', email: 'driver@example.com' })).toBe(true)
+    expect(isPaperEntryDraftStageable({ ...createEmptyPaperEntryDraft(), eventName: 'Event 1', seriesName: 'SIAM ECO', gradeName: 'PRO', carNumber: '39', firstNameTh: 'สมชาย', lastNameTh: 'ใจดี' })).toBe(true)
+    expect(isPaperEntryDraftStageable({ ...createEmptyPaperEntryDraft(), carNumber: '39', email: 'driver@example.com' })).toBe(false)
   })
 
   it('normalizes manual paper data into raw and structured payloads', () => {
@@ -38,9 +39,9 @@ describe('paper entry import helpers', () => {
 
   it('parses CSV rows using race-office friendly column names', () => {
     const csv = [
-      'Name EN,Surname EN,Email,Car No,Series Race,Grade Race',
-      'Max,Driver,max@example.com,39,SIAM ECO,PRO',
-      'No,Car,nocar@example.com,,SIAM ECO,AM',
+      'Name EN,Surname EN,Email,Car No,Event,Series Race,Grade Race',
+      'Max,Driver,max@example.com,39,Event 1,SIAM ECO,PRO',
+      'No,Car,nocar@example.com,,Event 1,SIAM ECO,AM',
     ].join('\n')
 
     const result = parsePaperEntryCsvImportRows(csv)
@@ -48,9 +49,9 @@ describe('paper entry import helpers', () => {
     expect(result.rows).toHaveLength(2)
     expect(result.rows[0]).toMatchObject({
       rowNumber: 2,
-      rawPayload: { firstNameEn: 'Max', lastNameEn: 'Driver', email: 'max@example.com', carNumber: '39' },
+      rawPayload: { firstNameEn: 'Max', lastNameEn: 'Driver', email: 'max@example.com', carNumber: '39', eventName: 'Event 1' },
     })
-    expect(result.errors).toEqual(['Row 3 needs car number plus identity, phone, email, or full name.'])
+    expect(result.errors).toEqual(['Row 3 needs event, series, grade, car number, plus identity, phone, email, or full name.'])
   })
 
   it('returns a clear error for empty CSV input', () => {
@@ -112,6 +113,31 @@ describe('paper entry import helpers', () => {
       canCommit: false,
       matchedCount: 0,
       blockingReason: 'This batch has already been committed.',
+    })
+  })
+
+  it('defaults manual paper entry scope from active event options', () => {
+    const options = [
+      { event_name: 'Event 1 Chang', series_name: 'SIAM ECO', grade_name: 'AM' },
+      { event_name: 'Event 1 Chang', series_name: 'SIAM ECO', grade_name: 'PRO' },
+      { event_name: 'Event 2 Songkhla', series_name: 'ISUZU', grade_name: 'PRO' },
+    ]
+
+    expect(applyPaperEntryOptionDefaults(createEmptyPaperEntryDraft(), options)).toMatchObject({
+      eventName: 'Event 1 Chang',
+      seriesName: 'SIAM ECO',
+      gradeName: 'AM',
+    })
+
+    expect(applyPaperEntryOptionDefaults({
+      ...createEmptyPaperEntryDraft(),
+      eventName: 'Event 2 Songkhla',
+      seriesName: 'SIAM ECO',
+      gradeName: 'AM',
+    }, options)).toMatchObject({
+      eventName: 'Event 2 Songkhla',
+      seriesName: 'ISUZU',
+      gradeName: 'PRO',
     })
   })
 })

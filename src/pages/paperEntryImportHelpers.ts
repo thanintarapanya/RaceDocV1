@@ -49,6 +49,12 @@ export type PaperEntryCommitReadiness = {
   blockingReason: string
 }
 
+export type PaperEntryOptionLike = {
+  event_name: string
+  series_name: string
+  grade_name: string
+}
+
 export function createEmptyPaperEntryDraft(): PaperEntryDraft {
   return {
     firstNameTh: '',
@@ -77,7 +83,8 @@ export function createEmptyPaperEntryDraft(): PaperEntryDraft {
 export function isPaperEntryDraftStageable(draft: PaperEntryDraft) {
   const hasIdentity = [draft.email, draft.phone, draft.identityNo, draft.passportNo].some(hasValue)
   const hasName = [draft.firstNameTh, draft.lastNameTh].every(hasValue) || [draft.firstNameEn, draft.lastNameEn].every(hasValue)
-  return (hasIdentity || hasName) && hasValue(draft.carNumber)
+  const hasEntryScope = [draft.eventName, draft.seriesName, draft.gradeName, draft.carNumber].every(hasValue)
+  return (hasIdentity || hasName) && hasEntryScope
 }
 
 export function createPaperEntryImportPayload(draft: PaperEntryDraft): PaperEntryImportPayload {
@@ -141,7 +148,7 @@ export function parsePaperEntryCsvImportRows(csvText: string) {
       })
 
       if (!isPaperEntryDraftStageable(draft)) {
-        errors.push(`Row ${rowNumber} needs car number plus identity, phone, email, or full name.`)
+        errors.push(`Row ${rowNumber} needs event, series, grade, car number, plus identity, phone, email, or full name.`)
       }
 
       return {
@@ -212,6 +219,26 @@ export function getPaperEntryCommitReadiness(rows: PaperEntryImportRowLike[]): P
   }
 
   return { canCommit: true, matchedCount: matchedRows.length, blockingReason: '' }
+}
+
+export function applyPaperEntryOptionDefaults<T extends PaperEntryDraft>(draft: T, options: PaperEntryOptionLike[]): T {
+  const scopedByEvent = options.filter((option) => !draft.eventName || option.event_name === draft.eventName)
+  const nextEventName = draft.eventName || options[0]?.event_name || ''
+  const eventOptions = options.filter((option) => option.event_name === nextEventName)
+  const nextSeriesName = draft.seriesName && eventOptions.some((option) => option.series_name === draft.seriesName)
+    ? draft.seriesName
+    : scopedByEvent[0]?.series_name || eventOptions[0]?.series_name || ''
+  const seriesOptions = eventOptions.filter((option) => option.series_name === nextSeriesName)
+  const nextGradeName = draft.gradeName && seriesOptions.some((option) => option.grade_name === draft.gradeName)
+    ? draft.gradeName
+    : seriesOptions[0]?.grade_name || ''
+
+  return {
+    ...draft,
+    eventName: nextEventName,
+    seriesName: nextSeriesName,
+    gradeName: nextGradeName,
+  }
 }
 
 function parseCsv(csvText: string) {

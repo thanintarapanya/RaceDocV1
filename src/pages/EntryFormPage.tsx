@@ -28,7 +28,7 @@ import {
 import { filterBySeriesRace, getSeriesRaceOptions } from '@/lib/series-race-filter'
 import { supabase } from '@/lib/supabase'
 import { createEmptyEntryListFilters, filterEntryList, getEntryListFilterOptions, getEntryStatusDisplay, getPaperEntryReadiness, hasActiveEntryListFilters, type EntryListFilters, type EntryListRow } from './entryFormListHelpers'
-import { createEmptyPaperEntryDraft, createPaperEntryImportPayload, getPaperEntryCommitReadiness, getPaperEntryImportRowSummary, getPaperEntryMatchPayload, getPaperEntryMatchTone, isPaperEntryDraftStageable, parsePaperEntryCsvImportRows, type PaperEntryDraft } from './paperEntryImportHelpers'
+import { applyPaperEntryOptionDefaults, createEmptyPaperEntryDraft, createPaperEntryImportPayload, getPaperEntryCommitReadiness, getPaperEntryImportRowSummary, getPaperEntryMatchPayload, getPaperEntryMatchTone, isPaperEntryDraftStageable, parsePaperEntryCsvImportRows, type PaperEntryDraft } from './paperEntryImportHelpers'
 
 type EntryStatus = 'draft' | 'pending' | 'active' | 'inactive' | 'rejected'
 
@@ -1064,6 +1064,8 @@ function PaperEntryImportModal({ onClose, onCommitted }: { onClose: () => void; 
   const [mode, setMode] = useState<'manual' | 'csv'>('manual')
   const [draft, setDraft] = useState<PaperEntryDraft>(() => createEmptyPaperEntryDraft())
   const [csvFileName, setCsvFileName] = useState('')
+  const [entryOptions, setEntryOptions] = useState<Step1Option[]>([])
+  const [entryOptionsLoading, setEntryOptionsLoading] = useState(true)
   const [batches, setBatches] = useState<EntryImportBatch[]>([])
   const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null)
   const [rows, setRows] = useState<EntryImportRow[]>([])
@@ -1080,6 +1082,9 @@ function PaperEntryImportModal({ onClose, onCommitted }: { onClose: () => void; 
   const canStageManual = isPaperEntryDraftStageable(draft)
   const selectedBatch = batches.find((batch) => batch.id === selectedBatchId) ?? null
   const commitReadiness = getPaperEntryCommitReadiness(rows)
+  const manualEventOptions = useMemo(() => uniqueBy(entryOptions, (option) => option.event_id).sort((first, second) => first.event_order - second.event_order), [entryOptions])
+  const manualSeriesOptions = useMemo(() => uniqueValues(entryOptions.filter((option) => !draft.eventName || option.event_name === draft.eventName).map((option) => option.series_name)), [draft.eventName, entryOptions])
+  const manualGradeOptions = useMemo(() => uniqueValues(entryOptions.filter((option) => (!draft.eventName || option.event_name === draft.eventName) && (!draft.seriesName || option.series_name === draft.seriesName)).map((option) => option.grade_name)), [draft.eventName, draft.seriesName, entryOptions])
 
   const loadBatches = useCallback(async (isActive: () => boolean = () => true) => {
     setBatchesLoading(true)
@@ -1103,6 +1108,36 @@ function PaperEntryImportModal({ onClose, onCommitted }: { onClose: () => void; 
     }
 
     setBatchesLoading(false)
+  }, [])
+
+  useEffect(() => {
+    let active = true
+
+    async function loadEntryOptions() {
+      setEntryOptionsLoading(true)
+      setError(null)
+
+      const { data, error: optionError } = await supabase.rpc('get_entry_form_step1_options')
+
+      if (!active) return
+
+      if (optionError) {
+        setEntryOptions([])
+        setError(optionError.message)
+      } else {
+        const nextOptions = (data ?? []) as Step1Option[]
+        setEntryOptions(nextOptions)
+        setDraft((current) => applyPaperEntryOptionDefaults(current, nextOptions))
+      }
+
+      setEntryOptionsLoading(false)
+    }
+
+    loadEntryOptions()
+
+    return () => {
+      active = false
+    }
   }, [])
 
   const loadRows = useCallback(async (batchId: string | null, isActive: () => boolean = () => true) => {
@@ -1201,6 +1236,14 @@ function PaperEntryImportModal({ onClose, onCommitted }: { onClose: () => void; 
 
   function updateDraft<Key extends keyof PaperEntryDraft>(key: Key, value: PaperEntryDraft[Key]) {
     setDraft((current) => ({ ...current, [key]: value }))
+  }
+
+  function selectManualEvent(eventName: string) {
+    setDraft((current) => applyPaperEntryOptionDefaults({ ...current, eventName, seriesName: '', gradeName: '' }, entryOptions))
+  }
+
+  function selectManualSeries(seriesName: string) {
+    setDraft((current) => applyPaperEntryOptionDefaults({ ...current, seriesName, gradeName: '' }, entryOptions))
   }
 
   async function createBatch(source: 'ManualPaper' | 'ExcelUpload', originalFilename: string | null, notes: string | null) {
@@ -1391,9 +1434,17 @@ function PaperEntryImportModal({ onClose, onCommitted }: { onClose: () => void; 
               <TextField label="Passport No." value={draft.passportNo} onChange={(value) => updateDraft('passportNo', value)} />
               <TextField label="หมายเลขรถ / Car Number" value={draft.carNumber} inputMode="numeric" onChange={(value) => updateDraft('carNumber', value)} />
               <TextField label="เลขที่ใบอนุญาตขับแข่ง / Competition License No." value={draft.licenseNo} onChange={(value) => updateDraft('licenseNo', value)} />
-              <TextField label="งานแข่งขัน / Event" value={draft.eventName} onChange={(value) => updateDraft('eventName', value)} />
-              <TextField label="รุ่นการแข่งขัน / Series Race" value={draft.seriesName} onChange={(value) => updateDraft('seriesName', value)} />
-              <TextField label="ระดับที่ลงแข่ง / Grade Race" value={draft.gradeName} onChange={(value) => updateDraft('gradeName', value)} />
+              {entryOptionsLoading ? (
+                <div className="xl:col-span-2 border border-zinc-200 p-4 text-sm text-zinc-500 dark:border-zinc-800">
+                  <div className="flex items-center gap-3">
+                    <Loader2 size={16} className="animate-spin text-primary" />
+                    Loading active event options for paper intake
+                  </div>
+                </div>
+              ) : null}
+              <SelectField label="งานแข่งขัน / Event" value={draft.eventName} options={manualEventOptions.map((option) => option.event_name)} onChange={selectManualEvent} required />
+              <SelectField label="รุ่นการแข่งขัน / Series Race" value={draft.seriesName} options={manualSeriesOptions} onChange={selectManualSeries} required />
+              <SelectField label="ระดับที่ลงแข่ง / Grade Race" value={draft.gradeName} options={manualGradeOptions} onChange={(value) => updateDraft('gradeName', value)} required />
               <TextField label="ชื่อทีมแข่ง / Team Name" value={draft.teamName} onChange={(value) => updateDraft('teamName', value)} />
               <TextField label="ยี่ห้อรถ / Car Manufacturer" value={draft.vehicleManufacturer} onChange={(value) => updateDraft('vehicleManufacturer', value)} />
               <TextField label="รุ่น / Model" value={draft.vehicleModel} onChange={(value) => updateDraft('vehicleModel', value)} />
@@ -1407,7 +1458,7 @@ function PaperEntryImportModal({ onClose, onCommitted }: { onClose: () => void; 
               <UploadCloud size={24} className="text-primary" />
               <h3 className="mt-4 text-xl font-semibold">CSV Bulk Import</h3>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600 dark:text-zinc-400">
-                Upload a CSV exported from Excel. Supported headers include Name EN, Surname EN, Email, Mobile No, ID Card No, Passport No, Car No, Series Race, Grade Race, and Team Name.
+                Upload a CSV exported from Excel. Supported headers include Name EN, Surname EN, Email, Mobile No, ID Card No, Passport No, Car No, Event, Series Race, Grade Race, and Team Name.
               </p>
               <label className="mt-5 flex min-h-32 cursor-pointer flex-col items-center justify-center rounded-md border border-dashed border-zinc-300 px-4 text-center dark:border-zinc-800">
                 {staging ? <Loader2 size={24} className="animate-spin text-primary" /> : <UploadCloud size={24} className="text-primary" />}
@@ -1461,7 +1512,7 @@ function PaperEntryImportModal({ onClose, onCommitted }: { onClose: () => void; 
 
         <footer className="flex flex-col gap-3 border-t border-zinc-200 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-zinc-800">
           <p className="text-sm text-zinc-500">
-            Manual staging requires car number plus email, phone, ID, passport, or full name.
+            Manual staging requires event scope, car number, plus email, phone, ID, passport, or full name.
           </p>
           <motion.button
             whileTap={{ scale: 0.98 }}

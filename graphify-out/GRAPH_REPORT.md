@@ -1,11 +1,11 @@
 # Graph Report - RaceDocV1Github  (2026-05-25)
 
 ## Corpus Check
-- 65 files · ~79,969 words
+- 65 files · ~80,383 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 452 nodes · 516 edges · 22 communities detected
+- 456 nodes · 519 edges · 22 communities detected
 - Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 30 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -65,7 +65,7 @@ Nodes (53): createBallastRuleForm(), createCircuitForm(), createEmptyBallastRule
 
 ### Community 1 - "Community 1"
 Cohesion: 0.05
-Nodes (23): createBatch(), createInitialEntryFormState(), createPersonalSnapshot(), draw(), getCanvasPoint(), handleDocumentUpload(), handleSignatureUpload(), handleSubmitBatch() (+15 more)
+Nodes (17): createInitialEntryFormState(), createPersonalSnapshot(), draw(), getCanvasPoint(), handleDocumentUpload(), handleSignatureUpload(), handleSubmitBatch(), loadOptions() (+9 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.08
@@ -80,24 +80,24 @@ Cohesion: 0.1
 Nodes (9): clean(), loadInitialProfile(), saveProfile(), loadInitialData(), getInvitationNotice(), inviteRoleByEmail(), normalizePayload(), resendInvitation() (+1 more)
 
 ### Community 5 - "Community 5"
+Cohesion: 0.12
+Nodes (16): createBatch(), loadMatches(), stageCsvFile(), stageManualRow(), stageRow(), createEmptyPaperEntryDraft(), createPaperEntryImportPayload(), firstNonEmpty() (+8 more)
+
+### Community 6 - "Community 6"
 Cohesion: 0.11
 Nodes (3): addReviewerDraft(), removeReviewerDraft(), updateReviewerDraft()
 
-### Community 6 - "Community 6"
+### Community 7 - "Community 7"
 Cohesion: 0.13
 Nodes (11): AuthRedirect(), OnboardingRoute(), ProtectedRoute(), AdminOnlyRoute(), AdminOrSecretaryRoute(), ScrutineerReportRoute(), useAuth(), canSeeAdminNavigation() (+3 more)
 
-### Community 7 - "Community 7"
+### Community 8 - "Community 8"
 Cohesion: 0.13
 Nodes (8): getAuthErrorMessage(), handleEmailLogin(), handleGoogleLogin(), handleSubmit(), validateIdentity(), updatePassword(), handleSignUp(), handleSubmit()
 
-### Community 8 - "Community 8"
+### Community 9 - "Community 9"
 Cohesion: 0.13
 Nodes (4): parseNullableInteger(), printSelectedResult(), saveEntry(), canPrintRaceResult()
-
-### Community 9 - "Community 9"
-Cohesion: 0.18
-Nodes (12): loadMatches(), firstNonEmpty(), getPaperEntryImportRowSummary(), getPaperEntryMatchPayload(), getPayloadRecord(), hasValue(), isPaperEntryDraftStageable(), normalizeHeader() (+4 more)
 
 ### Community 10 - "Community 10"
 Cohesion: 0.17
@@ -168,6 +168,8 @@ _Questions this graph is uniquely positioned to answer:_
   _High betweenness centrality (0.005) - this node is a cross-community bridge._
 - **Why does `isAnswerFilled()` connect `Community 10` to `Community 2`?**
   _High betweenness centrality (0.004) - this node is a cross-community bridge._
+- **Why does `stageManualRow()` connect `Community 5` to `Community 1`?**
+  _High betweenness centrality (0.004) - this node is a cross-community bridge._
 - **Are the 6 inferred relationships involving `useAuth()` (e.g. with `ProtectedRoute()` and `AdminOrSecretaryRoute()`) actually correct?**
   _`useAuth()` has 6 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 6 inferred relationships involving `getAuthErrorMessage()` (e.g. with `handleEmailLogin()` and `handleGoogleLogin()`) actually correct?**
@@ -176,5 +178,3 @@ _Questions this graph is uniquely positioned to answer:_
   _`stageManualRow()` has 2 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `Entry Form`, `Success Ballast`, `Audit Trail` to the rest of the system?**
   _8 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.05 - nodes in this community are weakly interconnected._
