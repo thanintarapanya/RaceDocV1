@@ -44,6 +44,6 @@ describe('Entry Form list helpers', () => {
     expect(getPaperEntryReadiness(['COMPETITOR']).canPreparePaperEntry).toBe(false)
     expect(getPaperEntryReadiness(['ADMIN']).manualEntryReady).toBe(true)
     expect(getPaperEntryReadiness(['ADMIN']).excelImportReady).toBe(true)
-    expect(getPaperEntryReadiness(['ADMIN']).nextBackendStep).toContain('commit approved rows')
+    expect(getPaperEntryReadiness(['ADMIN']).nextBackendStep).toContain('Pending Entry Forms')
   })
 })

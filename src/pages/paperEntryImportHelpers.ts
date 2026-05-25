@@ -37,8 +37,16 @@ export type PaperEntryImportRowSummary = {
 }
 
 export type PaperEntryImportRowLike = {
+  status?: string | null
+  matched_profile_id?: string | null
   raw_payload?: Record<string, unknown> | null
   normalized_payload?: Record<string, unknown> | null
+}
+
+export type PaperEntryCommitReadiness = {
+  canCommit: boolean
+  matchedCount: number
+  blockingReason: string
 }
 
 export function createEmptyPaperEntryDraft(): PaperEntryDraft {
@@ -180,6 +188,30 @@ export function getPaperEntryMatchTone(confidence: number | null | undefined) {
   if (confidence >= 90) return 'strong'
   if (confidence >= 70) return 'medium'
   return 'weak'
+}
+
+export function getPaperEntryCommitReadiness(rows: PaperEntryImportRowLike[]): PaperEntryCommitReadiness {
+  if (rows.length === 0) {
+    return { canCommit: false, matchedCount: 0, blockingReason: 'No staged rows in this batch.' }
+  }
+
+  const committedCount = rows.filter((row) => row.status === 'Committed').length
+  if (committedCount === rows.length) {
+    return { canCommit: false, matchedCount: 0, blockingReason: 'This batch has already been committed.' }
+  }
+
+  const matchedRows = rows.filter((row) => row.status === 'Matched' && Boolean(row.matched_profile_id))
+  const blockingRows = rows.length - matchedRows.length
+
+  if (blockingRows > 0) {
+    return {
+      canCommit: false,
+      matchedCount: matchedRows.length,
+      blockingReason: `${blockingRows} row(s) still need an accepted profile match.`,
+    }
+  }
+
+  return { canCommit: true, matchedCount: matchedRows.length, blockingReason: '' }
 }
 
 function parseCsv(csvText: string) {

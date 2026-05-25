@@ -1,11 +1,11 @@
-# Graph Report - RaceDocV1Github  (2026-05-24)
+# Graph Report - RaceDocV1Github  (2026-05-25)
 
 ## Corpus Check
-- 65 files · ~79,538 words
+- 65 files · ~79,969 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 449 nodes · 513 edges · 22 communities detected
+- 452 nodes · 516 edges · 22 communities detected
 - Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 30 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -96,12 +96,12 @@ Cohesion: 0.13
 Nodes (4): parseNullableInteger(), printSelectedResult(), saveEntry(), canPrintRaceResult()
 
 ### Community 9 - "Community 9"
-Cohesion: 0.17
-Nodes (6): calculateItemWeight(), createInspectionVersionDiff(), getSelectedValues(), getSingleSelectedValue(), isAnswerFilled(), mapReviews()
+Cohesion: 0.18
+Nodes (12): loadMatches(), firstNonEmpty(), getPaperEntryImportRowSummary(), getPaperEntryMatchPayload(), getPayloadRecord(), hasValue(), isPaperEntryDraftStageable(), normalizeHeader() (+4 more)
 
 ### Community 10 - "Community 10"
-Cohesion: 0.2
-Nodes (12): loadMatches(), firstNonEmpty(), getPaperEntryImportRowSummary(), getPaperEntryMatchPayload(), getPayloadRecord(), hasValue(), isPaperEntryDraftStageable(), normalizeHeader() (+4 more)
+Cohesion: 0.17
+Nodes (6): calculateItemWeight(), createInspectionVersionDiff(), getSelectedValues(), getSingleSelectedValue(), isAnswerFilled(), mapReviews()
 
 ### Community 11 - "Community 11"
 Cohesion: 0.2
@@ -164,9 +164,9 @@ Nodes (1): Branding
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `prefillInspectionAnswers()` connect `Community 2` to `Community 9`?**
+- **Why does `prefillInspectionAnswers()` connect `Community 2` to `Community 10`?**
   _High betweenness centrality (0.005) - this node is a cross-community bridge._
-- **Why does `isAnswerFilled()` connect `Community 9` to `Community 2`?**
+- **Why does `isAnswerFilled()` connect `Community 10` to `Community 2`?**
   _High betweenness centrality (0.004) - this node is a cross-community bridge._
 - **Are the 6 inferred relationships involving `useAuth()` (e.g. with `ProtectedRoute()` and `AdminOrSecretaryRoute()`) actually correct?**
   _`useAuth()` has 6 INFERRED edges - model-reasoned connections that need verification._

@@ -71,7 +71,7 @@ export function getPaperEntryReadiness(roles: string[]) {
     canPreparePaperEntry,
     manualEntryReady: true,
     excelImportReady: true,
-    nextBackendStep: 'Review staged rows, resolve profile matches, then commit approved rows into locked Entry Forms.',
+    nextBackendStep: 'Review staged rows, resolve every profile match, then commit them into Pending Entry Forms for normal approval.',
   }
 }
 

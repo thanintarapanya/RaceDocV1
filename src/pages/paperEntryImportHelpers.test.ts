@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   createEmptyPaperEntryDraft,
   createPaperEntryImportPayload,
+  getPaperEntryCommitReadiness,
   getPaperEntryImportRowSummary,
   getPaperEntryMatchTone,
   isPaperEntryDraftStageable,
@@ -78,5 +79,39 @@ describe('paper entry import helpers', () => {
     expect(getPaperEntryMatchTone(75)).toBe('medium')
     expect(getPaperEntryMatchTone(55)).toBe('weak')
     expect(getPaperEntryMatchTone(null)).toBe('weak')
+  })
+
+  it('requires every staged row to be matched before commit', () => {
+    expect(getPaperEntryCommitReadiness([])).toEqual({
+      canCommit: false,
+      matchedCount: 0,
+      blockingReason: 'No staged rows in this batch.',
+    })
+
+    expect(getPaperEntryCommitReadiness([
+      { status: 'Matched', matched_profile_id: 'profile-1' },
+      { status: 'NeedsReview', matched_profile_id: null },
+    ])).toEqual({
+      canCommit: false,
+      matchedCount: 1,
+      blockingReason: '1 row(s) still need an accepted profile match.',
+    })
+
+    expect(getPaperEntryCommitReadiness([
+      { status: 'Matched', matched_profile_id: 'profile-1' },
+      { status: 'Matched', matched_profile_id: 'profile-2' },
+    ])).toEqual({
+      canCommit: true,
+      matchedCount: 2,
+      blockingReason: '',
+    })
+
+    expect(getPaperEntryCommitReadiness([
+      { status: 'Committed', matched_profile_id: 'profile-1' },
+    ])).toEqual({
+      canCommit: false,
+      matchedCount: 0,
+      blockingReason: 'This batch has already been committed.',
+    })
   })
 })

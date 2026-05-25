@@ -28,7 +28,7 @@ import {
 import { filterBySeriesRace, getSeriesRaceOptions } from '@/lib/series-race-filter'
 import { supabase } from '@/lib/supabase'
 import { createEmptyEntryListFilters, filterEntryList, getEntryListFilterOptions, getEntryStatusDisplay, getPaperEntryReadiness, hasActiveEntryListFilters, type EntryListFilters, type EntryListRow } from './entryFormListHelpers'
-import { createEmptyPaperEntryDraft, createPaperEntryImportPayload, getPaperEntryImportRowSummary, getPaperEntryMatchPayload, getPaperEntryMatchTone, isPaperEntryDraftStageable, parsePaperEntryCsvImportRows, type PaperEntryDraft } from './paperEntryImportHelpers'
+import { createEmptyPaperEntryDraft, createPaperEntryImportPayload, getPaperEntryCommitReadiness, getPaperEntryImportRowSummary, getPaperEntryMatchPayload, getPaperEntryMatchTone, isPaperEntryDraftStageable, parsePaperEntryCsvImportRows, type PaperEntryDraft } from './paperEntryImportHelpers'
 
 type EntryStatus = 'draft' | 'pending' | 'active' | 'inactive' | 'rejected'
 
@@ -482,7 +482,7 @@ export function EntryFormPage() {
 
       <AnimatePresence>
         {creatorOpen ? <EntryFormCreator onClose={() => setCreatorOpen(false)} /> : null}
-        {paperEntryOpen ? <PaperEntryImportModal onClose={() => setPaperEntryOpen(false)} /> : null}
+        {paperEntryOpen ? <PaperEntryImportModal onClose={() => setPaperEntryOpen(false)} onCommitted={() => loadEntries()} /> : null}
       </AnimatePresence>
     </div>
   )
@@ -1060,7 +1060,7 @@ function PaperEntryOperationsMenu({ readiness, onOpen }: { readiness: ReturnType
   )
 }
 
-function PaperEntryImportModal({ onClose }: { onClose: () => void }) {
+function PaperEntryImportModal({ onClose, onCommitted }: { onClose: () => void; onCommitted: () => void }) {
   const [mode, setMode] = useState<'manual' | 'csv'>('manual')
   const [draft, setDraft] = useState<PaperEntryDraft>(() => createEmptyPaperEntryDraft())
   const [csvFileName, setCsvFileName] = useState('')
@@ -1073,11 +1073,13 @@ function PaperEntryImportModal({ onClose }: { onClose: () => void }) {
   const [matches, setMatches] = useState<EntryImportProfileMatch[]>([])
   const [matchesLoading, setMatchesLoading] = useState(false)
   const [matchingRowId, setMatchingRowId] = useState<string | null>(null)
+  const [committing, setCommitting] = useState(false)
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [staging, setStaging] = useState(false)
   const canStageManual = isPaperEntryDraftStageable(draft)
   const selectedBatch = batches.find((batch) => batch.id === selectedBatchId) ?? null
+  const commitReadiness = getPaperEntryCommitReadiness(rows)
 
   const loadBatches = useCallback(async (isActive: () => boolean = () => true) => {
     setBatchesLoading(true)
@@ -1300,6 +1302,36 @@ function PaperEntryImportModal({ onClose }: { onClose: () => void }) {
     }
   }
 
+  async function commitSelectedBatch() {
+    if (!selectedBatchId || !commitReadiness.canCommit || committing) return
+
+    const confirmed = window.confirm(`Commit ${commitReadiness.matchedCount} matched row(s) into real Pending Entry Forms? This cannot be edited from the staging table after commit.`)
+    if (!confirmed) return
+
+    setCommitting(true)
+    setError(null)
+    setStatusMessage(null)
+
+    try {
+      const { data, error: commitError } = await supabase.rpc('commit_entry_import_batch', {
+        p_batch_id: selectedBatchId,
+      })
+
+      if (commitError) throw commitError
+
+      const result = Array.isArray(data) ? data[0] : data
+      const committedCount = result?.committed_row_count ?? commitReadiness.matchedCount
+      setStatusMessage(`${committedCount} Entry Form(s) created as Pending for Secretary/Admin review.`)
+      await loadBatches()
+      await loadRows(selectedBatchId)
+      onCommitted()
+    } catch (commitError) {
+      setError(commitError instanceof Error ? commitError.message : 'Import batch commit failed')
+    } finally {
+      setCommitting(false)
+    }
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -1407,9 +1439,12 @@ function PaperEntryImportModal({ onClose }: { onClose: () => void }) {
             matches={matches}
             matchesLoading={matchesLoading}
             matchingRowId={matchingRowId}
+            committing={committing}
+            commitReadiness={commitReadiness}
             onSelectBatch={(batchId) => setSelectedBatchId(batchId)}
             onSelectRow={setSelectedRow}
             onAcceptMatch={acceptMatch}
+            onCommitBatch={commitSelectedBatch}
             onRefresh={() => {
               loadBatches()
               loadRows(selectedBatchId)
@@ -1469,9 +1504,12 @@ function PaperEntryMatchReviewBoard({
   matches,
   matchesLoading,
   matchingRowId,
+  committing,
+  commitReadiness,
   onSelectBatch,
   onSelectRow,
   onAcceptMatch,
+  onCommitBatch,
   onRefresh,
 }: {
   batches: EntryImportBatch[]
@@ -1484,9 +1522,12 @@ function PaperEntryMatchReviewBoard({
   matches: EntryImportProfileMatch[]
   matchesLoading: boolean
   matchingRowId: string | null
+  committing: boolean
+  commitReadiness: ReturnType<typeof getPaperEntryCommitReadiness>
   onSelectBatch: (batchId: string) => void
   onSelectRow: (row: EntryImportRow) => void
   onAcceptMatch: (match: EntryImportProfileMatch) => void
+  onCommitBatch: () => void
   onRefresh: () => void
 }) {
   return (
@@ -1551,8 +1592,25 @@ function PaperEntryMatchReviewBoard({
 
           <div className="min-w-0 border border-zinc-200 dark:border-zinc-800">
             <div className="border-b border-zinc-200 p-4 dark:border-zinc-800">
-              <p className="font-semibold">{selectedBatch ? `${selectedBatch.source} batch` : 'Select a batch'}</p>
-              <p className="mt-1 text-sm text-zinc-500">{selectedBatch?.original_filename || selectedBatch?.notes || selectedBatch?.id || 'Rows will appear here.'}</p>
+              <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                <div>
+                  <p className="font-semibold">{selectedBatch ? `${selectedBatch.source} batch` : 'Select a batch'}</p>
+                  <p className="mt-1 text-sm text-zinc-500">{selectedBatch?.original_filename || selectedBatch?.notes || selectedBatch?.id || 'Rows will appear here.'}</p>
+                  <p className="mt-2 text-xs text-zinc-500">
+                    {commitReadiness.canCommit ? `${commitReadiness.matchedCount} matched row(s) ready to create Pending Entry Forms.` : commitReadiness.blockingReason}
+                  </p>
+                </div>
+                <motion.button
+                  whileTap={{ scale: 0.98 }}
+                  type="button"
+                  onClick={onCommitBatch}
+                  disabled={!commitReadiness.canCommit || committing || selectedBatch?.status === 'Committed'}
+                  className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-45"
+                >
+                  {committing ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
+                  Commit Entry Forms
+                </motion.button>
+              </div>
             </div>
 
             {rowsLoading ? (
