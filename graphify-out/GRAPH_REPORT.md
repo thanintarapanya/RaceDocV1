@@ -1,12 +1,12 @@
-# Graph Report - RaceDocV1Github  (2026-05-25)
+# Graph Report - RaceDocV1Github  (2026-06-03)
 
 ## Corpus Check
-- 65 files · ~80,753 words
+- 65 files · ~81,521 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 460 nodes · 524 edges · 22 communities detected
-- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 31 edges (avg confidence: 0.8)
+- 465 nodes · 537 edges · 22 communities detected
+- Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 35 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -34,7 +34,7 @@
 - [[_COMMUNITY_Community 51|Community 51]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `finishSave()` - 18 edges
+1. `finishSave()` - 20 edges
 2. `useAuth()` - 7 edges
 3. `getAuthErrorMessage()` - 7 edges
 4. `createOrganizerSetupBoard()` - 5 edges
@@ -60,8 +60,8 @@
 ## Communities
 
 ### Community 0 - "Community 0"
-Cohesion: 0.05
-Nodes (53): createBallastRuleForm(), createCircuitForm(), createEmptyBallastRuleForm(), createEmptyCircuitForm(), createEmptyEventForm(), createEmptyEventSeriesRuleForm(), createEmptyGradeForm(), createEmptyInspectionItemForm() (+45 more)
+Cohesion: 0.04
+Nodes (55): createBallastRuleForm(), createCircuitForm(), createEmptyBallastRuleForm(), createEmptyCircuitForm(), createEmptyEventForm(), createEmptyEventSeriesRuleForm(), createEmptyGradeForm(), createEmptyInspectionItemForm() (+47 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.05
@@ -72,8 +72,8 @@ Cohesion: 0.08
 Nodes (14): createInspectionFilePath(), createInspectionForm(), flattenSnapshot(), normalizeLabel(), openInspectionForm(), prefillInspectionAnswers(), refreshDetail(), refreshEntries() (+6 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.09
-Nodes (5): createOrganizerSetupBoard(), createSetupStep(), getClassActionLabel(), getClassEditorKey(), getRuleEditorKey()
+Cohesion: 0.08
+Nodes (9): createOrganizerSetupBoard(), createSetupStep(), getClassActionLabel(), getClassEditorKey(), getEligibleGradesForEventSeries(), getEligibleSeriesForEvent(), getRuleEditorKey(), createEventSeriesRuleDraft() (+1 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.1
@@ -164,10 +164,10 @@ Nodes (1): Branding
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `prefillInspectionAnswers()` connect `Community 2` to `Community 10`?**
-  _High betweenness centrality (0.004) - this node is a cross-community bridge._
-- **Why does `isAnswerFilled()` connect `Community 10` to `Community 2`?**
-  _High betweenness centrality (0.004) - this node is a cross-community bridge._
+- **Why does `createEventSeriesRuleDraft()` connect `Community 3` to `Community 0`?**
+  _High betweenness centrality (0.009) - this node is a cross-community bridge._
+- **Why does `normalizeEventSeriesRuleForm()` connect `Community 3` to `Community 0`?**
+  _High betweenness centrality (0.009) - this node is a cross-community bridge._
 - **Are the 6 inferred relationships involving `useAuth()` (e.g. with `ProtectedRoute()` and `AdminOrSecretaryRoute()`) actually correct?**
   _`useAuth()` has 6 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 6 inferred relationships involving `getAuthErrorMessage()` (e.g. with `handleEmailLogin()` and `handleGoogleLogin()`) actually correct?**
@@ -177,4 +177,4 @@ _Questions this graph is uniquely positioned to answer:_
 - **What connects `Entry Form`, `Success Ballast`, `Audit Trail` to the rest of the system?**
   _8 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.05 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.04 - nodes in this community are weakly interconnected._

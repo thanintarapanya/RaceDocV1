@@ -453,8 +453,8 @@ export function getSelectedEventId(events: EventRow[], selectedEventId: string |
 }
 
 export function seasonNeedsAttention(season: SeasonRow, seasonSeriesBySeason: Map<string, SeasonSeriesRow[]>, seasonSeriesGradesBySeries: Map<string, SeasonSeriesGradeRow[]>) {
-  const seasonSeries = seasonSeriesBySeason.get(season.seasonId) ?? []
-  return seasonSeries.length === 0 || seasonSeries.some((series) => (seasonSeriesGradesBySeries.get(series.seasonSeriesId) ?? []).length === 0)
+  const seasonSeries = (seasonSeriesBySeason.get(season.seasonId) ?? []).filter((series) => series.isActive)
+  return seasonSeries.length === 0 || seasonSeries.some((series) => (seasonSeriesGradesBySeries.get(series.seasonSeriesId) ?? []).filter((grade) => grade.isActive).length === 0)
 }
 
 export function eventNeedsAttention(event: EventRow, printBackgroundAssetsByEvent: Map<string, PrintBackgroundAssetRow[]>) {
@@ -607,4 +607,15 @@ export function getEligibleGradesForEventSeries(
   if (!seasonSeriesId) return []
 
   return seasonSeriesGrades.filter((grade) => grade.seasonSeriesId === seasonSeriesId && grade.isActive)
+}
+
+export function getEligibleSeriesForEvent(
+  eventId: string,
+  events: EventRow[],
+  seasonSeries: SeasonSeriesRow[],
+) {
+  const seasonId = events.find((event) => event.eventId === eventId)?.seasonId
+  if (!seasonId) return []
+
+  return seasonSeries.filter((series) => series.seasonId === seasonId && series.isActive)
 }

@@ -19,6 +19,7 @@ import {
   getScopeFilterSummary,
   getRulePackageReadiness,
   getEligibleGradesForEventSeries,
+  getEligibleSeriesForEvent,
   hasActiveScopeFilter,
   normalizeOrganizerSettingsPayload,
   raceEventNeedsAttention,
@@ -367,7 +368,7 @@ export function OrganizerSettingsPage() {
       setSeriesRaceForm((current) => current.seriesRaceId || current.organizationId ? current : createEmptySeriesRaceForm(nextPayload.organizations[0]?.organizationId ?? ''))
       setSeasonSeriesForm((current) => current.seasonId || current.seriesRaceId ? current : createEmptySeasonSeriesForm(nextPayload.seasons[0]?.seasonId ?? '', nextPayload.seriesRaces[0]?.seriesRaceId ?? ''))
       setSeasonSeriesGradeForm((current) => current.seasonId || current.seriesRaceId || current.gradeId ? current : createEmptySeasonSeriesGradeForm(nextPayload.seasons[0]?.seasonId ?? '', nextPayload.seriesRaces[0]?.seriesRaceId ?? '', nextPayload.grades[0]?.gradeId ?? ''))
-      setEventSeriesRuleForm((current) => current.eventSeriesRuleId || current.eventId ? current : createEmptyEventSeriesRuleForm(nextPayload.events[0]?.eventId ?? '', nextPayload.seriesRaces[0]?.seriesRaceId ?? ''))
+      setEventSeriesRuleForm((current) => current.eventSeriesRuleId || current.eventId ? current : createEventSeriesRuleDraft(nextPayload))
       setInspectionTemplateForm((current) => current.templateId || current.eventSeriesRuleId ? current : createEmptyInspectionTemplateForm(nextPayload.eventSeriesRules[0]?.eventSeriesRuleId ?? ''))
       setInspectionSectionForm((current) => current.sectionId || current.templateId ? current : createEmptyInspectionSectionForm(nextPayload.inspectionTemplates[0]?.templateId ?? ''))
       setInspectionItemForm((current) => current.itemId || current.sectionId ? current : createEmptyInspectionItemForm(nextPayload.inspectionTemplates[0]?.sections[0]?.sectionId ?? ''))
@@ -409,11 +410,17 @@ export function OrganizerSettingsPage() {
   const inspectionTemplatesByEventRule = useMemo(() => groupInspectionTemplatesByEventRule(payload.inspectionTemplates), [payload.inspectionTemplates])
   const seasonSeriesBySeason = useMemo(() => groupSeasonSeriesBySeason(payload.seasonSeries), [payload.seasonSeries])
   const seasonSeriesGradesBySeries = useMemo(() => groupSeasonSeriesGradesBySeries(payload.seasonSeriesGrades), [payload.seasonSeriesGrades])
+  const eventRuleSeriesOptions = useMemo(() => {
+    const eligibleSeries = getEligibleSeriesForEvent(eventSeriesRuleForm.eventId, payload.events, payload.seasonSeries)
+    const eligibleSeriesIds = new Set(eligibleSeries.map((series) => series.seriesRaceId))
+    return payload.seriesRaces.filter((seriesRace) => eligibleSeriesIds.has(seriesRace.seriesRaceId))
+  }, [eventSeriesRuleForm.eventId, payload.events, payload.seasonSeries, payload.seriesRaces])
   const eventRuleGradeOptions = useMemo(() => {
     const eligibleGrades = getEligibleGradesForEventSeries(eventSeriesRuleForm.eventId, eventSeriesRuleForm.seriesRaceId, payload.events, payload.seasonSeries, payload.seasonSeriesGrades)
-    if (eligibleGrades.length === 0) return payload.grades
-    return payload.grades.filter((grade) => eligibleGrades.some((eligibleGrade) => eligibleGrade.gradeId === grade.gradeId))
+    const eligibleGradeIds = new Set(eligibleGrades.map((grade) => grade.gradeId))
+    return payload.grades.filter((grade) => eligibleGradeIds.has(grade.gradeId))
   }, [eventSeriesRuleForm.eventId, eventSeriesRuleForm.seriesRaceId, payload.events, payload.grades, payload.seasonSeries, payload.seasonSeriesGrades])
+
   const inspectionSections = useMemo(() => payload.inspectionTemplates.flatMap((template) => template.sections), [payload.inspectionTemplates])
   const inspectionItems = useMemo(() => inspectionSections.flatMap((section) => section.items), [inspectionSections])
   const activeEditorMeta = settingsEditors.find((editor) => editor.key === activeEditor) ?? settingsEditors[0]
@@ -598,24 +605,69 @@ export function OrganizerSettingsPage() {
     setUpdatingKey(null)
   }
 
+  async function unlinkSeasonSeries(series: SeasonSeriesRow) {
+    const confirmed = window.confirm(`Unlink ${series.seriesName} from this Season? This hides the Series from active setup but preserves audit and history.`)
+    if (!confirmed) return
+
+    setUpdatingKey(`unlink-season-series-${series.seasonSeriesId}`)
+    setError(null)
+    setNotice(null)
+
+    const { error } = await supabase.rpc('set_organizer_season_series', {
+      p_season_id: series.seasonId,
+      p_series_race_id: series.seriesRaceId,
+      p_is_active: false,
+    })
+
+    await finishSave(error, 'Season Series unlinked.', () => setSeasonSeriesForm(createEmptySeasonSeriesForm(payload.seasons[0]?.seasonId ?? '', payload.seriesRaces[0]?.seriesRaceId ?? '')))
+    setUpdatingKey(null)
+  }
+
+  async function unlinkSeasonSeriesGrade(grade: SeasonSeriesGradeRow) {
+    const confirmed = window.confirm(`Unlink ${grade.gradeName} from this Season Series? This hides the Grade from active setup but preserves audit and history.`)
+    if (!confirmed) return
+
+    setUpdatingKey(`unlink-season-grade-${grade.seasonSeriesGradeId}`)
+    setError(null)
+    setNotice(null)
+
+    const { error } = await supabase.rpc('set_organizer_season_series_grade', {
+      p_season_id: grade.seasonId,
+      p_series_race_id: grade.seriesRaceId,
+      p_grade_id: grade.gradeId,
+      p_is_active: false,
+    })
+
+    await finishSave(error, 'Season Grade unlinked.', () => setSeasonSeriesGradeForm(createEmptySeasonSeriesGradeForm(payload.seasons[0]?.seasonId ?? '', payload.seriesRaces[0]?.seriesRaceId ?? '', payload.grades[0]?.gradeId ?? '')))
+    setUpdatingKey(null)
+  }
+
   async function saveEventSeriesRule(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setUpdatingKey('eventSeriesRule')
     setError(null)
     setNotice(null)
 
+    const normalizedEventSeriesRuleForm = normalizeEventSeriesRuleForm(eventSeriesRuleForm, payload)
+
+    if (!normalizedEventSeriesRuleForm.eventId || !normalizedEventSeriesRuleForm.seriesRaceId || !normalizedEventSeriesRuleForm.gradeId) {
+      setError('Choose an Event, active Season Series, and active Season Grade before creating a Rule Package.')
+      setUpdatingKey(null)
+      return
+    }
+
     const { error } = await supabase.rpc('save_organizer_event_series_rule', {
-      p_event_series_rule_id: eventSeriesRuleForm.eventSeriesRuleId || null,
-      p_event_id: eventSeriesRuleForm.eventId || null,
-      p_series_race_id: eventSeriesRuleForm.seriesRaceId || null,
-      p_grade_id: eventSeriesRuleForm.gradeId || null,
-      p_status: eventSeriesRuleForm.status,
-      p_version: Number(eventSeriesRuleForm.version),
-      p_is_locked: eventSeriesRuleForm.isLocked,
-      p_cloned_from_id: eventSeriesRuleForm.clonedFromId || null,
+      p_event_series_rule_id: normalizedEventSeriesRuleForm.eventSeriesRuleId || null,
+      p_event_id: normalizedEventSeriesRuleForm.eventId || null,
+      p_series_race_id: normalizedEventSeriesRuleForm.seriesRaceId || null,
+      p_grade_id: normalizedEventSeriesRuleForm.gradeId || null,
+      p_status: normalizedEventSeriesRuleForm.status,
+      p_version: Number(normalizedEventSeriesRuleForm.version),
+      p_is_locked: normalizedEventSeriesRuleForm.isLocked,
+      p_cloned_from_id: normalizedEventSeriesRuleForm.clonedFromId || null,
     })
 
-    await finishSave(error, eventSeriesRuleForm.eventSeriesRuleId ? 'Event Rule updated.' : 'Event Rule created.', () => setEventSeriesRuleForm(createEmptyEventSeriesRuleForm(payload.events[0]?.eventId ?? '', payload.seriesRaces[0]?.seriesRaceId ?? '')))
+    await finishSave(error, eventSeriesRuleForm.eventSeriesRuleId ? 'Event Rule updated.' : 'Event Rule created.', () => setEventSeriesRuleForm(createEventSeriesRuleDraft(payload)))
     setUpdatingKey(null)
   }
 
@@ -1054,9 +1106,30 @@ export function OrganizerSettingsPage() {
             </SettingsForm>
 
             <SettingsForm active={activeEditor === 'eventSeriesRule'} editorKey="eventSeriesRule" title="Event Rule" icon={ClipboardList} onSubmit={saveEventSeriesRule} updating={updatingKey === 'eventSeriesRule'} buttonLabel={eventSeriesRuleForm.eventSeriesRuleId ? 'Update Event Rule' : 'Create Event Rule'}>
-              <EntitySelect label="Event" value={eventSeriesRuleForm.eventId} options={payload.events.map((event) => ({ value: event.eventId, label: `${event.eventOrder}. ${event.name}` }))} onChange={(eventId) => setEventSeriesRuleForm((current) => ({ ...current, eventId }))} />
-              <EntitySelect label="Series Race" value={eventSeriesRuleForm.seriesRaceId} options={payload.seriesRaces.map((seriesRace) => ({ value: seriesRace.seriesRaceId, label: `${seriesRace.code} / ${seriesRace.name}` }))} onChange={(seriesRaceId) => setEventSeriesRuleForm((current) => ({ ...current, seriesRaceId, gradeId: '' }))} />
+              <EntitySelect
+                label="Event"
+                value={eventSeriesRuleForm.eventId}
+                options={payload.events.map((event) => ({ value: event.eventId, label: `${event.eventOrder}. ${event.name}` }))}
+                onChange={(eventId) => {
+                  const draft = createEventSeriesRuleDraft(payload, eventId)
+                  setEventSeriesRuleForm((current) => ({ ...current, eventId, seriesRaceId: draft.seriesRaceId, gradeId: draft.gradeId }))
+                }}
+              />
+              <EntitySelect
+                label="Series Race"
+                value={eventSeriesRuleForm.seriesRaceId}
+                options={eventRuleSeriesOptions.map((seriesRace) => ({ value: seriesRace.seriesRaceId, label: `${seriesRace.code} / ${seriesRace.name}` }))}
+                onChange={(seriesRaceId) => {
+                  const [firstGrade] = getEligibleGradesForEventSeries(eventSeriesRuleForm.eventId, seriesRaceId, payload.events, payload.seasonSeries, payload.seasonSeriesGrades)
+                  setEventSeriesRuleForm((current) => ({ ...current, seriesRaceId, gradeId: firstGrade?.gradeId ?? '' }))
+                }}
+              />
               <EntitySelect label="Grade" value={eventSeriesRuleForm.gradeId} options={eventRuleGradeOptions.map((grade) => ({ value: grade.gradeId, label: `${grade.code} / ${grade.name}` }))} onChange={(gradeId) => setEventSeriesRuleForm((current) => ({ ...current, gradeId }))} />
+              {eventRuleSeriesOptions.length === 0 || eventRuleGradeOptions.length === 0 ? (
+                <div className="rounded-md border border-amber-200 bg-amber-500/10 px-3 py-2 text-sm leading-6 text-amber-700 dark:border-amber-900/60 dark:text-amber-400">
+                  Link an active Season Series and Season Grade for the selected Event season before creating a Rule Package.
+                </div>
+              ) : null}
               <div className="grid gap-3 sm:grid-cols-2">
                 <EntitySelect label="Rule status" value={eventSeriesRuleForm.status} options={ruleStatuses.map((status) => ({ value: status, label: status }))} onChange={(status) => setEventSeriesRuleForm((current) => ({ ...current, status: status as RuleStatus, isLocked: status === 'Locked' ? true : current.isLocked }))} />
                 <TextField label="Version" type="number" value={eventSeriesRuleForm.version} onChange={(version) => setEventSeriesRuleForm((current) => ({ ...current, version }))} placeholder="1" />
@@ -1074,7 +1147,7 @@ export function OrganizerSettingsPage() {
                 value={eventSeriesRuleForm.eventSeriesRuleId}
                 emptyLabel="Create new Event Rule"
                 options={payload.eventSeriesRules.map((rule) => ({ value: rule.eventSeriesRuleId, label: `${rule.eventName} / ${rule.seriesName} / ${rule.gradeName} / v${rule.version}` }))}
-                onChange={(eventSeriesRuleId) => setEventSeriesRuleForm(eventSeriesRuleId ? createEventSeriesRuleForm(payload.eventSeriesRules.find((rule) => rule.eventSeriesRuleId === eventSeriesRuleId) ?? null) : createEmptyEventSeriesRuleForm(payload.events[0]?.eventId ?? '', payload.seriesRaces[0]?.seriesRaceId ?? ''))}
+                onChange={(eventSeriesRuleId) => setEventSeriesRuleForm(eventSeriesRuleId ? createEventSeriesRuleForm(payload.eventSeriesRules.find((rule) => rule.eventSeriesRuleId === eventSeriesRuleId) ?? null) : createEventSeriesRuleDraft(payload))}
               />
             </SettingsForm>
 
@@ -1371,6 +1444,8 @@ export function OrganizerSettingsPage() {
               setSeasonSeriesGradeForm(createEmptySeasonSeriesGradeForm(season?.seasonId ?? payload.seasons[0]?.seasonId ?? '', payload.seriesRaces[0]?.seriesRaceId ?? '', payload.grades[0]?.gradeId ?? ''))
               openEditor('seasonSeriesGrade')
             }}
+            onUnlinkSeasonSeries={unlinkSeasonSeries}
+            onUnlinkSeasonSeriesGrade={unlinkSeasonSeriesGrade}
             onCreateEvent={(season) => {
               setEventForm(createEmptyEventForm(season?.seasonId ?? payload.seasons[0]?.seasonId ?? '', payload.circuits[0]?.circuitId ?? ''))
               openEditor('event')
@@ -1389,7 +1464,7 @@ export function OrganizerSettingsPage() {
               openEditor('printBackgroundAsset')
             }}
             onCreateEventSeriesRule={(event) => {
-              setEventSeriesRuleForm(createEmptyEventSeriesRuleForm(event?.eventId ?? payload.events[0]?.eventId ?? '', payload.seriesRaces[0]?.seriesRaceId ?? ''))
+              setEventSeriesRuleForm(createEventSeriesRuleDraft(payload, event?.eventId ?? payload.events[0]?.eventId ?? ''))
               openEditor('eventSeriesRule')
             }}
             onEditEventSeriesRule={(rule) => {
@@ -1716,6 +1791,8 @@ type ScopeBoardProps = {
   onDuplicateSeason: (season: SeasonRow) => void
   onCreateSeasonSeries: (season: SeasonRow | null) => void
   onCreateSeasonGrade: (season: SeasonRow | null) => void
+  onUnlinkSeasonSeries: (series: SeasonSeriesRow) => void
+  onUnlinkSeasonSeriesGrade: (grade: SeasonSeriesGradeRow) => void
   onCreateEvent: (season: SeasonRow | null) => void
   onEditEvent: (event: EventRow) => void
   onDuplicateEvent: (event: EventRow) => void
@@ -1888,7 +1965,7 @@ function GlobalScopeBoard({ payload, filter, onCreateCircuit, onEditCircuit, onC
   )
 }
 
-function SeasonScopeBoard({ payload, activeSeason, filter, seasonSeriesBySeason, seasonSeriesGradesBySeries, onCreateSeason, onEditSeason, onDuplicateSeason, onCreateSeasonSeries, onCreateSeasonGrade }: ScopeBoardProps & { activeSeason: SeasonRow | null }) {
+function SeasonScopeBoard({ payload, activeSeason, filter, seasonSeriesBySeason, seasonSeriesGradesBySeries, onCreateSeason, onEditSeason, onDuplicateSeason, onCreateSeasonSeries, onCreateSeasonGrade, onUnlinkSeasonSeries, onUnlinkSeasonSeriesGrade }: ScopeBoardProps & { activeSeason: SeasonRow | null }) {
   const seasons = filterByQuery(payload.seasons, filter.query, (season) => [season.name, String(season.year), season.status, season.isActive ? 'active season' : 'inactive season'])
     .filter((season) => !filter.needsAttentionOnly || seasonNeedsAttention(season, seasonSeriesBySeason, seasonSeriesGradesBySeries))
   const showNoActiveSeason = !activeSeason && (!filter.query.trim() || 'no active season missing'.includes(filter.query.trim().toLowerCase()))
@@ -1900,8 +1977,8 @@ function SeasonScopeBoard({ payload, activeSeason, filter, seasonSeriesBySeason,
         {seasons.length === 0 && payload.seasons.length === 0 ? <ScopeCard scope="season" title="No Seasons yet" description="Create the first racing year before building Events and Rule Packages." statusLabel="Missing" actionLabel="Create Season" onAction={onCreateSeason}><ScopeEmptyMessage filter={filter} defaultMessage="No seasons configured. Create the first season to start building events and races." /></ScopeCard> : null}
         {seasons.length === 0 && payload.seasons.length > 0 ? <ScopeCard scope="season" title="No Seasons match" description="Adjust search or clear the attention filter to return to the Season board." statusLabel="Filtered"><ScopeEmptyMessage filter={filter} defaultMessage="No seasons configured." /></ScopeCard> : null}
         {seasons.map((season) => {
-          const seasonSeries = seasonSeriesBySeason.get(season.seasonId) ?? []
-          const gradeCount = seasonSeries.reduce((total, series) => total + (seasonSeriesGradesBySeries.get(series.seasonSeriesId) ?? []).length, 0)
+          const seasonSeries = (seasonSeriesBySeason.get(season.seasonId) ?? []).filter((series) => series.isActive)
+          const gradeCount = seasonSeries.reduce((total, series) => total + (seasonSeriesGradesBySeries.get(series.seasonSeriesId) ?? []).filter((grade) => grade.isActive).length, 0)
 
           return (
             <ScopeCard key={season.seasonId} scope="season" title={`${season.year} / ${season.name}`} description={season.isActive ? 'Active racing season.' : 'Season configuration.'} statusLabel={season.status} actionLabel="Edit Season" onAction={() => onEditSeason(season)}>
@@ -1910,12 +1987,28 @@ function SeasonScopeBoard({ payload, activeSeason, filter, seasonSeriesBySeason,
                 <TextButton label="Add Season Series" onClick={() => onCreateSeasonSeries(season)} />
                 <TextButton label="Add Season Grade" onClick={() => onCreateSeasonGrade(season)} />
               </div>
-              <p className="text-sm text-zinc-500">{seasonSeries.length} series link(s) / {gradeCount} grade link(s)</p>
+              <p className="text-sm text-zinc-500">{seasonSeries.length} active series link(s) / {gradeCount} active grade link(s)</p>
+              <p className="text-xs leading-5 text-zinc-500">Unlink hides incorrect bindings from active setup while preserving audit and historical records.</p>
               {seasonSeries.length === 0 ? <p className="text-sm text-amber-700 dark:text-amber-400">Season series missing.</p> : null}
               {seasonSeries.length > 0 && gradeCount === 0 ? <p className="text-sm text-amber-700 dark:text-amber-400">Season grades missing.</p> : null}
               {seasonSeries.map((series) => {
-                const grades = seasonSeriesGradesBySeries.get(series.seasonSeriesId) ?? []
-                return <AssetPill key={series.seasonSeriesId} label={`${series.seriesName} / ${grades.length > 0 ? grades.map((grade) => grade.gradeName).join(', ') : 'No grades'}`} onClick={() => onCreateSeasonGrade(season)} />
+                const grades = (seasonSeriesGradesBySeries.get(series.seasonSeriesId) ?? []).filter((grade) => grade.isActive)
+                return (
+                  <div key={series.seasonSeriesId} className="w-full rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <p className="text-sm font-semibold">{series.seriesName}</p>
+                        <p className="mt-1 text-xs text-zinc-500">{grades.length > 0 ? `${grades.length} active grade(s)` : 'No active grades'}</p>
+                      </div>
+                      <TextButton label="Unlink Series" onClick={() => onUnlinkSeasonSeries(series)} />
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {grades.length === 0 ? <p className="text-sm text-amber-700 dark:text-amber-400">Add at least one Grade for this Season Series.</p> : null}
+                      {grades.map((grade) => <RemovablePill key={grade.seasonSeriesGradeId} label={grade.gradeName} removeLabel="Unlink Grade" onRemove={() => onUnlinkSeasonSeriesGrade(grade)} />)}
+                      <TextButton label="Add Grade" onClick={() => onCreateSeasonGrade(season)} />
+                    </div>
+                  </div>
+                )
               })}
             </ScopeCard>
           )
@@ -2319,6 +2412,26 @@ function AssetPill({ label, onClick }: { label: string; onClick: () => void }) {
   )
 }
 
+function RemovablePill({ label, removeLabel, onRemove }: { label: string; removeLabel: string; onRemove: () => void }) {
+  return (
+    <span className="inline-flex min-h-9 items-center overflow-hidden rounded-md border border-zinc-200 text-xs font-semibold dark:border-zinc-800">
+      <span className="px-2">{label}</span>
+      <motion.button
+        whileTap={{ scale: 0.98 }}
+        type="button"
+        onClick={(event) => {
+          event.preventDefault()
+          event.stopPropagation()
+          onRemove()
+        }}
+        className="min-h-9 border-l border-zinc-200 px-2 text-red-700 transition hover:bg-red-500/10 dark:border-zinc-800 dark:text-red-400"
+      >
+        {removeLabel}
+      </motion.button>
+    </span>
+  )
+}
+
 function TextField({ label, value, onChange, type = 'text', placeholder }: { label: string; value: string; onChange: (value: string) => void; type?: string; placeholder?: string }) {
   return (
     <label className="block">
@@ -2516,6 +2629,33 @@ function createEmptySeasonSeriesGradeForm(seasonId = '', seriesRaceId = '', grad
 
 function createEmptyEventSeriesRuleForm(eventId = '', seriesRaceId = ''): EventSeriesRuleForm {
   return { eventSeriesRuleId: '', eventId, seriesRaceId, gradeId: '', status: 'Draft', version: '1', isLocked: false, clonedFromId: '' }
+}
+
+function createEventSeriesRuleDraft(payload: OrganizerPayload, eventId = payload.events[0]?.eventId ?? ''): EventSeriesRuleForm {
+  const [firstSeries] = getEligibleSeriesForEvent(eventId, payload.events, payload.seasonSeries)
+  const [firstGrade] = firstSeries
+    ? getEligibleGradesForEventSeries(eventId, firstSeries.seriesRaceId, payload.events, payload.seasonSeries, payload.seasonSeriesGrades)
+    : []
+
+  return {
+    ...createEmptyEventSeriesRuleForm(eventId, firstSeries?.seriesRaceId ?? ''),
+    gradeId: firstGrade?.gradeId ?? '',
+  }
+}
+
+function normalizeEventSeriesRuleForm(form: EventSeriesRuleForm, payload: OrganizerPayload): EventSeriesRuleForm {
+  if (form.eventSeriesRuleId) return form
+
+  const eligibleSeries = getEligibleSeriesForEvent(form.eventId, payload.events, payload.seasonSeries)
+  const seriesRaceId = eligibleSeries.some((series) => series.seriesRaceId === form.seriesRaceId)
+    ? form.seriesRaceId
+    : eligibleSeries[0]?.seriesRaceId ?? ''
+  const eligibleGrades = getEligibleGradesForEventSeries(form.eventId, seriesRaceId, payload.events, payload.seasonSeries, payload.seasonSeriesGrades)
+  const gradeId = eligibleGrades.some((grade) => grade.gradeId === form.gradeId)
+    ? form.gradeId
+    : eligibleGrades[0]?.gradeId ?? ''
+
+  return { ...form, seriesRaceId, gradeId }
 }
 
 function createEventSeriesRuleForm(rule: EventSeriesRuleRow | null): EventSeriesRuleForm {

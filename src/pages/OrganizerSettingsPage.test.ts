@@ -6,6 +6,7 @@ import {
   filterByQuery,
   getScopeFilterSummary,
   getEligibleGradesForEventSeries,
+  getEligibleSeriesForEvent,
   getRulePackageReadiness,
   getSelectedEventId,
   groupBallastRulesByEventRule,
@@ -165,6 +166,23 @@ describe('OrganizerSettingsPage helpers', () => {
     expect(eligibleGrades.map((grade) => grade.gradeId)).toEqual(['grade-pro'])
   })
 
+  it('returns only active series linked to the selected event season', () => {
+    const eligibleSeries = getEligibleSeriesForEvent(
+      'event-1',
+      [
+        { eventId: 'event-1', seasonId: 'season-1', circuitId: null, circuitName: null, name: 'Event 1', eventOrder: 1, startsOn: null, endsOn: null, status: 'Draft' },
+        { eventId: 'event-2', seasonId: 'season-2', circuitId: null, circuitName: null, name: 'Event 2', eventOrder: 2, startsOn: null, endsOn: null, status: 'Draft' },
+      ],
+      [
+        { seasonSeriesId: 'ss-1', seasonId: 'season-1', seriesRaceId: 'series-1', seriesName: 'Siam Eco', isActive: true },
+        { seasonSeriesId: 'ss-2', seasonId: 'season-1', seriesRaceId: 'series-2', seriesName: 'Siam Truck', isActive: false },
+        { seasonSeriesId: 'ss-3', seasonId: 'season-2', seriesRaceId: 'series-3', seriesName: 'Siam GT', isActive: true },
+      ],
+    )
+
+    expect(eligibleSeries.map((series) => series.seriesRaceId)).toEqual(['series-1'])
+  })
+
   it('creates setup board guidance for a new empty organizer setup', () => {
     const board = createOrganizerSetupBoard(createOrganizerPayload())
 
@@ -244,6 +262,26 @@ describe('OrganizerSettingsPage helpers', () => {
     expect(seasonNeedsAttention(completeSeason, seriesBySeason, gradesBySeries)).toBe(false)
     expect(seasonNeedsAttention(missingGradeSeason, seriesBySeason, gradesBySeries)).toBe(true)
     expect(seasonNeedsAttention(emptySeason, seriesBySeason, gradesBySeries)).toBe(true)
+  })
+
+  it('ignores inactive season series and grade links when checking season readiness', () => {
+    const season = { seasonId: 'season-1', organizationId: 'org-1', name: '2026 Season', year: 2026, status: 'Active' as const, isActive: true, activatedAt: '2026-01-01' }
+    const inactiveSeriesOnly = groupSeasonSeriesBySeason([
+      { seasonSeriesId: 'ss-1', seasonId: 'season-1', seriesRaceId: 'series-1', seriesName: 'Siam Series', isActive: false },
+    ])
+    const activeSeries = groupSeasonSeriesBySeason([
+      { seasonSeriesId: 'ss-2', seasonId: 'season-1', seriesRaceId: 'series-2', seriesName: 'Truck Series', isActive: true },
+    ])
+    const inactiveGradeOnly = groupSeasonSeriesGradesBySeries([
+      { seasonSeriesGradeId: 'ssg-1', seasonSeriesId: 'ss-2', seasonId: 'season-1', seriesRaceId: 'series-2', gradeId: 'grade-pro', gradeName: 'PRO', isActive: false },
+    ])
+    const activeGrade = groupSeasonSeriesGradesBySeries([
+      { seasonSeriesGradeId: 'ssg-2', seasonSeriesId: 'ss-2', seasonId: 'season-1', seriesRaceId: 'series-2', gradeId: 'grade-am', gradeName: 'AM', isActive: true },
+    ])
+
+    expect(seasonNeedsAttention(season, inactiveSeriesOnly, groupSeasonSeriesGradesBySeries([]))).toBe(true)
+    expect(seasonNeedsAttention(season, activeSeries, inactiveGradeOnly)).toBe(true)
+    expect(seasonNeedsAttention(season, activeSeries, activeGrade)).toBe(false)
   })
 
   it('flags events missing a circuit or A4 background as attention items', () => {
