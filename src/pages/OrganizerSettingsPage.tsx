@@ -1973,93 +1973,116 @@ function SeasonScopeBoard({ payload, activeSeason, filter, seasonSeriesBySeason,
   const seasons = filterByQuery(payload.seasons, filter.query, (season) => [season.name, String(season.year), season.status, season.isActive ? 'active season' : 'inactive season'])
     .filter((season) => !filter.needsAttentionOnly || seasonNeedsAttention(season, seasonSeriesBySeason, seasonSeriesGradesBySeries))
   const showNoActiveSeason = !activeSeason && (!filter.query.trim() || 'no active season missing'.includes(filter.query.trim().toLowerCase()))
+  const [selectedSeasonId, setSelectedSeasonId] = useState(() => activeSeason?.seasonId ?? seasons[0]?.seasonId ?? '')
+  const [selectedEventSlot, setSelectedEventSlot] = useState(1)
+  const [selectedRuleId, setSelectedRuleId] = useState('')
+  const selectedSeason = seasons.find((season) => season.seasonId === selectedSeasonId) ?? seasons[0] ?? null
+  const seasonEvents = selectedSeason ? payload.events.filter((event) => event.seasonId === selectedSeason.seasonId) : []
+  const eventSlots = selectedSeason ? createSeasonEventSlots(selectedSeason, seasonEvents) : []
+  const selectedSlot = eventSlots.find((slot) => slot.slotNumber === selectedEventSlot) ?? eventSlots[0] ?? null
+  const selectedEvent = selectedSlot?.event ?? null
+  const selectedEventRules = selectedEvent ? eventSeriesRulesByEvent.get(selectedEvent.eventId) ?? [] : []
+  const selectedRule = selectedEventRules.find((rule) => rule.eventSeriesRuleId === selectedRuleId) ?? selectedEventRules[0] ?? null
+  const selectedSeasonSeries = selectedSeason ? (seasonSeriesBySeason.get(selectedSeason.seasonId) ?? []).filter((series) => series.isActive) : []
+  const selectedSeasonGradeCount = selectedSeasonSeries.reduce((total, series) => total + (seasonSeriesGradesBySeries.get(series.seasonSeriesId) ?? []).filter((grade) => grade.isActive).length, 0)
 
   return (
     <>
-      <ScopeBoardHeader scope="season" title="Season Workspace" description="One racing year contains a fixed number of Event slots. Build the Season, fill each Event slot, then manage Rule Packages inside the Event that owns them." actionLabel="Create Season" onAction={onCreateSeason} />
-      <div className="grid gap-3 p-4 xl:grid-cols-2">
+      <ScopeBoardHeader scope="season" title="Season Workspace" description="Use this as a nested workspace: choose a Season, open one Event slot, then open one Rule Package. The page stays calm while the hierarchy remains clear." actionLabel="Create Season" onAction={onCreateSeason} />
+      <div className="p-4">
         {seasons.length === 0 && payload.seasons.length === 0 ? <ScopeCard scope="season" title="No Seasons yet" description="Create the first racing year before building Events and Rule Packages." statusLabel="Missing" actionLabel="Create Season" onAction={onCreateSeason}><ScopeEmptyMessage filter={filter} defaultMessage="No seasons configured. Create the first season to start building events and races." /></ScopeCard> : null}
         {seasons.length === 0 && payload.seasons.length > 0 ? <ScopeCard scope="season" title="No Seasons match" description="Adjust search or clear the attention filter to return to the Season board." statusLabel="Filtered"><ScopeEmptyMessage filter={filter} defaultMessage="No seasons configured." /></ScopeCard> : null}
-        {seasons.map((season) => {
-          const seasonEvents = payload.events.filter((event) => event.seasonId === season.seasonId)
-          const eventSlots = createSeasonEventSlots(season, seasonEvents)
-          const seasonSeries = (seasonSeriesBySeason.get(season.seasonId) ?? []).filter((series) => series.isActive)
-          const gradeCount = seasonSeries.reduce((total, series) => total + (seasonSeriesGradesBySeries.get(series.seasonSeriesId) ?? []).filter((grade) => grade.isActive).length, 0)
+        {selectedSeason ? (
+          <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
+            <aside className="rounded-md border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-950">
+              <div className="flex items-center justify-between gap-3 px-1 pb-3">
+                <div>
+                  <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Season menu</p>
+                  <p className="mt-1 text-sm text-zinc-500">Select one workspace</p>
+                </div>
+                <TextButton label="New" onClick={onCreateSeason} />
+              </div>
+              <div className="space-y-2">
+                {seasons.map((season) => {
+                  const count = payload.events.filter((event) => event.seasonId === season.seasonId).length
+                  return <WorkspaceMenuButton key={season.seasonId} active={season.seasonId === selectedSeason.seasonId} title={`${season.year} / ${season.name}`} eyebrow={season.isActive ? 'Active season' : season.status} meta={`${count}/${season.plannedEventCount} events`} onClick={() => { setSelectedSeasonId(season.seasonId); setSelectedEventSlot(1); setSelectedRuleId('') }} />
+                })}
+              </div>
+            </aside>
 
-          return (
-            <ScopeCard key={season.seasonId} scope="season" title={`${season.year} / ${season.name}`} description={season.isActive ? 'Active racing season workspace.' : 'Season workspace.'} statusLabel={`${season.status} / ${seasonEvents.length}/${season.plannedEventCount} events`} actionLabel="Edit Season" onAction={() => onEditSeason(season)}>
-              <div className="flex flex-wrap gap-2">
-                <TextButton label="Duplicate Season" onClick={() => onDuplicateSeason(season)} />
-                <TextButton label="Add Season Series" onClick={() => onCreateSeasonSeries(season)} />
-                <TextButton label="Add Season Grade" onClick={() => onCreateSeasonGrade(season)} />
-              </div>
-              <div className="w-full rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div className="space-y-6">
+              <section className="rounded-md border border-zinc-200 bg-zinc-50 p-6 dark:border-zinc-800 dark:bg-zinc-950">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div>
-                    <p className="font-mono text-xs uppercase tracking-[0.12em] text-zinc-500">Fixed Season plan</p>
-                    <p className="mt-1 text-sm font-semibold">{season.plannedEventCount} planned Event slot(s)</p>
+                    <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Selected Season</p>
+                    <h3 className="mt-2 text-2xl font-semibold">{selectedSeason.year} / {selectedSeason.name}</h3>
+                    <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600 dark:text-zinc-400">Fixed plan: {selectedSeason.plannedEventCount} Event slots. Configure the Season class access here, then open one Event slot below.</p>
                   </div>
-                  <TextButton label="Add Event" onClick={() => onCreateEvent(season)} />
-                </div>
-                <div className="mt-3 grid gap-2">
-                  {eventSlots.map((slot) => (
-                    <SeasonEventSlotCard
-                      key={slot.slotNumber}
-                      slotNumber={slot.slotNumber}
-                      event={slot.event}
-                      rules={slot.event ? eventSeriesRulesByEvent.get(slot.event.eventId) ?? [] : []}
-                      weightRulesByEventRule={weightRulesByEventRule}
-                      ballastRulesByEventRule={ballastRulesByEventRule}
-                      tireRulesByEventRule={tireRulesByEventRule}
-                      sponsorStickerAssetsByEventRule={sponsorStickerAssetsByEventRule}
-                      inspectionTemplatesByEventRule={inspectionTemplatesByEventRule}
-                      onCreateEvent={() => onCreateEvent(season)}
-                      onEditEvent={onEditEvent}
-                      onDuplicateEvent={onDuplicateEvent}
-                      onCreateEventSeriesRule={onCreateEventSeriesRule}
-                      onEditRule={onEditEventSeriesRule}
-                      onCreateWeightRule={onCreateWeightRule}
-                      onEditWeightRule={onEditWeightRule}
-                      onCreateBallastRule={onCreateBallastRule}
-                      onEditBallastRule={onEditBallastRule}
-                      onCreateTireRule={onCreateTireRule}
-                      onEditTireRule={onEditTireRule}
-                      onCreateSponsorStickerAsset={onCreateSponsorStickerAsset}
-                      onEditSponsorStickerAsset={onEditSponsorStickerAsset}
-                      onCreateInspectionTemplate={onCreateInspectionTemplate}
-                      onEditInspectionTemplate={onEditInspectionTemplate}
-                      onEditInspectionSection={onEditInspectionSection}
-                      onEditInspectionItem={onEditInspectionItem}
-                    />
-                  ))}
-                </div>
-              </div>
-              <p className="text-sm text-zinc-500">{seasonSeries.length} active series link(s) / {gradeCount} active grade link(s)</p>
-              <p className="text-xs leading-5 text-zinc-500">Unlink hides incorrect bindings from active setup while preserving audit and historical records.</p>
-              {seasonSeries.length === 0 ? <p className="text-sm text-amber-700 dark:text-amber-400">Season series missing.</p> : null}
-              {seasonSeries.length > 0 && gradeCount === 0 ? <p className="text-sm text-amber-700 dark:text-amber-400">Season grades missing.</p> : null}
-              {seasonSeries.map((series) => {
-                const grades = (seasonSeriesGradesBySeries.get(series.seasonSeriesId) ?? []).filter((grade) => grade.isActive)
-                return (
-                  <div key={series.seasonSeriesId} className="w-full rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                      <div>
-                        <p className="text-sm font-semibold">{series.seriesName}</p>
-                        <p className="mt-1 text-xs text-zinc-500">{grades.length > 0 ? `${grades.length} active grade(s)` : 'No active grades'}</p>
-                      </div>
-                      <TextButton label="Unlink Series" onClick={() => onUnlinkSeasonSeries(series)} />
-                    </div>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {grades.length === 0 ? <p className="text-sm text-amber-700 dark:text-amber-400">Add at least one Grade for this Season Series.</p> : null}
-                      {grades.map((grade) => <RemovablePill key={grade.seasonSeriesGradeId} label={grade.gradeName} removeLabel="Unlink Grade" onRemove={() => onUnlinkSeasonSeriesGrade(grade)} />)}
-                      <TextButton label="Add Grade" onClick={() => onCreateSeasonGrade(season)} />
-                    </div>
+                  <div className="flex flex-wrap gap-2">
+                    <TextButton label="Edit Season" onClick={() => onEditSeason(selectedSeason)} />
+                    <TextButton label="Duplicate Season" onClick={() => onDuplicateSeason(selectedSeason)} />
                   </div>
-                )
-              })}
-            </ScopeCard>
-          )
-        })}
+                </div>
+                <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                  <SummaryTile label="Event Slots" value={`${seasonEvents.length}/${selectedSeason.plannedEventCount}`} />
+                  <SummaryTile label="Active Series" value={selectedSeasonSeries.length} />
+                  <SummaryTile label="Active Grades" value={selectedSeasonGradeCount} />
+                </div>
+              </section>
+
+              <SeasonClassAccessPanel season={selectedSeason} seasonSeries={selectedSeasonSeries} seasonSeriesGradesBySeries={seasonSeriesGradesBySeries} onCreateSeasonSeries={onCreateSeasonSeries} onCreateSeasonGrade={onCreateSeasonGrade} onUnlinkSeasonSeries={onUnlinkSeasonSeries} onUnlinkSeasonSeriesGrade={onUnlinkSeasonSeriesGrade} />
+
+              <section className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
+                <aside className="rounded-md border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-950">
+                  <div className="flex items-start justify-between gap-3 px-1 pb-3">
+                    <div>
+                      <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Event slots</p>
+                      <p className="mt-1 text-sm text-zinc-500">Open one Event</p>
+                    </div>
+                    <TextButton label="Add" onClick={() => onCreateEvent(selectedSeason)} />
+                  </div>
+                  <div className="space-y-2">
+                    {eventSlots.map((slot) => {
+                      const ruleCount = slot.event ? eventSeriesRulesByEvent.get(slot.event.eventId)?.length ?? 0 : 0
+                      return <WorkspaceMenuButton key={slot.slotNumber} active={slot.slotNumber === selectedSlot?.slotNumber} title={slot.event ? `Event ${slot.event.eventOrder}: ${slot.event.name}` : `Event slot ${slot.slotNumber}`} eyebrow={slot.event ? slot.event.status : 'Planned'} meta={slot.event ? `${ruleCount} rule package(s)` : 'Not created'} onClick={() => { setSelectedEventSlot(slot.slotNumber); setSelectedRuleId('') }} />
+                    })}
+                  </div>
+                </aside>
+
+                <SelectedEventWorkspace
+                  slotNumber={selectedSlot?.slotNumber ?? 1}
+                  season={selectedSeason}
+                  event={selectedEvent}
+                  rules={selectedEventRules}
+                  selectedRule={selectedRule}
+                  onSelectRule={setSelectedRuleId}
+                  weightRulesByEventRule={weightRulesByEventRule}
+                  ballastRulesByEventRule={ballastRulesByEventRule}
+                  tireRulesByEventRule={tireRulesByEventRule}
+                  sponsorStickerAssetsByEventRule={sponsorStickerAssetsByEventRule}
+                  inspectionTemplatesByEventRule={inspectionTemplatesByEventRule}
+                  onCreateEvent={() => onCreateEvent(selectedSeason)}
+                  onEditEvent={onEditEvent}
+                  onDuplicateEvent={onDuplicateEvent}
+                  onCreateEventSeriesRule={onCreateEventSeriesRule}
+                  onEditRule={onEditEventSeriesRule}
+                  onCreateWeightRule={onCreateWeightRule}
+                  onEditWeightRule={onEditWeightRule}
+                  onCreateBallastRule={onCreateBallastRule}
+                  onEditBallastRule={onEditBallastRule}
+                  onCreateTireRule={onCreateTireRule}
+                  onEditTireRule={onEditTireRule}
+                  onCreateSponsorStickerAsset={onCreateSponsorStickerAsset}
+                  onEditSponsorStickerAsset={onEditSponsorStickerAsset}
+                  onCreateInspectionTemplate={onCreateInspectionTemplate}
+                  onEditInspectionTemplate={onEditInspectionTemplate}
+                  onEditInspectionSection={onEditInspectionSection}
+                  onEditInspectionItem={onEditInspectionItem}
+                />
+              </section>
+            </div>
+          </div>
+        ) : null}
         {showNoActiveSeason ? <ScopeCard scope="season" title="No active season" description="Create or activate a Season before building Events." statusLabel="Missing" actionLabel="Create Season" onAction={onCreateSeason} /> : null}
       </div>
     </>
@@ -2094,10 +2117,84 @@ function EventScopeBoard({ events, filter, printBackgroundAssetsByEvent, onCreat
   )
 }
 
-function SeasonEventSlotCard({ slotNumber, event, rules, weightRulesByEventRule, ballastRulesByEventRule, tireRulesByEventRule, sponsorStickerAssetsByEventRule, inspectionTemplatesByEventRule, onCreateEvent, onEditEvent, onDuplicateEvent, onCreateEventSeriesRule, onEditRule, onCreateWeightRule, onEditWeightRule, onCreateBallastRule, onEditBallastRule, onCreateTireRule, onEditTireRule, onCreateSponsorStickerAsset, onEditSponsorStickerAsset, onCreateInspectionTemplate, onEditInspectionTemplate, onEditInspectionSection, onEditInspectionItem }: {
+function WorkspaceMenuButton({ active, title, eyebrow, meta, onClick }: { active: boolean; title: string; eyebrow: string; meta: string; onClick: () => void }) {
+  return (
+    <motion.button
+      whileTap={{ scale: 0.98 }}
+      type="button"
+      onClick={onClick}
+      className={`w-full rounded-md border p-3 text-left transition ${active ? 'border-primary bg-zinc-100 dark:bg-zinc-900' : 'border-zinc-200 hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600'}`}
+    >
+      <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-zinc-500">{eyebrow}</span>
+      <span className="mt-2 block text-sm font-semibold">{title}</span>
+      <span className="mt-1 block text-xs text-zinc-500">{meta}</span>
+    </motion.button>
+  )
+}
+
+function SummaryTile({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
+      <p className="font-mono text-xs uppercase tracking-[0.12em] text-zinc-500">{label}</p>
+      <p className="mt-2 text-xl font-semibold">{value}</p>
+    </div>
+  )
+}
+
+function SeasonClassAccessPanel({ season, seasonSeries, seasonSeriesGradesBySeries, onCreateSeasonSeries, onCreateSeasonGrade, onUnlinkSeasonSeries, onUnlinkSeasonSeriesGrade }: {
+  season: SeasonRow
+  seasonSeries: SeasonSeriesRow[]
+  seasonSeriesGradesBySeries: Map<string, SeasonSeriesGradeRow[]>
+  onCreateSeasonSeries: (season: SeasonRow | null) => void
+  onCreateSeasonGrade: (season: SeasonRow | null) => void
+  onUnlinkSeasonSeries: (series: SeasonSeriesRow) => void
+  onUnlinkSeasonSeriesGrade: (grade: SeasonSeriesGradeRow) => void
+}) {
+  return (
+    <section className="rounded-md border border-zinc-200 bg-zinc-50 p-6 dark:border-zinc-800 dark:bg-zinc-950">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Season access</p>
+          <h3 className="mt-2 text-lg font-semibold">Series and Grades</h3>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600 dark:text-zinc-400">These are Season-level permissions. Rule Packages can only use Series and Grades activated here.</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <TextButton label="Add Season Series" onClick={() => onCreateSeasonSeries(season)} />
+          <TextButton label="Add Season Grade" onClick={() => onCreateSeasonGrade(season)} />
+        </div>
+      </div>
+      {seasonSeries.length === 0 ? <p className="mt-5 text-sm text-amber-700 dark:text-amber-400">Season series missing.</p> : null}
+      <div className="mt-5 grid gap-3 lg:grid-cols-2">
+        {seasonSeries.map((series) => {
+          const grades = (seasonSeriesGradesBySeries.get(series.seasonSeriesId) ?? []).filter((grade) => grade.isActive)
+          return (
+            <div key={series.seasonSeriesId} className="rounded-md border border-zinc-200 p-4 dark:border-zinc-800">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <p className="text-sm font-semibold">{series.seriesName}</p>
+                  <p className="mt-1 text-xs text-zinc-500">{grades.length > 0 ? `${grades.length} active grade(s)` : 'No active grades'}</p>
+                </div>
+                <TextButton label="Unlink Series" onClick={() => onUnlinkSeasonSeries(series)} />
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {grades.length === 0 ? <p className="text-sm text-amber-700 dark:text-amber-400">Add at least one Grade for this Season Series.</p> : null}
+                {grades.map((grade) => <RemovablePill key={grade.seasonSeriesGradeId} label={grade.gradeName} removeLabel="Unlink Grade" onRemove={() => onUnlinkSeasonSeriesGrade(grade)} />)}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
+function SelectedEventWorkspace({ slotNumber, season, event, rules, selectedRule, onSelectRule, weightRulesByEventRule, ballastRulesByEventRule, tireRulesByEventRule, sponsorStickerAssetsByEventRule, inspectionTemplatesByEventRule, onCreateEvent, onEditEvent, onDuplicateEvent, onCreateEventSeriesRule, onEditRule, onCreateWeightRule, onEditWeightRule, onCreateBallastRule, onEditBallastRule, onCreateTireRule, onEditTireRule, onCreateSponsorStickerAsset, onEditSponsorStickerAsset, onCreateInspectionTemplate, onEditInspectionTemplate, onEditInspectionSection, onEditInspectionItem }: {
   slotNumber: number
+  season: SeasonRow
   event: EventRow | null
   rules: EventSeriesRuleRow[]
+  selectedRule: EventSeriesRuleRow | null
+  onSelectRule: (ruleId: string) => void
   weightRulesByEventRule: Map<string, WeightRuleRow[]>
   ballastRulesByEventRule: Map<string, BallastRuleRow[]>
   tireRulesByEventRule: Map<string, TireRuleRow[]>
@@ -2123,67 +2220,81 @@ function SeasonEventSlotCard({ slotNumber, event, rules, weightRulesByEventRule,
 }) {
   if (!event) {
     return (
-      <div className="rounded-md border border-dashed border-zinc-300 p-3 dark:border-zinc-700">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+      <section className="min-h-[440px] rounded-md border border-dashed border-zinc-300 bg-zinc-50 p-8 dark:border-zinc-700 dark:bg-zinc-950">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.12em] text-zinc-500">Event slot {slotNumber}</p>
-            <p className="mt-1 text-sm font-semibold text-amber-700 dark:text-amber-400">Planned, not created</p>
+            <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Event slot {slotNumber}</p>
+            <h3 className="mt-3 text-2xl font-semibold">Planned, not created</h3>
+            <p className="mt-3 max-w-xl text-sm leading-6 text-zinc-600 dark:text-zinc-400">This slot is part of {season.name}'s fixed Season plan. Create the Event only when the race weekend details are ready.</p>
           </div>
           <TextButton label="Create Event" onClick={onCreateEvent} />
         </div>
-      </div>
+      </section>
     )
   }
 
   return (
-    <div className="rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+    <section className="min-h-[440px] rounded-md border border-zinc-200 bg-zinc-50 p-6 dark:border-zinc-800 dark:bg-zinc-950">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <p className="font-mono text-xs uppercase tracking-[0.12em] text-zinc-500">Event slot {slotNumber}</p>
-          <p className="mt-1 text-sm font-semibold">Event {event.eventOrder}: {event.name}</p>
-          <p className="mt-1 text-xs text-zinc-500">{event.circuitName ?? 'No circuit'} / {formatDateRange(event.startsOn, event.endsOn)}</p>
+          <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Event slot {slotNumber}</p>
+          <h3 className="mt-2 text-2xl font-semibold">Event {event.eventOrder}: {event.name}</h3>
+          <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">{event.circuitName ?? 'No circuit'} / {formatDateRange(event.startsOn, event.endsOn)}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <TextButton label="Edit Event" onClick={() => onEditEvent(event)} />
           <TextButton label="Duplicate" onClick={() => onDuplicateEvent(event)} />
         </div>
       </div>
-      <div className="mt-3 flex flex-col gap-2">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold">Rule Packages</p>
-            <p className="mt-1 text-xs text-zinc-500">Owned by this Event slot.</p>
+      <div className="mt-8 grid gap-6 xl:grid-cols-[260px_minmax(0,1fr)]">
+        <aside className="rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
+          <div className="flex flex-col gap-2 pb-3 sm:flex-row sm:items-start sm:justify-between xl:flex-col">
+            <div>
+              <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">Rule submenu</p>
+              <p className="mt-1 text-sm text-zinc-500">Open one package</p>
+            </div>
+            <TextButton label="Create" onClick={() => onCreateEventSeriesRule(event)} />
           </div>
-          <TextButton label="Create Rule Package" onClick={() => onCreateEventSeriesRule(event)} />
+          <div className="space-y-2">
+            {rules.length === 0 ? <p className="rounded-md border border-dashed border-zinc-300 p-3 text-sm text-amber-700 dark:border-zinc-700 dark:text-amber-400">No Rule Packages yet for this Event.</p> : null}
+            {rules.map((rule) => {
+              const readiness = getRulePackageReadiness(rule, weightRulesByEventRule, ballastRulesByEventRule, tireRulesByEventRule, sponsorStickerAssetsByEventRule, inspectionTemplatesByEventRule)
+              return <WorkspaceMenuButton key={rule.eventSeriesRuleId} active={rule.eventSeriesRuleId === selectedRule?.eventSeriesRuleId} title={`${rule.seriesName} / ${rule.gradeName}`} eyebrow={`v${rule.version} / ${rule.status}`} meta={readiness.ready ? 'Ready' : `Missing ${readiness.missingLabels.length}`} onClick={() => onSelectRule(rule.eventSeriesRuleId)} />
+            })}
+          </div>
+        </aside>
+        <div>
+          {!selectedRule ? (
+            <div className="rounded-md border border-dashed border-zinc-300 p-6 dark:border-zinc-700">
+              <p className="text-sm text-zinc-500">Select or create a Rule Package for this Event.</p>
+            </div>
+          ) : (
+            <RulePackageCard
+              rule={selectedRule}
+              readiness={getRulePackageReadiness(selectedRule, weightRulesByEventRule, ballastRulesByEventRule, tireRulesByEventRule, sponsorStickerAssetsByEventRule, inspectionTemplatesByEventRule)}
+              weightRules={weightRulesByEventRule.get(selectedRule.eventSeriesRuleId) ?? []}
+              ballastRules={ballastRulesByEventRule.get(selectedRule.eventSeriesRuleId) ?? []}
+              tireRules={tireRulesByEventRule.get(selectedRule.eventSeriesRuleId) ?? []}
+              sponsorStickerAssets={sponsorStickerAssetsByEventRule.get(selectedRule.eventSeriesRuleId) ?? []}
+              templates={inspectionTemplatesByEventRule.get(selectedRule.eventSeriesRuleId) ?? []}
+              onEditRule={onEditRule}
+              onCreateWeightRule={onCreateWeightRule}
+              onCreateBallastRule={onCreateBallastRule}
+              onCreateTireRule={onCreateTireRule}
+              onCreateSponsorStickerAsset={onCreateSponsorStickerAsset}
+              onCreateInspectionTemplate={onCreateInspectionTemplate}
+              onEditWeightRule={onEditWeightRule}
+              onEditBallastRule={onEditBallastRule}
+              onEditTireRule={onEditTireRule}
+              onEditSponsorStickerAsset={onEditSponsorStickerAsset}
+              onEditInspectionTemplate={onEditInspectionTemplate}
+              onEditInspectionSection={onEditInspectionSection}
+              onEditInspectionItem={onEditInspectionItem}
+            />
+          )}
         </div>
-        {rules.length === 0 ? <p className="text-sm text-amber-700 dark:text-amber-400">No Rule Packages yet for this Event.</p> : null}
-        {rules.map((rule) => (
-          <RulePackageCard
-            key={rule.eventSeriesRuleId}
-            rule={rule}
-            readiness={getRulePackageReadiness(rule, weightRulesByEventRule, ballastRulesByEventRule, tireRulesByEventRule, sponsorStickerAssetsByEventRule, inspectionTemplatesByEventRule)}
-            weightRules={weightRulesByEventRule.get(rule.eventSeriesRuleId) ?? []}
-            ballastRules={ballastRulesByEventRule.get(rule.eventSeriesRuleId) ?? []}
-            tireRules={tireRulesByEventRule.get(rule.eventSeriesRuleId) ?? []}
-            sponsorStickerAssets={sponsorStickerAssetsByEventRule.get(rule.eventSeriesRuleId) ?? []}
-            templates={inspectionTemplatesByEventRule.get(rule.eventSeriesRuleId) ?? []}
-            onEditRule={onEditRule}
-            onCreateWeightRule={onCreateWeightRule}
-            onCreateBallastRule={onCreateBallastRule}
-            onCreateTireRule={onCreateTireRule}
-            onCreateSponsorStickerAsset={onCreateSponsorStickerAsset}
-            onCreateInspectionTemplate={onCreateInspectionTemplate}
-            onEditWeightRule={onEditWeightRule}
-            onEditBallastRule={onEditBallastRule}
-            onEditTireRule={onEditTireRule}
-            onEditSponsorStickerAsset={onEditSponsorStickerAsset}
-            onEditInspectionTemplate={onEditInspectionTemplate}
-            onEditInspectionSection={onEditInspectionSection}
-            onEditInspectionItem={onEditInspectionItem}
-          />
-        ))}
       </div>
-    </div>
+    </section>
   )
 }
 

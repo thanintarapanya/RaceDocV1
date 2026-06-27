@@ -1,7 +1,7 @@
 # Graph Report - RaceDocV1Github  (2026-06-27)
 
 ## Corpus Check
-- 65 files · ~82,234 words
+- 65 files · ~82,795 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
