@@ -13,6 +13,7 @@ import {
   groupInspectionTemplatesByEventRule,
   groupWeightRulesByEventRule,
   createEmptyScopeFilter,
+  createSeasonEventSlots,
   createOrganizerSetupBoard,
   eventNeedsAttention,
   filterByQuery,
@@ -65,6 +66,7 @@ type SeasonForm = {
   organizationId: string
   name: string
   year: string
+  plannedEventCount: string
   status: SeasonStatus
   isActive: boolean
 }
@@ -528,6 +530,7 @@ export function OrganizerSettingsPage() {
       p_organization_id: seasonForm.organizationId || null,
       p_name: seasonForm.name,
       p_year: Number(seasonForm.year),
+      p_planned_event_count: Number(seasonForm.plannedEventCount),
       p_status: seasonForm.status,
       p_is_active: seasonForm.isActive,
     })
@@ -1048,6 +1051,7 @@ export function OrganizerSettingsPage() {
               />
               <TextField label="Season name" value={seasonForm.name} onChange={(name) => setSeasonForm((current) => ({ ...current, name }))} placeholder="2026 Season" />
               <TextField label="Year" type="number" value={seasonForm.year} onChange={(year) => setSeasonForm((current) => ({ ...current, year }))} placeholder="2026" />
+              <TextField label="Number of Events in Season" type="number" value={seasonForm.plannedEventCount} onChange={(plannedEventCount) => setSeasonForm((current) => ({ ...current, plannedEventCount }))} placeholder="3" />
               <EntitySelect label="Status" value={seasonForm.status} options={seasonStatuses.map((status) => ({ value: status, label: status }))} onChange={(status) => setSeasonForm((current) => ({ ...current, status: status as SeasonStatus }))} />
               <CheckboxField label="Set as active season" checked={seasonForm.isActive} onChange={(isActive) => setSeasonForm((current) => ({ ...current, isActive }))} />
               <EntitySelect
@@ -1965,27 +1969,70 @@ function GlobalScopeBoard({ payload, filter, onCreateCircuit, onEditCircuit, onC
   )
 }
 
-function SeasonScopeBoard({ payload, activeSeason, filter, seasonSeriesBySeason, seasonSeriesGradesBySeries, onCreateSeason, onEditSeason, onDuplicateSeason, onCreateSeasonSeries, onCreateSeasonGrade, onUnlinkSeasonSeries, onUnlinkSeasonSeriesGrade }: ScopeBoardProps & { activeSeason: SeasonRow | null }) {
+function SeasonScopeBoard({ payload, activeSeason, filter, seasonSeriesBySeason, seasonSeriesGradesBySeries, eventSeriesRulesByEvent, weightRulesByEventRule, ballastRulesByEventRule, tireRulesByEventRule, sponsorStickerAssetsByEventRule, inspectionTemplatesByEventRule, onCreateSeason, onEditSeason, onDuplicateSeason, onCreateSeasonSeries, onCreateSeasonGrade, onUnlinkSeasonSeries, onUnlinkSeasonSeriesGrade, onCreateEvent, onEditEvent, onDuplicateEvent, onCreateEventSeriesRule, onEditEventSeriesRule, onCreateWeightRule, onEditWeightRule, onCreateBallastRule, onEditBallastRule, onCreateTireRule, onEditTireRule, onCreateSponsorStickerAsset, onEditSponsorStickerAsset, onCreateInspectionTemplate, onEditInspectionTemplate, onEditInspectionSection, onEditInspectionItem }: ScopeBoardProps & { activeSeason: SeasonRow | null }) {
   const seasons = filterByQuery(payload.seasons, filter.query, (season) => [season.name, String(season.year), season.status, season.isActive ? 'active season' : 'inactive season'])
     .filter((season) => !filter.needsAttentionOnly || seasonNeedsAttention(season, seasonSeriesBySeason, seasonSeriesGradesBySeries))
   const showNoActiveSeason = !activeSeason && (!filter.query.trim() || 'no active season missing'.includes(filter.query.trim().toLowerCase()))
 
   return (
     <>
-      <ScopeBoardHeader scope="season" title="Season Setup" description="This board controls the racing year: Season record, active Series, and available Grades. Start here before Events and Rule Packages." actionLabel="Create Season" onAction={onCreateSeason} />
+      <ScopeBoardHeader scope="season" title="Season Workspace" description="One racing year contains a fixed number of Event slots. Build the Season, fill each Event slot, then manage Rule Packages inside the Event that owns them." actionLabel="Create Season" onAction={onCreateSeason} />
       <div className="grid gap-3 p-4 xl:grid-cols-2">
         {seasons.length === 0 && payload.seasons.length === 0 ? <ScopeCard scope="season" title="No Seasons yet" description="Create the first racing year before building Events and Rule Packages." statusLabel="Missing" actionLabel="Create Season" onAction={onCreateSeason}><ScopeEmptyMessage filter={filter} defaultMessage="No seasons configured. Create the first season to start building events and races." /></ScopeCard> : null}
         {seasons.length === 0 && payload.seasons.length > 0 ? <ScopeCard scope="season" title="No Seasons match" description="Adjust search or clear the attention filter to return to the Season board." statusLabel="Filtered"><ScopeEmptyMessage filter={filter} defaultMessage="No seasons configured." /></ScopeCard> : null}
         {seasons.map((season) => {
+          const seasonEvents = payload.events.filter((event) => event.seasonId === season.seasonId)
+          const eventSlots = createSeasonEventSlots(season, seasonEvents)
           const seasonSeries = (seasonSeriesBySeason.get(season.seasonId) ?? []).filter((series) => series.isActive)
           const gradeCount = seasonSeries.reduce((total, series) => total + (seasonSeriesGradesBySeries.get(series.seasonSeriesId) ?? []).filter((grade) => grade.isActive).length, 0)
 
           return (
-            <ScopeCard key={season.seasonId} scope="season" title={`${season.year} / ${season.name}`} description={season.isActive ? 'Active racing season.' : 'Season configuration.'} statusLabel={season.status} actionLabel="Edit Season" onAction={() => onEditSeason(season)}>
+            <ScopeCard key={season.seasonId} scope="season" title={`${season.year} / ${season.name}`} description={season.isActive ? 'Active racing season workspace.' : 'Season workspace.'} statusLabel={`${season.status} / ${seasonEvents.length}/${season.plannedEventCount} events`} actionLabel="Edit Season" onAction={() => onEditSeason(season)}>
               <div className="flex flex-wrap gap-2">
                 <TextButton label="Duplicate Season" onClick={() => onDuplicateSeason(season)} />
                 <TextButton label="Add Season Series" onClick={() => onCreateSeasonSeries(season)} />
                 <TextButton label="Add Season Grade" onClick={() => onCreateSeasonGrade(season)} />
+              </div>
+              <div className="w-full rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <p className="font-mono text-xs uppercase tracking-[0.12em] text-zinc-500">Fixed Season plan</p>
+                    <p className="mt-1 text-sm font-semibold">{season.plannedEventCount} planned Event slot(s)</p>
+                  </div>
+                  <TextButton label="Add Event" onClick={() => onCreateEvent(season)} />
+                </div>
+                <div className="mt-3 grid gap-2">
+                  {eventSlots.map((slot) => (
+                    <SeasonEventSlotCard
+                      key={slot.slotNumber}
+                      slotNumber={slot.slotNumber}
+                      event={slot.event}
+                      rules={slot.event ? eventSeriesRulesByEvent.get(slot.event.eventId) ?? [] : []}
+                      weightRulesByEventRule={weightRulesByEventRule}
+                      ballastRulesByEventRule={ballastRulesByEventRule}
+                      tireRulesByEventRule={tireRulesByEventRule}
+                      sponsorStickerAssetsByEventRule={sponsorStickerAssetsByEventRule}
+                      inspectionTemplatesByEventRule={inspectionTemplatesByEventRule}
+                      onCreateEvent={() => onCreateEvent(season)}
+                      onEditEvent={onEditEvent}
+                      onDuplicateEvent={onDuplicateEvent}
+                      onCreateEventSeriesRule={onCreateEventSeriesRule}
+                      onEditRule={onEditEventSeriesRule}
+                      onCreateWeightRule={onCreateWeightRule}
+                      onEditWeightRule={onEditWeightRule}
+                      onCreateBallastRule={onCreateBallastRule}
+                      onEditBallastRule={onEditBallastRule}
+                      onCreateTireRule={onCreateTireRule}
+                      onEditTireRule={onEditTireRule}
+                      onCreateSponsorStickerAsset={onCreateSponsorStickerAsset}
+                      onEditSponsorStickerAsset={onEditSponsorStickerAsset}
+                      onCreateInspectionTemplate={onCreateInspectionTemplate}
+                      onEditInspectionTemplate={onEditInspectionTemplate}
+                      onEditInspectionSection={onEditInspectionSection}
+                      onEditInspectionItem={onEditInspectionItem}
+                    />
+                  ))}
+                </div>
               </div>
               <p className="text-sm text-zinc-500">{seasonSeries.length} active series link(s) / {gradeCount} active grade link(s)</p>
               <p className="text-xs leading-5 text-zinc-500">Unlink hides incorrect bindings from active setup while preserving audit and historical records.</p>
@@ -2044,6 +2091,99 @@ function EventScopeBoard({ events, filter, printBackgroundAssetsByEvent, onCreat
         })}
       </div>
     </>
+  )
+}
+
+function SeasonEventSlotCard({ slotNumber, event, rules, weightRulesByEventRule, ballastRulesByEventRule, tireRulesByEventRule, sponsorStickerAssetsByEventRule, inspectionTemplatesByEventRule, onCreateEvent, onEditEvent, onDuplicateEvent, onCreateEventSeriesRule, onEditRule, onCreateWeightRule, onEditWeightRule, onCreateBallastRule, onEditBallastRule, onCreateTireRule, onEditTireRule, onCreateSponsorStickerAsset, onEditSponsorStickerAsset, onCreateInspectionTemplate, onEditInspectionTemplate, onEditInspectionSection, onEditInspectionItem }: {
+  slotNumber: number
+  event: EventRow | null
+  rules: EventSeriesRuleRow[]
+  weightRulesByEventRule: Map<string, WeightRuleRow[]>
+  ballastRulesByEventRule: Map<string, BallastRuleRow[]>
+  tireRulesByEventRule: Map<string, TireRuleRow[]>
+  sponsorStickerAssetsByEventRule: Map<string, SponsorStickerAssetRow[]>
+  inspectionTemplatesByEventRule: Map<string, InspectionTemplateRow[]>
+  onCreateEvent: () => void
+  onEditEvent: (event: EventRow) => void
+  onDuplicateEvent: (event: EventRow) => void
+  onCreateEventSeriesRule: (event: EventRow | null) => void
+  onEditRule: (rule: EventSeriesRuleRow) => void
+  onCreateWeightRule: (rule: EventSeriesRuleRow) => void
+  onEditWeightRule: (rule: WeightRuleRow) => void
+  onCreateBallastRule: (rule: EventSeriesRuleRow) => void
+  onEditBallastRule: (rule: BallastRuleRow) => void
+  onCreateTireRule: (rule: EventSeriesRuleRow) => void
+  onEditTireRule: (rule: TireRuleRow) => void
+  onCreateSponsorStickerAsset: (rule: EventSeriesRuleRow) => void
+  onEditSponsorStickerAsset: (asset: SponsorStickerAssetRow) => void
+  onCreateInspectionTemplate: (rule: EventSeriesRuleRow) => void
+  onEditInspectionTemplate: (template: InspectionTemplateRow) => void
+  onEditInspectionSection: (section: InspectionTemplateSectionRow) => void
+  onEditInspectionItem: (item: InspectionTemplateItemRow) => void
+}) {
+  if (!event) {
+    return (
+      <div className="rounded-md border border-dashed border-zinc-300 p-3 dark:border-zinc-700">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="font-mono text-xs uppercase tracking-[0.12em] text-zinc-500">Event slot {slotNumber}</p>
+            <p className="mt-1 text-sm font-semibold text-amber-700 dark:text-amber-400">Planned, not created</p>
+          </div>
+          <TextButton label="Create Event" onClick={onCreateEvent} />
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="font-mono text-xs uppercase tracking-[0.12em] text-zinc-500">Event slot {slotNumber}</p>
+          <p className="mt-1 text-sm font-semibold">Event {event.eventOrder}: {event.name}</p>
+          <p className="mt-1 text-xs text-zinc-500">{event.circuitName ?? 'No circuit'} / {formatDateRange(event.startsOn, event.endsOn)}</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <TextButton label="Edit Event" onClick={() => onEditEvent(event)} />
+          <TextButton label="Duplicate" onClick={() => onDuplicateEvent(event)} />
+        </div>
+      </div>
+      <div className="mt-3 flex flex-col gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold">Rule Packages</p>
+            <p className="mt-1 text-xs text-zinc-500">Owned by this Event slot.</p>
+          </div>
+          <TextButton label="Create Rule Package" onClick={() => onCreateEventSeriesRule(event)} />
+        </div>
+        {rules.length === 0 ? <p className="text-sm text-amber-700 dark:text-amber-400">No Rule Packages yet for this Event.</p> : null}
+        {rules.map((rule) => (
+          <RulePackageCard
+            key={rule.eventSeriesRuleId}
+            rule={rule}
+            readiness={getRulePackageReadiness(rule, weightRulesByEventRule, ballastRulesByEventRule, tireRulesByEventRule, sponsorStickerAssetsByEventRule, inspectionTemplatesByEventRule)}
+            weightRules={weightRulesByEventRule.get(rule.eventSeriesRuleId) ?? []}
+            ballastRules={ballastRulesByEventRule.get(rule.eventSeriesRuleId) ?? []}
+            tireRules={tireRulesByEventRule.get(rule.eventSeriesRuleId) ?? []}
+            sponsorStickerAssets={sponsorStickerAssetsByEventRule.get(rule.eventSeriesRuleId) ?? []}
+            templates={inspectionTemplatesByEventRule.get(rule.eventSeriesRuleId) ?? []}
+            onEditRule={onEditRule}
+            onCreateWeightRule={onCreateWeightRule}
+            onCreateBallastRule={onCreateBallastRule}
+            onCreateTireRule={onCreateTireRule}
+            onCreateSponsorStickerAsset={onCreateSponsorStickerAsset}
+            onCreateInspectionTemplate={onCreateInspectionTemplate}
+            onEditWeightRule={onEditWeightRule}
+            onEditBallastRule={onEditBallastRule}
+            onEditTireRule={onEditTireRule}
+            onEditSponsorStickerAsset={onEditSponsorStickerAsset}
+            onEditInspectionTemplate={onEditInspectionTemplate}
+            onEditInspectionSection={onEditInspectionSection}
+            onEditInspectionItem={onEditInspectionItem}
+          />
+        ))}
+      </div>
+    </div>
   )
 }
 
@@ -2574,7 +2714,7 @@ function createCircuitForm(circuit: CircuitOption | null): CircuitForm {
 
 function createEmptySeasonForm(organizationId = ''): SeasonForm {
   const year = String(new Date().getFullYear())
-  return { seasonId: '', organizationId, name: `${year} Season`, year, status: 'Draft', isActive: false }
+  return { seasonId: '', organizationId, name: `${year} Season`, year, plannedEventCount: '3', status: 'Draft', isActive: false }
 }
 
 function createSeasonForm(season: SeasonRow | null): SeasonForm {
@@ -2584,6 +2724,7 @@ function createSeasonForm(season: SeasonRow | null): SeasonForm {
     organizationId: season.organizationId,
     name: season.name,
     year: String(season.year),
+    plannedEventCount: String(season.plannedEventCount),
     status: season.status,
     isActive: season.isActive,
   }

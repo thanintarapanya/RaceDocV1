@@ -35,11 +35,12 @@ where not exists (
 with org as (
   select id from public.organizations where slug = 'pt-maxnitron' limit 1
 )
-insert into public.seasons (organization_id, name, year, status, is_active, activated_at)
-select id, 'PT Maxnitron 2026', 2026, 'Active'::public.season_status, true, now()
+insert into public.seasons (organization_id, name, year, planned_event_count, status, is_active, activated_at)
+select id, 'PT Maxnitron 2026', 2026, 3, 'Active'::public.season_status, true, now()
 from org
 on conflict (organization_id, year) do update set
   name = excluded.name,
+  planned_event_count = excluded.planned_event_count,
   status = 'Active'::public.season_status,
   is_active = true,
   activated_at = coalesce(public.seasons.activated_at, now());

@@ -310,11 +310,12 @@ begin
     raise exception 'This organization already has a Season for the target year.';
   end if;
 
-  insert into public.seasons (organization_id, name, year, status, is_active, activated_at, created_by_id)
+  insert into public.seasons (organization_id, name, year, planned_event_count, status, is_active, activated_at, created_by_id)
   values (
     v_source_season.organization_id,
     v_new_name,
     v_new_year,
+    v_source_season.planned_event_count,
     'Draft'::public.season_status,
     false,
     null,

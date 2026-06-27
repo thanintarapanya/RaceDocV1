@@ -138,6 +138,7 @@ as $$
         'organizationId', s.organization_id,
         'name', s.name,
         'year', s.year,
+        'plannedEventCount', s.planned_event_count,
         'status', s.status::text,
         'isActive', s.is_active,
         'activatedAt', s.activated_at

@@ -24,6 +24,7 @@ export type SeasonRow = {
   organizationId: string
   name: string
   year: number
+  plannedEventCount: number
   status: SeasonStatus
   isActive: boolean
   activatedAt: string | null
@@ -303,6 +304,11 @@ export type RulePackageReadiness = {
   missingLabels: string[]
 }
 
+export type SeasonEventSlot = {
+  slotNumber: number
+  event: EventRow | null
+}
+
 export function normalizeOrganizerSettingsPayload(payload: OrganizerPayload | null): OrganizerPayload {
   return {
     canManage: Boolean(payload?.canManage),
@@ -319,7 +325,10 @@ export function normalizeOrganizerSettingsPayload(payload: OrganizerPayload | nu
     printBackgroundAssets: payload?.printBackgroundAssets ?? [],
     weightRules: payload?.weightRules ?? [],
     inspectionTemplates: payload?.inspectionTemplates ?? [],
-    seasons: payload?.seasons ?? [],
+    seasons: (payload?.seasons ?? []).map((season) => ({
+      ...season,
+      plannedEventCount: Math.max(Number(season.plannedEventCount) || 1, 1),
+    })),
     events: payload?.events ?? [],
     races: payload?.races ?? [],
   }
@@ -450,6 +459,15 @@ export function createOrganizerSetupBoard(payload: OrganizerPayload): OrganizerS
 export function getSelectedEventId(events: EventRow[], selectedEventId: string | null) {
   if (selectedEventId && events.some((event) => event.eventId === selectedEventId)) return selectedEventId
   return events[0]?.eventId ?? null
+}
+
+export function createSeasonEventSlots(season: SeasonRow, events: EventRow[]): SeasonEventSlot[] {
+  const eventsByOrder = new Map(events.filter((event) => event.seasonId === season.seasonId).map((event) => [event.eventOrder, event]))
+  const plannedEventCount = Math.max(Number(season.plannedEventCount) || 1, 1)
+  return Array.from({ length: plannedEventCount }, (_, index) => {
+    const slotNumber = index + 1
+    return { slotNumber, event: eventsByOrder.get(slotNumber) ?? null }
+  })
 }
 
 export function seasonNeedsAttention(season: SeasonRow, seasonSeriesBySeason: Map<string, SeasonSeriesRow[]>, seasonSeriesGradesBySeries: Map<string, SeasonSeriesGradeRow[]>) {

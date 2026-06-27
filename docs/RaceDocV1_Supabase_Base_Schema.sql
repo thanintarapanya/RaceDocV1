@@ -269,11 +269,13 @@ create table public.seasons (
   organization_id uuid not null references public.organizations(id) on delete restrict,
   name text not null,
   year integer not null,
+  planned_event_count integer not null default 1,
   status public.season_status not null default 'Draft',
   is_active boolean not null default false,
   activated_at timestamptz,
   created_by_id uuid references public.profiles(id) on delete set null,
   constraint seasons_year_chk check (year >= 2000),
+  constraint seasons_planned_event_count_positive_chk check (planned_event_count > 0),
   constraint seasons_org_year_uk unique (organization_id, year)
 );
 

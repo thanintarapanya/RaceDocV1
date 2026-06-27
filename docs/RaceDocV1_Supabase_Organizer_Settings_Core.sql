@@ -4,6 +4,15 @@
 create index if not exists seasons_created_by_id_idx
   on public.seasons (created_by_id);
 
+alter table public.seasons
+  add column if not exists planned_event_count integer not null default 1;
+
+alter table public.seasons
+  drop constraint if exists seasons_planned_event_count_positive_chk;
+
+alter table public.seasons
+  add constraint seasons_planned_event_count_positive_chk check (planned_event_count > 0);
+
 create or replace function public.get_organizer_settings()
 returns jsonb
 language sql
@@ -67,6 +76,7 @@ as $$
         'organizationId', s.organization_id,
         'name', s.name,
         'year', s.year,
+        'plannedEventCount', s.planned_event_count,
         'status', s.status::text,
         'isActive', s.is_active,
         'activatedAt', s.activated_at
@@ -149,6 +159,7 @@ create or replace function public.save_organizer_season(
   p_organization_id uuid default null,
   p_name text default null,
   p_year integer default null,
+  p_planned_event_count integer default 1,
   p_status text default 'Draft',
   p_is_active boolean default false
 )
@@ -180,6 +191,10 @@ begin
 
   if coalesce(p_year, 0) < 2000 then
     raise exception 'Season year must be 2000 or later.';
+  end if;
+
+  if coalesce(p_planned_event_count, 0) <= 0 then
+    raise exception 'Planned event count must be greater than zero.';
   end if;
 
   begin
@@ -220,17 +235,19 @@ begin
     set organization_id = v_organization_id,
         name = btrim(p_name),
         year = p_year,
+        planned_event_count = p_planned_event_count,
         status = v_status,
         is_active = (p_is_active or v_status = 'Active'::public.season_status),
         activated_at = case when (p_is_active or v_status = 'Active'::public.season_status) and activated_at is null then now() else activated_at end
     where id = p_season_id
     returning id, to_jsonb(public.seasons.*) into v_season_id, v_new_values;
   else
-    insert into public.seasons (organization_id, name, year, status, is_active, activated_at, created_by_id)
+    insert into public.seasons (organization_id, name, year, planned_event_count, status, is_active, activated_at, created_by_id)
     values (
       v_organization_id,
       btrim(p_name),
       p_year,
+      p_planned_event_count,
       v_status,
       (p_is_active or v_status = 'Active'::public.season_status),
       case when (p_is_active or v_status = 'Active'::public.season_status) then now() else null end,
@@ -420,11 +437,12 @@ $$;
 revoke execute on function public.get_organizer_settings() from public, anon;
 revoke execute on function public.save_organizer_circuit(uuid, text, text, text) from public, anon;
 revoke execute on function public.save_organizer_season(uuid, uuid, text, integer, text, boolean) from public, anon;
+revoke execute on function public.save_organizer_season(uuid, uuid, text, integer, integer, text, boolean) from public, anon;
 revoke execute on function public.save_organizer_event(uuid, uuid, uuid, text, integer, date, date, text) from public, anon;
 revoke execute on function public.save_organizer_race(uuid, uuid, text, integer, text, timestamptz, boolean) from public, anon;
 
 grant execute on function public.get_organizer_settings() to authenticated, service_role;
 grant execute on function public.save_organizer_circuit(uuid, text, text, text) to authenticated, service_role;
-grant execute on function public.save_organizer_season(uuid, uuid, text, integer, text, boolean) to authenticated, service_role;
+grant execute on function public.save_organizer_season(uuid, uuid, text, integer, integer, text, boolean) to authenticated, service_role;
 grant execute on function public.save_organizer_event(uuid, uuid, uuid, text, integer, date, date, text) to authenticated, service_role;
 grant execute on function public.save_organizer_race(uuid, uuid, text, integer, text, timestamptz, boolean) to authenticated, service_role;

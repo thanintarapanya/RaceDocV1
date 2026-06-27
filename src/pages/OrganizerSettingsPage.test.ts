@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   createEmptyScopeFilter,
+  createSeasonEventSlots,
   createOrganizerSetupBoard,
   eventNeedsAttention,
   filterByQuery,
@@ -194,7 +195,7 @@ describe('OrganizerSettingsPage helpers', () => {
 
   it('prioritizes missing rule package setup for an active season', () => {
     const payload = createOrganizerPayload({
-      seasons: [{ seasonId: 'season-1', organizationId: 'org-1', name: '2026 Season', year: 2026, status: 'Active', isActive: true, activatedAt: '2026-01-01' }],
+      seasons: [{ seasonId: 'season-1', organizationId: 'org-1', name: '2026 Season', year: 2026, plannedEventCount: 3, status: 'Active', isActive: true, activatedAt: '2026-01-01' }],
       circuits: [{ circuitId: 'circuit-1', name: 'Chang International Circuit', location: 'Buriram', country: 'Thailand' }],
       events: [{ eventId: 'event-1', seasonId: 'season-1', circuitId: 'circuit-1', circuitName: 'Chang International Circuit', name: 'Event 1', eventOrder: 1, startsOn: null, endsOn: null, status: 'Draft' }],
       races: [{ raceId: 'race-1', eventId: 'event-1', name: 'Race 1', raceOrder: 1, sessionType: 'Race', scheduledAt: null, resultsImportUnlocked: false }],
@@ -220,6 +221,21 @@ describe('OrganizerSettingsPage helpers', () => {
     expect(getSelectedEventId(events, 'event-2')).toBe('event-2')
     expect(getSelectedEventId(events, 'missing-event')).toBe('event-1')
     expect(getSelectedEventId([], 'event-2')).toBeNull()
+  })
+
+  it('creates fixed season event slots from planned event count', () => {
+    const season = { seasonId: 'season-1', organizationId: 'org-1', name: '2026 Season', year: 2026, plannedEventCount: 3, status: 'Active' as const, isActive: true, activatedAt: '2026-01-01' }
+    const slots = createSeasonEventSlots(season, [
+      { eventId: 'event-1', seasonId: 'season-1', circuitId: null, circuitName: null, name: 'Event 1', eventOrder: 1, startsOn: null, endsOn: null, status: 'Draft' },
+      { eventId: 'event-3', seasonId: 'season-1', circuitId: null, circuitName: null, name: 'Event 3', eventOrder: 3, startsOn: null, endsOn: null, status: 'Draft' },
+      { eventId: 'other-event', seasonId: 'season-2', circuitId: null, circuitName: null, name: 'Other Event', eventOrder: 2, startsOn: null, endsOn: null, status: 'Draft' },
+    ])
+
+    expect(slots.map((slot) => ({ slot: slot.slotNumber, eventId: slot.event?.eventId ?? null }))).toEqual([
+      { slot: 1, eventId: 'event-1' },
+      { slot: 2, eventId: null },
+      { slot: 3, eventId: 'event-3' },
+    ])
   })
 
   it('filters organizer scope rows by normalized query values', () => {
@@ -248,9 +264,9 @@ describe('OrganizerSettingsPage helpers', () => {
   })
 
   it('flags seasons missing series or grade links as attention items', () => {
-    const completeSeason = { seasonId: 'season-1', organizationId: 'org-1', name: '2026 Season', year: 2026, status: 'Active' as const, isActive: true, activatedAt: '2026-01-01' }
-    const missingGradeSeason = { ...completeSeason, seasonId: 'season-2', name: '2027 Season', year: 2027 }
-    const emptySeason = { ...completeSeason, seasonId: 'season-3', name: '2028 Season', year: 2028 }
+    const completeSeason = { seasonId: 'season-1', organizationId: 'org-1', name: '2026 Season', year: 2026, plannedEventCount: 3, status: 'Active' as const, isActive: true, activatedAt: '2026-01-01' }
+    const missingGradeSeason = { ...completeSeason, seasonId: 'season-2', name: '2027 Season', year: 2027, plannedEventCount: 3 }
+    const emptySeason = { ...completeSeason, seasonId: 'season-3', name: '2028 Season', year: 2028, plannedEventCount: 3 }
     const seriesBySeason = groupSeasonSeriesBySeason([
       { seasonSeriesId: 'ss-1', seasonId: 'season-1', seriesRaceId: 'series-1', seriesName: 'Siam Series', isActive: true },
       { seasonSeriesId: 'ss-2', seasonId: 'season-2', seriesRaceId: 'series-1', seriesName: 'Siam Series', isActive: true },
@@ -265,7 +281,7 @@ describe('OrganizerSettingsPage helpers', () => {
   })
 
   it('ignores inactive season series and grade links when checking season readiness', () => {
-    const season = { seasonId: 'season-1', organizationId: 'org-1', name: '2026 Season', year: 2026, status: 'Active' as const, isActive: true, activatedAt: '2026-01-01' }
+    const season = { seasonId: 'season-1', organizationId: 'org-1', name: '2026 Season', year: 2026, plannedEventCount: 3, status: 'Active' as const, isActive: true, activatedAt: '2026-01-01' }
     const inactiveSeriesOnly = groupSeasonSeriesBySeason([
       { seasonSeriesId: 'ss-1', seasonId: 'season-1', seriesRaceId: 'series-1', seriesName: 'Siam Series', isActive: false },
     ])
